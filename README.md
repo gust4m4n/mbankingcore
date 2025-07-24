@@ -1,23 +1,23 @@
-# MBankingCore - macOS Setup Guide
+# MBankingCore - Panduan Setup macOS
 
 Go RESTful API dengan JWT Authentication menggunakan Gin Framework, GORM, dan PostgreSQL.
 
-> 🍎 **Setup guide ini khusus untuk macOS menggunakan Homebrew**
+> 🍎 **Panduan setup ini khusus untuk macOS menggunakan Homebrew**
 >
 > 📋 **Untuk dokumentasi API lengkap:** [MBANKINGCORE-APIS.md](./MBANKINGCORE-APIS.md)
 >
-> ⚠️ **Updated API Endpoints:** API endpoints have been simplified - `/api/register`, `/api/login`, `/api/refresh` (previously `/api/v1/auth/multi-*`)
+> ⚠️ **Pembaruan API Endpoints:** API endpoints telah disederhanakan - `/api/register`, `/api/login`, `/api/refresh` (sebelumnya `/api/v1/auth/multi-*`)
 
-## 🏗️ Architecture Overview
+## 🏗️ Gambaran Arsitektur
 
-### Core Features
+### Fitur Utama
 
 - 🔐 **Multi-Platform JWT Authentication** (Android, iOS, Web, Desktop)
-- � **Multi-Device Session Management** (Login dari multiple devices)
-- � **SSO Provider Support** (Google, Apple, Facebook - Ready)
+- 📱 **Multi-Device Session Management** (Login dari multiple devices)
+- 🔐 **SSO Provider Support** (Google, Apple, Facebook - Siap)
 - 🔒 **Double-Layer Security** (SHA256 + bcrypt password hashing)
 - 🎯 **Selective Logout** (Per device atau semua device)
-- 👥 **User Management** (CRUD Operations)
+- 👥 **User Management** (Operasi CRUD)
 - ⚡ **RESTful API** dengan response format konsisten
 - 🗄️ **PostgreSQL Database** dengan GORM ORM
 - 🔄 **Auto Database Migration**
@@ -25,7 +25,7 @@ Go RESTful API dengan JWT Authentication menggunakan Gin Framework, GORM, dan Po
 - ⚙️ **Environment Configuration**
 - 📊 **Health Check Endpoint**
 
-## 🏗️ Project Structure
+## 🏗️ Struktur Proyek
 
 ```
 mbankingcore/
@@ -52,19 +52,19 @@ mbankingcore/
 ├── go.mod                       # Go modules
 ├── go.sum                       # Go modules checksum
 ├── main.go                      # Application entry point
-├── MBankingCore-API.md          # API Documentation
-├── MIGRATIONS.md                # Database migration guide
-└── README.md                    # Setup guide & documentation
+├── MBankingCore-API.md          # Dokumentasi API
+├── MIGRATIONS.md                # Panduan migrasi database
+└── README.md                    # Panduan setup & dokumentasi
 ```
 
-## 📋 Prerequisites (macOS)
+## 📋 Prasyarat (macOS)
 
 - **Go** 1.19+ (install via Homebrew: `brew install go`)
 - **PostgreSQL** 12+ (install via Homebrew: `brew install postgresql`)
 - **Homebrew** package manager
 - **Git**
 
-## 🚀 Quick Start (macOS)
+## 🚀 Mulai Cepat (macOS)
 
 ### 1. Clone Repository
 
@@ -79,18 +79,18 @@ cd mbankingcore
 go mod tidy
 ```
 
-### 3. Database Setup (macOS)
+### 3. Setup Database (macOS)
 
 ```bash
-# Using Homebrew
+# Menggunakan Homebrew
 brew install postgresql
 brew services start postgresql
 
-# Create database
+# Buat database
 createdb mbcdb
 ```
 
-### 4. Environment Configuration
+### 4. Konfigurasi Environment
 
 Copy dan edit file `.env`:
 
@@ -98,7 +98,7 @@ Copy dan edit file `.env`:
 cp .env.example .env
 ```
 
-Edit `.env` file:
+Edit file `.env`:
 
 ```properties
 # Database Configuration
@@ -116,7 +116,7 @@ PORT=8080
 JWT_SECRET=your-secret-key-change-this-in-production
 ```
 
-### 5. Run Application
+### 5. Jalankan Aplikasi
 
 ```bash
 go run main.go
@@ -124,16 +124,16 @@ go run main.go
 
 Server akan berjalan di `http://localhost:8080`
 
-## 📖 API Documentation
+## 📖 Dokumentasi API
 
 **📋 Untuk dokumentasi API lengkap dengan contoh request/response:**
 👉 **[MBANKINGCORE-APIS.md](./MBANKINGCORE-APIS.md)**
 
 ## 🧪 Testing Multi-Platform Authentication
 
-### Quick Test dengan cURL
+### Test Cepat dengan cURL
 
-#### 1. Register User
+#### 1. Daftar User
 
 ```bash
 curl -X POST http://localhost:8080/api/register \
@@ -167,14 +167,14 @@ curl -X POST http://localhost:8080/api/login \
   }'
 ```
 
-#### 3. Get Active Sessions
+#### 3. Dapatkan Active Sessions
 
 ```bash
 curl -X GET http://localhost:8080/api/sessions \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
-### Postman Testing
+### Testing Postman
 
 Import koleksi Postman untuk testing yang lebih komprehensif:
 
@@ -190,7 +190,7 @@ Import koleksi Postman untuk testing yang lebih komprehensif:
 - 🧪 Comprehensive API coverage
 - 📊 Test result validation
 
-## 🔧 Development Guide
+## 🔧 Panduan Development
 
 ### Hot Reload dengan Air
 
@@ -200,26 +200,26 @@ Untuk development yang lebih cepat dengan auto-reload:
 # Install Air
 go install github.com/cosmtrek/air@latest
 
-# Run with hot reload
+# Jalankan dengan hot reload
 air
 ```
 
-### Database Migration
+### Migrasi Database
 
-Database migration dilakukan otomatis saat aplikasi start. Untuk operasi manual:
+Migrasi database dilakukan otomatis saat aplikasi start. Untuk operasi manual:
 
 ```bash
-# Connect to PostgreSQL
+# Koneksi ke PostgreSQL
 psql -h localhost -U your_username -d mbcdb
 
-# Check tables
+# Cek tabel
 \dt
 
-# View users table structure
+# Lihat struktur tabel users
 \d users
 ```
 
-## 🔧 Development & Deployment Guide
+## 🔧 Panduan Development & Deployment
 
 ### Build Production
 
@@ -227,7 +227,7 @@ psql -h localhost -U your_username -d mbcdb
 # Build executable
 go build -o mbankingcore
 
-# Run production build
+# Jalankan production build
 ./mbankingcore
 ```
 
@@ -241,10 +241,10 @@ export GIN_MODE=release
 export PORT=8080
 ```
 
-### Database Setup untuk Production (macOS)
+### Setup Database untuk Production (macOS)
 
 ```bash
-# Create production database
+# Buat production database
 createdb mbankingcore_prod
 
 # Set production environment
@@ -254,11 +254,11 @@ export DB_USER=your_db_user
 export DB_PASSWORD=your_secure_password
 ```
 
-## 🔐 Security Implementation
+## 🔐 Implementasi Keamanan
 
-### Multi-Platform Authentication Security
+### Keamanan Multi-Platform Authentication
 
-#### Double-Layer Password Protection
+#### Perlindungan Password Double-Layer
 
 ```
 Client-Side: SHA256 Hash
@@ -268,102 +268,102 @@ Server-Side: bcrypt Hash + Salt
 Database: bcrypt(SHA256(password))
 ```
 
-#### Device Session Management
+#### Manajemen Device Session
 
-- **Unique Device IDs**: Each device gets tracked individually
+- **Unique Device IDs**: Setiap device dilacak secara individual
 - **Session Isolation**: Sessions per device, tidak saling mempengaruhi
 - **Selective Logout**: Bisa logout per device atau semua device
 - **Token Refresh**: Access token + Refresh token per device
 
-#### JWT Token Strategy
+#### Strategi JWT Token
 
 - **Access Token**: Short-lived (15 menit)
 - **Refresh Token**: Long-lived (7 hari)  
 - **Device-Specific**: Token terikat dengan device_id
-- **Auto-Invalidation**: Password change invalidates semua sessions
+- **Auto-Invalidation**: Password change membatalkan semua sessions
 
-### Security Best Practices
+### Best Practices Keamanan
 
-#### JWT Security
+#### Keamanan JWT
 
-- Use strong, random JWT_SECRET (minimum 32 characters)
-- Consider shorter token expiration for production
-- Implement token refresh mechanism
+- Gunakan JWT_SECRET yang kuat dan random (minimum 32 karakter)
+- Pertimbangkan token expiration yang lebih pendek untuk production
+- Implementasikan token refresh mechanism
 
-#### Password Security
+#### Keamanan Password
 
-- bcrypt cost is set to default (sufficient for most use cases)
-- Client-side SHA256 prevents plain text transmission
+- bcrypt cost di-set ke default (cukup untuk kebanyakan use cases)
+- Client-side SHA256 mencegah transmisi plain text
 
-#### Database Security
+#### Keamanan Database
 
-- Use strong database passwords
-- Enable SSL for production database connections
-- Implement database connection pooling
+- Gunakan password database yang kuat
+- Aktifkan SSL untuk koneksi database production
+- Implementasikan database connection pooling
 
-#### API Security
+#### Keamanan API
 
-- Implement rate limiting
-- Add request validation middleware
-- Use HTTPS in production
-- Implement proper CORS configuration
+- Implementasikan rate limiting
+- Tambahkan request validation middleware
+- Gunakan HTTPS di production
+- Implementasikan konfigurasi CORS yang tepat
 
-## 🧪 Testing & Validation
+## 🧪 Testing & Validasi
 
 ### Unit Testing
 
 ```bash
-# Run tests
+# Jalankan tests
 go test ./...
 
-# Run tests with coverage
+# Jalankan tests dengan coverage
 go test -cover ./...
 
-# Run specific test
+# Jalankan specific test
 go test ./handlers -v
 ```
 
 ### Load Testing
 
 ```bash
-# Install artillery for load testing
+# Install artillery untuk load testing
 npm install -g artillery
 
-# Create artillery test config
-# Then run load test
+# Buat artillery test config
+# Kemudian jalankan load test
 artillery run load-test.yml
 ```
 
-### API Testing dengan Postman
+### Testing API dengan Postman
 
 1. Import collection: `postman/MBankingCore-API.postman_collection.json`
 2. Import environment: `postman/MBankingCore-API.postman_environment.json`
-3. Run collection dengan Newman:
+3. Jalankan collection dengan Newman:
 
 ```bash
 # Install Newman
 npm install -g newman
 
-# Run Postman tests
+# Jalankan Postman tests
 newman run postman/MBankingCore-API.postman_collection.json \
   -e postman/MBankingCore-API.postman_environment.json
 ```
 
-### Quick Testing dengan cURL
+### Testing Cepat dengan cURL
 
 ```bash
-# Start server first
+# Jalankan server terlebih dahulu
 go run main.go
 
 # Test health check
 curl http://localhost:8080/health
 
-# Register a test user (multi-platform)
+# Daftarkan test user (multi-platform)
 curl -X POST http://localhost:8080/api/register \
   -H "Content-Type: application/json" \
   -d '{"name":"Test User","email":"test@example.com","password":"ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f","phone":"08123456789","provider":"email","device_info":{"device_type":"web","device_id":"web_browser_123","device_name":"Chrome","user_agent":"Mozilla/5.0"}}'
 
-# Login and get JWT token (multi-platform)
+# Login dan dapatkan JWT token (multi-platform)
 curl -X POST http://localhost:8080/api/login \
   -H "Content-Type: application/json" \
   -d '{"email":"test@example.com","password":"ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f","provider":"email","device_info":{"device_type":"web","device_id":"web_browser_123","device_name":"Chrome","user_agent":"Mozilla/5.0"}}'
@@ -371,10 +371,10 @@ curl -X POST http://localhost:8080/api/login \
 
 ## 📊 Monitoring & Logging
 
-### Logging Best Practices
+### Best Practices Logging
 
 ```go
-// Add structured logging
+// Tambahkan structured logging
 import "github.com/sirupsen/logrus"
 
 log := logrus.New()
@@ -385,18 +385,18 @@ log.SetLevel(logrus.InfoLevel)
 ### Health Checks
 
 - `GET /health` endpoint untuk monitoring
-- Database connection check
-- Response time monitoring
+- Pengecekan koneksi database
+- Monitoring waktu response
 
-## 🚀 Deployment Options (macOS)
+## 🚀 Opsi Deployment (macOS)
 
-### 1. Local Development
+### 1. Development Lokal
 
 ```bash
-# Run directly
+# Jalankan secara langsung
 go run main.go
 
-# Or build and run
+# Atau build dan jalankan
 go build -o mbankingcore
 ./mbankingcore
 ```
@@ -407,15 +407,15 @@ go build -o mbankingcore
 # Install PM2
 npm install -g pm2
 
-# Start application with PM2
+# Jalankan aplikasi dengan PM2
 pm2 start mbankingcore --name "mbankingcore-api"
 pm2 save
 pm2 startup
 ```
 
-### 3. Background Service with launchctl (macOS)
+### 3. Background Service dengan launchctl (macOS)
 
-Create a plist file for macOS service:
+Buat file plist untuk service macOS:
 
 ```xml
 <!-- ~/Library/LaunchAgents/com.mbankingcore.api.plist -->
@@ -439,7 +439,7 @@ Create a plist file for macOS service:
 </plist>
 ```
 
-Load the service:
+Load service:
 
 ```bash
 launchctl load ~/Library/LaunchAgents/com.mbankingcore.api.plist
@@ -448,71 +448,71 @@ launchctl start com.mbankingcore.api
 
 ## 🔍 Troubleshooting (macOS)
 
-### Common Issues
+### Masalah Umum
 
-**Database Connection Error:**
+**Error Koneksi Database:**
 
 ```bash
-# Check if PostgreSQL is running
+# Cek apakah PostgreSQL sedang berjalan
 brew services list | grep postgresql
 
-# Start PostgreSQL if not running
+# Jalankan PostgreSQL jika belum berjalan
 brew services start postgresql
 
-# Check database status
+# Cek status database
 pg_isready -h localhost -U $(whoami)
 
-# Check environment variables
+# Cek environment variables
 echo $DB_HOST $DB_PORT $DB_USER
 ```
 
-**Port Already in Use:**
+**Port Sudah Digunakan:**
 
 ```bash
-# Find process using port 8080
+# Cari process yang menggunakan port 8080
 lsof -i :8080
 
 # Kill process
 kill -9 <PID>
 ```
 
-**Permission Issues with PostgreSQL:**
+**Masalah Permission PostgreSQL:**
 
 ```bash
-# If you get permission denied, create user and database
+# Jika mendapat permission denied, buat user dan database
 createuser -s $(whoami)
 createdb mbcdb
 ```
 
-**JWT Token Issues:**
+**Masalah JWT Token:**
 
-- Verify JWT_SECRET is set correctly
-- Check token expiration time
-- Validate token format
+- Verifikasi JWT_SECRET sudah di-set dengan benar
+- Cek waktu expiration token
+- Validasi format token
 
-## 📚 Additional Resources
+## 📚 Sumber Daya Tambahan
 
-- [Go Documentation](https://golang.org/doc/)
+- [Dokumentasi Go](https://golang.org/doc/)
 - [Gin Framework](https://gin-gonic.com/)
-- [GORM Documentation](https://gorm.io/)
+- [Dokumentasi GORM](https://gorm.io/)
 - [JWT Go Library](https://github.com/golang-jwt/jwt)
-- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
+- [Dokumentasi PostgreSQL](https://www.postgresql.org/docs/)
 
-## 👥 Authors
+## 👥 Penulis
 
 - **Gustaman** - Initial work
 
-## 🔗 Links
+## 🔗 Link Referensi
 
-- [Go Documentation](https://golang.org/doc/)
+- [Dokumentasi Go](https://golang.org/doc/)
 - [Gin Framework](https://gin-gonic.com/)
 - [GORM](https://gorm.io/)
 - [JWT Go](https://github.com/golang-jwt/jwt)
 
 ---
 
-**📋 API Documentation:** [MBANKINGCORE-APIS.md](./MBANKINGCORE-APIS.md)
+**📋 Dokumentasi API:** [MBankingCore-API.md](./MBankingCore-API.md)
 
 ---
 
-## Happy Coding! 🚀
+## Selamat Coding! 🚀

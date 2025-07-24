@@ -1,58 +1,177 @@
-# MBX Backend - Migration System
+# MBankingCore - Sistem Migrasi
 
-This project uses an integrated migration system that automatically sets up the database and initial data when the application starts.
+Proyek ini menggunakan sistem migrasi terintegrasi yang secara otomatis mengatur database dan data awal ketika aplikasi dimulai.
 
-## How It Works
+## Cara Kerja
 
-### Automatic Migration on Startup
-When you run the main application (`go run main.go`), the system automatically:
+### Migrasi Otomatis saat Startup
 
-1. **Connects to the database**
-2. **Runs all migrations** (table creation, schema updates)
-3. **Seeds initial data** (default configurations, sample content)
-4. **Starts the API server**
+Ketika Anda menjalankan aplikasi utama (`go run main.go`), sistem secara otomatis:
 
-### Manual Migration Tool
-For database setup without starting the server, use the migration tool:
+1. **Terhubung ke database**
+2. **Menjalankan semua migrasi** (pembuatan tabel, update schema)
+3. **Mengisi data awal** (konfigurasi default, konten sampel)
+4. **Memulai API server**
+
+### Tool Migrasi Manual
+
+Untuk setup database tanpa memulai server, gunakan tool migrasi:
 
 ```bash
-# Build the migration tool
+# Build tool migrasi
 go build -o migrate ./cmd/migrate
 
-# Run migrations only
+# Jalankan migrasi saja
 ./migrate
 ```
 
-## Migration Components
+## Komponen Migrasi
 
 ### 1. Auto-Migration
-- Creates all database tables based on model structures
-- Updates existing tables when models change
-- Handles: Users, DeviceSessions, Articles, Onboarding, Photos, Config
 
-### 2. Custom Migrations
-- **User Roles**: Ensures all users have proper role assignments
-- **Data Consistency**: Fixes any data integrity issues
-- **Schema Updates**: Handles complex schema changes
+- Membuat semua tabel database berdasarkan struktur model
+- Update tabel yang ada ketika model berubah
+- Menangani: Users, DeviceSessions, Articles, Onboarding, Photos, Config
 
-### 3. Initial Data Seeding
+### 2. Migrasi Kustom
 
-#### Configuration Data
-- `app_version`: Application version info
-- `tnc`: Default Terms and Conditions content
-- `privacy-policy`: Default Privacy Policy content  
-- `maintenance_mode`: Maintenance flag
-- `max_upload_size`: File upload size limits
+- **User Roles**: Memastikan semua user memiliki assignment role yang tepat
+- **Konsistensi Data**: Memperbaiki masalah integritas data
+- **Update Schema**: Menangani perubahan schema yang kompleks
 
-#### Onboarding Content
-- Welcome slide
-- Authentication features
-- API management info
-- Getting started guide
+### 3. Seeding Data Awal
 
-## Database Configuration
+#### Data Konfigurasi
 
-The system uses the following environment variables:
+- `app_version`: Info versi aplikasi (default: "1.0.0")
+- `tnc`: Konten default Syarat dan Ketentuan
+- `privacy-policy`: Konten default Kebijakan Privasi  
+- `maintenance_mode`: Flag maintenance (default: "false")
+- `max_upload_size`: Batas ukuran upload file (default: "10485760" = 10MB)
+
+#### Konten Onboarding
+
+- Slide welcome: "Welcome to MBankingCore"
+- Fitur authentication: "Secure Authentication"
+- Info manajemen API: "Easy API Management"
+- Panduan getting started: "Get Started"
+
+## Struktur Database
+
+### Tabel yang Dibuat Otomatis
+
+#### 1. Users
+```sql
+users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR NOT NULL,
+    email VARCHAR UNIQUE NOT NULL,
+    password VARCHAR NOT NULL,
+    phone VARCHAR,
+    provider VARCHAR DEFAULT 'email',
+    role VARCHAR DEFAULT 'user',
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+)
+```
+
+#### 2. Device Sessions
+```sql
+device_sessions (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    device_id VARCHAR NOT NULL,
+    device_type VARCHAR,
+    device_name VARCHAR,
+    user_agent TEXT,
+    access_token TEXT,
+    refresh_token TEXT,
+    expires_at TIMESTAMP,
+    last_activity TIMESTAMP,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+)
+```
+
+#### 3. Articles
+```sql
+articles (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR NOT NULL,
+    content TEXT NOT NULL,
+    author_id INTEGER REFERENCES users(id),
+    is_published BOOLEAN DEFAULT false,
+    published_at TIMESTAMP,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+)
+```
+
+#### 4. Onboarding
+```sql
+onboarding (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR NOT NULL,
+    description TEXT,
+    image VARCHAR,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+)
+```
+
+#### 5. Photos
+```sql
+photos (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR NOT NULL,
+    description TEXT,
+    filename VARCHAR NOT NULL,
+    original_name VARCHAR,
+    file_size INTEGER,
+    mime_type VARCHAR,
+    path VARCHAR NOT NULL,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+)
+```
+
+#### 6. Config
+```sql
+config (
+    id SERIAL PRIMARY KEY,
+    key VARCHAR UNIQUE NOT NULL,
+    value TEXT,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+)
+```
+
+## Update Terbaru (Juli 2025)
+
+### Perubahan Project
+- **Nama Project**: Berubah dari `mbxbackend` menjadi `mbankingcore`
+- **Branding**: Menggunakan `MBankingCore` untuk dokumentasi dan label
+- **Dokumentasi**: Semua file .md dipindah ke root directory
+- **Lokalisasi**: Semua dokumentasi ditranslasi ke bahasa Indonesia
+
+### Fitur Baru
+- **Multi-Platform Authentication**: Support untuk berbagai device dengan session management
+- **Device Session Management**: Tracking device individual dengan logout selektif
+- **User Management**: Role-based access control (admin/user)
+- **Article Management**: CRUD operations untuk artikel dengan author tracking
+- **Photo Gallery**: Sistem upload dan manajemen foto dengan metadata
+- **Configuration Management**: Dynamic app configuration melalui database
+
+### Security Enhancements
+- **Double-Layer Password Protection**: SHA256 (client) + bcrypt (server)
+- **JWT Token Strategy**: Access token (15 menit) + Refresh token (7 hari)
+- **Device-Specific Tokens**: Token terikat dengan device_id untuk keamanan extra
+- **Auto Session Invalidation**: Password change membatalkan semua sessions
+
+## Konfigurasi Database
+
+Sistem menggunakan environment variables berikut:
 
 ```env
 DB_HOST=localhost
@@ -63,62 +182,62 @@ DB_NAME=mbankingcore
 DB_SSLMODE=disable
 ```
 
-## Migration Safety
+## Keamanan Migrasi
 
-### First Time Setup
-- ✅ **Safe**: Creates all tables and initial data
-- ✅ **Idempotent**: Can be run multiple times safely
-- ✅ **Non-destructive**: Never deletes existing data
+### Setup Pertama Kali
+- ✅ **Aman**: Membuat semua tabel dan data awal
+- ✅ **Idempotent**: Dapat dijalankan berkali-kali dengan aman
+- ✅ **Non-destructive**: Tidak pernah menghapus data yang ada
 
-### Updates
-- ✅ **Automatic**: Runs on every application start
-- ✅ **Smart**: Only creates missing data, skips existing
-- ✅ **Logged**: All actions are logged for debugging
+### Update
+- ✅ **Otomatis**: Berjalan di setiap start aplikasi
+- ✅ **Pintar**: Hanya membuat data yang hilang, melewati yang sudah ada
+- ✅ **Logged**: Semua aksi dicatat untuk debugging
 
-## File Structure
+## Struktur File
 
 ```
 config/
-├── database.go    # Database connection and migration trigger
-└── migrations.go  # Migration logic and data seeding
+├── database.go    # Koneksi database dan trigger migrasi
+└── migrations.go  # Logic migrasi dan seeding data
 
 cmd/
 └── migrate/
-    └── main.go    # Standalone migration tool
+    └── main.go    # Tool migrasi standalone
 
-models/            # Database models (auto-migrated)
+models/            # Model database (auto-migrated)
 ├── user.go
 ├── onboarding.go
 ├── config.go
 └── ...
 ```
 
-## Usage Examples
+## Contoh Penggunaan
 
-### Development Setup
+### Setup Development
 ```bash
 # 1. Setup environment
 cp .env.example .env
-# Edit .env with your database credentials
+# Edit .env dengan kredensial database Anda
 
-# 2. Start application (migrations run automatically)
+# 2. Start aplikasi (migrasi berjalan otomatis)
 go run main.go
 ```
 
-### Production Deployment
+### Deployment Production
 ```bash
-# 1. Run migrations first
+# 1. Jalankan migrasi terlebih dahulu
 go build -o migrate ./cmd/migrate
 ./migrate
 
-# 2. Start application
+# 2. Start aplikasi
 go build -o mbankingcore .
 ./mbankingcore
 ```
 
-### Database Reset (Development)
+### Reset Database (Development)
 ```bash
-# Drop database, recreate, and run migrations
+# Drop database, buat ulang, dan jalankan migrasi
 dropdb mbankingcore
 createdb mbankingcore
 go run main.go
@@ -126,36 +245,36 @@ go run main.go
 
 ## Troubleshooting
 
-### Migration Fails
-- Check database credentials in `.env`
-- Ensure PostgreSQL is running
-- Verify database exists and is accessible
+### Migrasi Gagal
+- Cek kredensial database di `.env`
+- Pastikan PostgreSQL sedang berjalan
+- Verifikasi database ada dan dapat diakses
 
-### Duplicate Data
-- The system is idempotent - safe to re-run
-- Existing data is preserved
-- Only missing data is created
+### Data Duplikat
+- Sistem bersifat idempotent - aman untuk dijalankan ulang
+- Data yang ada dipertahankan
+- Hanya data yang hilang yang dibuat
 
-### Schema Issues
-- GORM AutoMigrate handles most schema changes
-- For complex changes, add custom migration functions
-- Backup database before major updates
+### Masalah Schema
+- GORM AutoMigrate menangani sebagian besar perubahan schema
+- Untuk perubahan kompleks, tambahkan fungsi migrasi kustom
+- Backup database sebelum update besar
 
-## Adding New Migrations
+## Menambah Migrasi Baru
 
-To add new migration logic:
+Untuk menambah logic migrasi baru:
 
 1. **Edit `config/migrations.go`**
-2. **Add function to `runCustomMigrations()`**
-3. **Test with migration tool**: `./migrate`
-4. **Deploy**: Migrations run automatically on startup
+2. **Tambahkan function ke `runCustomMigrations()`**
+3. **Test dengan migration tool**: `./migrate`
+4. **Deploy**: Migrasi berjalan otomatis saat startup
 
-Example:
+Contoh:
 ```go
 func runCustomMigrations() error {
-    // Existing migrations...
+    // Migrasi yang ada...
     
-    // Add new migration
+    // Tambah migrasi baru
     if err := migrateNewFeature(); err != nil {
         return err
     }
@@ -164,16 +283,58 @@ func runCustomMigrations() error {
 }
 
 func migrateNewFeature() error {
-    // Your migration logic here
+    // Logic migrasi Anda di sini
     return nil
 }
 ```
 
-## Benefits
+## Keuntungan
 
-✅ **Zero-Config**: Works out of the box  
-✅ **Developer Friendly**: No manual SQL scripts  
-✅ **Production Ready**: Safe for production deployments  
-✅ **Maintainable**: All migration logic in one place  
-✅ **Flexible**: Easy to add new migrations  
-✅ **Logged**: Complete visibility into migration process
+✅ **Zero-Config**: Bekerja langsung tanpa konfigurasi  
+✅ **Developer Friendly**: Tidak perlu script SQL manual  
+✅ **Production Ready**: Aman untuk deployment production  
+✅ **Maintainable**: Semua logic migrasi di satu tempat  
+✅ **Fleksibel**: Mudah menambah migrasi baru  
+✅ **Logged**: Visibilitas lengkap proses migrasi
+
+## Monitoring & Log Migrasi
+
+### Log Output Contoh
+```
+Starting database migrations...
+✅ Auto-migration completed successfully
+Running custom migrations...
+Migrating user roles...
+✅ All users already have proper roles
+✅ Custom migrations completed
+Seeding initial data...
+Seeding initial configurations...
+✅ Config already exists: app_version
+✅ Config already exists: tnc
+✅ Config already exists: privacy-policy
+✅ Config already exists: maintenance_mode
+✅ Config already exists: max_upload_size
+Seeding initial onboarding content...
+✅ Onboarding content already exists
+✅ Initial data seeding completed
+🚀 All migrations and initial setup completed successfully!
+```
+
+### Performance Tips
+
+- **Database Connection**: Gunakan connection pooling untuk performa optimal
+- **Migration Time**: Migrasi biasanya selesai dalam < 5 detik untuk database kosong
+- **Memory Usage**: Sistem menggunakan memory minimal untuk migrasi
+- **Concurrent Access**: Aman untuk multiple instances (menggunakan database locks)
+
+### Best Practices
+
+1. **Backup Database**: Selalu backup sebelum menjalankan migrasi di production
+2. **Test Environment**: Test migrasi di development environment terlebih dahulu
+3. **Monitor Logs**: Pantau log migrasi untuk memastikan semua berjalan dengan baik
+4. **Version Control**: Track perubahan migration logic di version control
+5. **Rollback Plan**: Siapkan rencana rollback untuk perubahan schema besar
+
+---
+
+**💡 Tips**: Untuk development, Anda bisa menjalankan `go run main.go` dan migrasi akan berjalan otomatis. Untuk production, gunakan tool migrasi terpisah terlebih dahulu untuk memastikan database siap sebelum menjalankan aplikasi.

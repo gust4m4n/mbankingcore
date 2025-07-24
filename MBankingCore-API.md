@@ -27,19 +27,19 @@ Semua API menggunakan format response yang konsisten:
 }
 ```
 
-## 📚 API Overview
+## 📚 Gambaran API
 
-The API is organized into the following sections:
+API diorganisir ke dalam bagian-bagian berikut:
 
-- **[Health Check](#1-health-check)** - Server health status
-- **[Terms & Conditions APIs](#2-terms--conditions-apis)** - Terms and conditions management
-- **[Privacy Policy APIs](#3-privacy-policy-apis)** - Privacy policy management
-- **[Onboarding Management APIs](#4-onboarding-management-apis)** - App onboarding content
-- **[Authentication APIs](#5-authentication-apis)** - User registration, login, profile management
-- **[User Management APIs](#6-user-management-apis)** - Admin user operations
-- **[Article Management APIs](#7-article-management-apis)** - Article CRUD operations
-- **[Photo Gallery APIs](#8-photo-gallery-apis)** - Photo management system
-- **[Configuration APIs](#9-configuration-apis)** - Application settings management
+- **[Health Check](#1-health-check)** - Status kesehatan server
+- **[Terms & Conditions APIs](#2-terms--conditions-apis)** - Manajemen syarat dan ketentuan
+- **[Privacy Policy APIs](#3-privacy-policy-apis)** - Manajemen kebijakan privasi
+- **[Onboarding Management APIs](#4-onboarding-management-apis)** - Konten onboarding aplikasi
+- **[Authentication APIs](#5-authentication-apis)** - Registrasi user, login, manajemen profil
+- **[User Management APIs](#6-user-management-apis)** - Operasi admin user
+- **[Article Management APIs](#7-article-management-apis)** - Operasi CRUD artikel
+- **[Photo Gallery APIs](#8-photo-gallery-apis)** - Sistem manajemen foto
+- **[Configuration APIs](#9-configuration-apis)** - Manajemen pengaturan aplikasi
 
 ---
 

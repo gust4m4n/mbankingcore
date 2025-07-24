@@ -1,10 +1,10 @@
 {
 	"info": {
-		"_postman_id": "mbx-backend-api-collection",
+		"_postman_id": "mbankingcore-api-collection",
 		"name": "MBankingCore API - Complete Collection",
 		"description": "Complete API testing collection for MBankingCore with comprehensive endpoint coverage.\n\n## Features:\n- 🔐 JWT Authentication (Android, iOS, Web, Desktop)\n- 📱 Device session management\n- 🔄 Automated token refresh\n- ✅ Comprehensive API coverage\n- 📝 Article management (CRUD)\n- 🎯 Onboarding content management\n- 📸 Photo gallery management\n- ⚙️ Config management system\n- 📋 Terms & Conditions management\n- 🔐 Privacy Policy management\n- 👥 User management (Admin)\n- 🧪 Complete testing scenarios\n\n## API Coverage (37 endpoints):\n- **Public APIs** (7 endpoints)\n  - Health Check (1)\n  - Terms & Conditions (2)\n  - Privacy Policy (2)\n  - Onboarding (2)\n- **Authentication APIs** (9 endpoints)\n- **Protected User APIs** (8 endpoints)\n- **Admin Management APIs** (13 endpoints)\n\n## Testing Order:\n1. **Public APIs** - No authentication required\n2. **Authentication** - Register, Login, Token management\n3. **Protected APIs** - User profile, sessions\n4. **Admin APIs** - User management, content management\n\n## Usage:\n1. Import environment file: `MBankingCore-API.postman_environment.json`\n2. Run collection with automated token handling\n3. Test all API endpoints systematically\n\n## Authentication Flow:\n1. Register → Get tokens\n2. Login from different devices → Multiple sessions\n3. Access protected endpoints → Auto token refresh\n4. Test CRUD operations on all resources\n5. Logout selectively → Per device or all devices",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_uid": "12345-mbx-backend"
+		"_uid": "12345-mbankingcore"
 	},
 	"item": [
 		{
@@ -149,7 +149,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"content\": \"# Terms and Conditions\\n\\n## 1. Introduction\\nWelcome to MBX Backend API. By using our service, you agree to comply with and be bound by the following terms and conditions.\\n\\n## 2. Use License\\nPermission is granted to temporarily access our service for personal, non-commercial transitory viewing only.\\n\\n## 3. Disclaimer\\nThe materials on our service are provided on an 'as is' basis. We make no warranties, expressed or implied.\\n\\n## 4. Limitations\\nIn no event shall MBX Backend or its suppliers be liable for any damages arising out of the use or inability to use our service.\\n\\n## 5. Accuracy of Materials\\nThe materials appearing on our service could include technical, typographical, or photographic errors.\\n\\n## 6. Contact Information\\nFor questions about these Terms and Conditions, please contact our support team.\\n\\n---\\n*Last updated: January 2024*\"\n}"
+							"raw": "{\n    \"content\": \"# Terms and Conditions\\n\\n## 1. Introduction\\nWelcome to MBankingCore API. By using our service, you agree to comply with and be bound by the following terms and conditions.\\n\\n## 2. Use License\\nPermission is granted to temporarily access our service for personal, non-commercial transitory viewing only.\\n\\n## 3. Disclaimer\\nThe materials on our service are provided on an 'as is' basis. We make no warranties, expressed or implied.\\n\\n## 4. Limitations\\nIn no event shall MBankingCore or its suppliers be liable for any damages arising out of the use or inability to use our service.\\n\\n## 5. Accuracy of Materials\\nThe materials appearing on our service could include technical, typographical, or photographic errors.\\n\\n## 6. Contact Information\\nFor questions about these Terms and Conditions, please contact our support team.\\n\\n---\\n*Last updated: July 2025*\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/terms-conditions",
