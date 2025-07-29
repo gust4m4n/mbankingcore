@@ -1,6 +1,6 @@
 # MBankingCore API Documentation
 
-Dokumentasi lengkap untuk RESTful API MBankingCore dengan JWT Authentication dan Multi-Device Session Management.
+Dokumentasi lengkap untuk RESTful API MBankingCore dengan JWT Authentication, Multi-Device Session Management, dan Multi-Account Banking.
 
 ## 📖 Response Format
 
@@ -32,33 +32,39 @@ Semua API menggunakan format response yang konsisten:
 API diorganisir ke dalam bagian-bagian berikut:
 
 ### 🔓 Public APIs (7 endpoints)
+
 - **[Health Check](#1-health-check)** - Status kesehatan server (1 endpoint)
 - **[Terms & Conditions APIs](#2-terms--conditions-apis)** - Manajemen syarat dan ketentuan (2 endpoints)
 - **[Privacy Policy APIs](#3-privacy-policy-apis)** - Manajemen kebijakan privasi (2 endpoints)
 - **[Onboarding APIs](#4-onboarding-apis)** - Konten onboarding aplikasi (2 endpoints)
 
-### 🔐 Authentication APIs (3 endpoints)
-- **[Authentication](#5-authentication-apis)** - Registrasi, login, refresh token
+### 🔐 Banking Authentication APIs (3 endpoints)
 
-### 🛡️ Protected APIs (8 endpoints) 
+- **[Banking Authentication](#5-banking-authentication-apis)** - 2-step banking authentication dengan OTP
+
+### 🛡️ Protected APIs (13 endpoints)
+
 - **[User Profile Management](#6-user-profile-apis)** - Manajemen profil user (2 endpoints)
-- **[Article Management](#7-article-management-apis)** - Operasi CRUD artikel (5 endpoints)
-- **[Photo Management](#8-photo-management-apis)** - Sistem manajemen foto (4 endpoints)
-- **[Configuration APIs](#9-configuration-apis)** - Read config (1 endpoint)
+- **[Bank Account Management](#7-bank-account-management-apis)** - Multi-account banking CRUD (5 endpoints)
+- **[Article Management](#8-article-management-apis)** - Operasi CRUD artikel (5 endpoints)
+- **[Photo Management](#9-photo-management-apis)** - Sistem manajemen foto (4 endpoints)
+- **[Configuration APIs](#10-configuration-apis)** - Read config (1 endpoint)
 
 ### 👑 Admin APIs (13 endpoints)
-- **[Admin Article Management](#10-admin-article-management)** - Create artikel (1 endpoint)
-- **[Admin Onboarding Management](#11-admin-onboarding-management)** - CRUD onboarding (3 endpoints)
-- **[Admin Photo Management](#12-admin-photo-management)** - Create photo (1 endpoint)
-- **[Admin User Management](#13-admin-user-management)** - Manajemen user (4 endpoints)
-- **[Admin Configuration](#14-admin-configuration-apis)** - Full config management (3 endpoints)
-- **[Admin Terms & Conditions](#15-admin-terms-conditions)** - Set T&C (1 endpoint)
-- **[Admin Privacy Policy](#16-admin-privacy-policy)** - Set Privacy Policy (1 endpoint)
+
+- **[Admin Article Management](#11-admin-article-management)** - Create artikel (1 endpoint)
+- **[Admin Onboarding Management](#12-admin-onboarding-management)** - CRUD onboarding (3 endpoints)
+- **[Admin Photo Management](#13-admin-photo-management)** - Create photo (1 endpoint)
+- **[Admin User Management](#14-admin-user-management)** - Manajemen user (4 endpoints)
+- **[Admin Configuration](#15-admin-configuration-apis)** - Full config management (3 endpoints)
+- **[Admin Terms & Conditions](#16-admin-terms-conditions)** - Set T&C (1 endpoint)
+- **[Admin Privacy Policy](#17-admin-privacy-policy)** - Set Privacy Policy (1 endpoint)
 
 ### 👨‍💼 Owner-Only APIs (2 endpoints)
-- **[Owner User Management](#17-owner-user-management)** - Create & update users dengan roles (2 endpoints)
 
-**Total: 36 Active Endpoints**
+- **[Owner User Management](#18-owner-user-management)** - Create & update users dengan roles (2 endpoints)
+
+**Total: 38 Active Endpoints**
 
 ---
 
@@ -467,115 +473,153 @@ Authorization: Bearer <jwt_token>
 
 ---
 
-## Authentication Flow
+## Banking Authentication Flow
 
-1. **Register User** - Submit user registration data with device information
-2. **Login User** - Authenticate and receive JWT tokens  
-3. **Access Protected Endpoint** - Use JWT token in Authorization header
+**2-Step Banking Authentication Process:**
+
+1. **Banking Login** - Submit banking credentials and get login_token + OTP
+2. **Verify OTP** - Submit login_token + OTP code and receive session tokens
+3. **Access Protected Endpoints** - Use JWT tokens in Authorization header
+
+**Important Notes:**
+
+- Each account number must be unique across the system
+- If testing with existing data, ensure you use a unique account number
+- The system will return a 500 error if trying to create a user with a duplicate account number
+- For new user registration, use account numbers that don't exist in the database
 
 ---
 
-## 5. Authentication APIs
+## 5. Banking Authentication APIs
 
-### 5.1 Register User
+### 5.1 Banking Login (Step 1)
 
-**Endpoint:** `POST /api/register`  
-**Description:** Register new user with device information  
+**Endpoint:** `POST /api/login`  
+**Description:** First step of banking authentication - validates credentials and sends OTP  
 **Authentication:** None required
 
 **Request Body:**
 
 ```json
 {
-    "name": "John Doe",
-    "email": "john@example.com",
-    "password": "hashed_password_from_client",
-    "phone": "+1234567890",
-    "role": "user",
-    "provider": "email",
-    "provider_id": "",
+    "name": "John Doe Smith",
+    "account_number": "1234567890123456",
+    "mother_name": "Jane Doe Smith",
+    "phone": "081234567890",
+    "pin_atm": "123456",
     "device_info": {
         "device_type": "android",
         "device_id": "android_device_123",
-        "device_name": "Samsung Galaxy S21",
-        "user_agent": "MBankingCore-Android-App/1.0.0"
+        "device_name": "Samsung Galaxy S21"
     }
 }
 ```
 
 **Request Fields:**
 
-- `name` (required): User's full name
-- `email` (required): User's email address
-- `password` (required): SHA256 hashed password from client
-- `phone` (optional): User's phone number
-- `provider` (required): Authentication provider ("email", "google", "apple", "facebook")
+- `name` (required): User's full name as per KTP (min: 8 characters)
+- `account_number` (required): Bank account number (min: 8 characters)
+- `mother_name` (required): Mother's maiden name (min: 8 characters)
+- `phone` (required): Phone number (min: 8 characters)
+- `pin_atm` (required): 6-digit ATM PIN (exactly 6 numeric digits)
 - `device_info` (required): Device information object
+
+**Validation Rules:**
+- Name: minimum 8 characters
+- Account number: minimum 8 characters
+- Phone: minimum 8 characters
+- Mother name: minimum 8 characters
+- PIN ATM: exactly 6 numeric digits
+- If phone is registered: validates user data and account ownership
+- If phone is new: prepares for auto-registration after OTP verification
 
 **Response Success (200):**
 
 ```json
 {
     "code": 200,
-    "message": "User registered successfully",
+    "message": "OTP sent successfully",
     "data": {
-        "user": {
-            "id": 1,
-            "name": "John Doe",
-            "email": "john@example.com",
-            "phone": "+1234567890",
-            "role": "user",
-            "email_verified": false,
-            "avatar": null,
-            "created_at": "2023-01-01T00:00:00Z",
-            "updated_at": "2023-01-01T00:00:00Z"
-        },
-        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-        "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-        "expires_in": 86400,
-        "session_id": 1,
-        "device_info": {
-            "device_type": "android",
-            "device_id": "android_device_123",
-            "device_name": "Samsung Galaxy S21",
-            "user_agent": "MBankingCore-Android-App/1.0.0"
-        }
+        "login_token": "a1b2c3d4e5f6789012345678901234567890abcdef123456789012345678901234",
+        "message": "OTP sent to your phone number",
+        "expires_in": 300
     }
 }
 ```
 
 **Response Errors:**
 
-- `306` - Email already exists
-- `253` - Invalid request data
+- `400` - Invalid request data / validation errors
+- `401` - User information does not match records / Invalid PIN
+- `401` - Account number not found for this user
 - `250` - Internal server error
 
 ---
 
-### 5.2 Login User
+### 5.2 Banking Login Verify (Step 2)
 
-**Endpoint:** `POST /api/login`  
-**Description:** Authenticate user and create session  
+**Endpoint:** `POST /api/login/verify`  
+**Description:** Second step - verify OTP and receive session tokens  
 **Authentication:** None required
 
 **Request Body:**
 
 ```json
 {
-    "email": "john@example.com",
-    "password": "hashed_password_from_client",
-    "provider": "email",
-    "provider_id": "",
-    "device_info": {
-        "device_type": "ios",
-        "device_id": "ios_device_456",
-        "device_name": "iPhone 13 Pro",
-        "user_agent": "MBankingCore-iOS-App/1.0.0"
+    "login_token": "a1b2c3d4e5f6789012345678901234567890abcdef123456789012345678901234",
+    "otp_code": "123456"
+}
+```
+
+**Request Fields:**
+
+- `login_token` (required): Login token from first step
+- `otp_code` (required): 6-digit OTP code sent to phone
+
+**Response Success (200):**
+
+```json
+{
+    "code": 200,
+    "message": "Login successful",
+    "data": {
+        "user": {
+            "id": 1,
+            "name": "John Doe Smith",
+            "phone": "081234567890",
+            "mother_name": "Jane Doe Smith",
+            "role": "user",
+            "avatar": null,
+            "created_at": "2023-01-01T00:00:00Z",
+            "updated_at": "2023-01-01T00:00:00Z"
+        },
+        "tokens": {
+            "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "expires_in": 86400
+        },
+        "session": {
+            "session_id": 1,
+            "device_info": {
+                "device_type": "android",
+                "device_id": "android_device_123",
+                "device_name": "Samsung Galaxy S21"
+            }
+        }
     }
 }
 ```
 
-**Response Success (200):**
+**Note:** For development purposes, this endpoint currently accepts any valid login_token and returns success. Production implementation will include proper OTP validation.
+
+**Response Errors:**
+
+- `400` - Invalid request data
+- `401` - Invalid or expired login token
+- `401` - Invalid OTP code
+- `250` - Internal server error
+
+---
 
 ```json
 {
@@ -600,8 +644,7 @@ Authorization: Bearer <jwt_token>
         "device_info": {
             "device_type": "ios",
             "device_id": "ios_device_456",
-            "device_name": "iPhone 13 Pro",
-            "user_agent": "MBankingCore-iOS-App/1.0.0"
+            "device_name": "iPhone 13 Pro"
         }
     }
 }
@@ -654,9 +697,13 @@ Authorization: Bearer <jwt_token>
     "code": 200,
     "message": "Token refreshed successfully",
     "data": {
-        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-        "expires_in": 86400,
-        "session_id": 1
+        "tokens": {
+            "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "expires_in": 86400
+        },
+        "session": {
+            "session_id": 1
+        }
     }
 }
 ```
@@ -668,7 +715,9 @@ Authorization: Bearer <jwt_token>
 
 ---
 
-### 5.4 Get User Profile
+## 6. User Profile APIs
+
+### 6.1 Get User Profile
 
 **Endpoint:** `GET /api/profile`  
 **Description:** Get current user's profile information  
@@ -688,11 +737,10 @@ Authorization: Bearer <access_token>
     "message": "User retrieved successfully",
     "data": {
         "id": 1,
-        "name": "John Doe",
-        "email": "john@example.com",
-        "phone": "+1234567890",
+        "name": "John Doe Smith",
+        "phone": "081234567890",
+        "mother_name": "Jane Doe Smith",
         "role": "user",
-        "email_verified": false,
         "avatar": null,
         "created_at": "2023-01-01T00:00:00Z",
         "updated_at": "2023-01-01T00:00:00Z"
@@ -707,11 +755,303 @@ Authorization: Bearer <access_token>
 
 ---
 
-### 5.5 Update User Profile
+### 6.2 Update User Profile
 
 **Endpoint:** `PUT /api/profile`  
 **Description:** Update current user's profile information  
 **Authentication:** Bearer token required
+
+**Request Headers:**
+
+```
+Authorization: Bearer <access_token>
+Content-Type: application/json
+```
+
+**Request Body:**
+
+```json
+{
+    "name": "John Updated Name",
+    "avatar": "base64_encoded_image"
+}
+```
+
+**Response Success (200):**
+
+```json
+{
+    "code": 200,
+    "message": "Profile updated successfully",
+    "data": {
+        "id": 1,
+        "name": "John Updated Name",
+        "phone": "081234567890",
+        "mother_name": "Jane Doe Smith",
+        "role": "user",
+        "avatar": "https://example.com/avatar.jpg",
+        "created_at": "2023-01-01T00:00:00Z",
+        "updated_at": "2023-01-01T12:00:00Z"
+    }
+}
+```
+
+**Response Errors:**
+
+- `300` - Unauthorized access
+- `400` - Invalid request data
+- `250` - Internal server error
+
+---
+
+## 7. Bank Account Management APIs
+
+### 7.1 Get Bank Accounts
+
+**Endpoint:** `GET /api/bank-accounts`  
+**Description:** Get all bank accounts for the authenticated user  
+**Authentication:** Bearer token required
+
+**Request Headers:**
+
+```
+Authorization: Bearer <access_token>
+```
+
+**Response Success (200):**
+
+```json
+{
+    "code": 200,
+    "message": "Bank accounts retrieved successfully",
+    "data": {
+        "accounts": [
+            {
+                "id": 1,
+                "account_number": "1234567890123456",
+                "account_name": "John Doe Smith",
+                "bank_name": "Bank Central Asia",
+                "bank_code": "014",
+                "account_type": "saving",
+                "is_active": true,
+                "is_primary": true,
+                "created_at": "2023-01-01T00:00:00Z",
+                "updated_at": "2023-01-01T00:00:00Z"
+            },
+            {
+                "id": 2,
+                "account_number": "9876543210987654",
+                "account_name": "John Doe Smith",
+                "bank_name": "Bank Mandiri",
+                "bank_code": "008",
+                "account_type": "checking",
+                "is_active": true,
+                "is_primary": false,
+                "created_at": "2023-01-02T00:00:00Z",
+                "updated_at": "2023-01-02T00:00:00Z"
+            }
+        ],
+        "total": 2
+    }
+}
+```
+
+**Response Errors:**
+
+- `300` - Unauthorized access
+- `250` - Internal server error
+
+---
+
+### 7.2 Create Bank Account
+
+**Endpoint:** `POST /api/bank-accounts`  
+**Description:** Create a new bank account for the authenticated user  
+**Authentication:** Bearer token required
+
+**Request Headers:**
+
+```
+Authorization: Bearer <access_token>
+Content-Type: application/json
+```
+
+**Request Body:**
+
+```json
+{
+    "account_number": "1111222233334444",
+    "account_name": "John Doe Smith",
+    "bank_name": "Bank Negara Indonesia",
+    "bank_code": "009",
+    "account_type": "saving",
+    "is_primary": false
+}
+```
+
+**Request Fields:**
+
+- `account_number` (required): Bank account number (min: 8, max: 20 characters)
+- `account_name` (required): Account name (min: 3, max: 100 characters)
+- `bank_name` (optional): Bank institution name (max: 100 characters)
+- `bank_code` (optional): Bank code (max: 10 characters)
+- `account_type` (optional): Account type (max: 20 characters)
+- `is_primary` (optional): Set as primary account (boolean)
+
+**Response Success (200):**
+
+```json
+{
+    "code": 200,
+    "message": "Bank account created successfully",
+    "data": {
+        "id": 3,
+        "account_number": "1111222233334444",
+        "account_name": "John Doe Smith",
+        "bank_name": "Bank Negara Indonesia",
+        "bank_code": "009",
+        "account_type": "saving",
+        "is_active": true,
+        "is_primary": false,
+        "created_at": "2023-01-03T00:00:00Z",
+        "updated_at": "2023-01-03T00:00:00Z"
+    }
+}
+```
+
+**Response Errors:**
+
+- `300` - Unauthorized access
+- `400` - Invalid request data
+- `409` - Account number already exists for this user
+- `250` - Internal server error
+
+---
+
+### 7.3 Update Bank Account
+
+**Endpoint:** `PUT /api/bank-accounts/:id`  
+**Description:** Update an existing bank account  
+**Authentication:** Bearer token required
+
+**Request Headers:**
+
+```
+Authorization: Bearer <access_token>
+Content-Type: application/json
+```
+
+**Request Body:**
+
+```json
+{
+    "account_name": "Updated Account Name",
+    "bank_name": "Updated Bank Name",
+    "bank_code": "010",
+    "account_type": "checking"
+}
+```
+
+**Response Success (200):**
+
+```json
+{
+    "code": 200,
+    "message": "Bank account updated successfully",
+    "data": {
+        "id": 3,
+        "account_number": "1111222233334444",
+        "account_name": "Updated Account Name",
+        "bank_name": "Updated Bank Name",
+        "bank_code": "010",
+        "account_type": "checking",
+        "is_active": true,
+        "is_primary": false,
+        "created_at": "2023-01-03T00:00:00Z",
+        "updated_at": "2023-01-03T12:00:00Z"
+    }
+}
+```
+
+**Response Errors:**
+
+- `300` - Unauthorized access
+- `400` - Invalid request data
+- `404` - Bank account not found
+- `250` - Internal server error
+
+---
+
+### 7.4 Delete Bank Account
+
+**Endpoint:** `DELETE /api/bank-accounts/:id`  
+**Description:** Delete (soft delete) a bank account  
+**Authentication:** Bearer token required
+
+**Request Headers:**
+
+```
+Authorization: Bearer <access_token>
+```
+
+**Response Success (200):**
+
+```json
+{
+    "code": 200,
+    "message": "Bank account deleted successfully"
+}
+```
+
+**Response Errors:**
+
+- `300` - Unauthorized access
+- `404` - Bank account not found
+- `400` - Cannot delete primary account (set another as primary first)
+- `250` - Internal server error
+
+---
+
+### 7.5 Set Primary Account
+
+**Endpoint:** `PUT /api/bank-accounts/:id/primary`  
+**Description:** Set a bank account as the primary account  
+**Authentication:** Bearer token required
+
+**Request Headers:**
+
+```
+Authorization: Bearer <access_token>
+```
+
+**Response Success (200):**
+
+```json
+{
+    "code": 200,
+    "message": "Primary account updated successfully",
+    "data": {
+        "id": 3,
+        "account_number": "1111222233334444",
+        "account_name": "John Doe Smith",
+        "bank_name": "Bank Negara Indonesia",
+        "bank_code": "009",
+        "account_type": "saving",
+        "is_active": true,
+        "is_primary": true,
+        "created_at": "2023-01-03T00:00:00Z",
+        "updated_at": "2023-01-03T12:00:00Z"
+    }
+}
+```
+
+**Response Errors:**
+
+- `300` - Unauthorized access
+- `404` - Bank account not found
+- `250` - Internal server error
+
+---
 
 **Request Headers:**
 
@@ -1784,18 +2124,22 @@ The API uses a hierarchical error code system where each feature has its own uni
 - `306` - Email already exists
 - `307` - Registration failed
 - `308` - Login failed
+
 - `309` - Token refresh failed
 
 #### Public Content (350-399) - Terms, Privacy Policy
 
 **Terms & Conditions (360-369):**
+
 - `360` - Terms and conditions not found
+
 - `361` - Failed to create terms and conditions
 - `362` - Failed to update terms and conditions
 - `363` - Failed to delete terms and conditions
 - `364` - Failed to retrieve terms and conditions
 
 **Privacy Policy (370-379):**
+
 - `370` - Privacy policy not found
 - `371` - Failed to create privacy policy
 - `372` - Failed to update privacy policy
@@ -1850,6 +2194,7 @@ All error responses follow this standard format:
             "field": "email",
             "message": "Email is required"
         }
+
     ]
 }
 ```
@@ -1857,6 +2202,7 @@ All error responses follow this standard format:
 ## Rate Limiting
 
 The API implements rate limiting to ensure fair usage:
+
 - **Authentication endpoints**: 5 requests per minute per IP
 - **General endpoints**: 100 requests per minute per authenticated user
 - **Admin endpoints**: 1000 requests per minute per admin user

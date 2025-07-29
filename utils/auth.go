@@ -1,7 +1,10 @@
 package utils
 
 import (
+	"crypto/rand"
 	"errors"
+	"fmt"
+	"math/big"
 	"os"
 	"time"
 
@@ -21,7 +24,7 @@ func getJWTSecret() []byte {
 // JWT Claims
 type Claims struct {
 	UserID uint   `json:"user_id"`
-	Email  string `json:"email"`
+	Phone  string `json:"phone"`
 	Role   string `json:"role"`
 	jwt.RegisteredClaims
 }
@@ -43,16 +46,15 @@ func CheckPassword(storedBcryptHash, clientSHA256Hash string) error {
 }
 
 // GenerateJWT generates a JWT token for the user
-func GenerateJWT(userID uint, email, role string) (string, error) {
+func GenerateJWT(userID uint, phone, role string) (string, error) {
 	expirationTime := time.Now().Add(24 * time.Hour) // Token expires in 24 hours
 
 	claims := &Claims{
 		UserID: userID,
-		Email:  email,
+		Phone:  phone,
 		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
 
@@ -82,4 +84,29 @@ func ValidateJWT(tokenString string) (*Claims, error) {
 	}
 
 	return claims, nil
+}
+
+// GenerateOTP generates a 6-digit OTP code
+func GenerateOTP() string {
+	max := big.NewInt(999999)
+	n, err := rand.Int(rand.Reader, max)
+	if err != nil {
+		// Fallback to timestamp-based OTP if crypto/rand fails
+		return fmt.Sprintf("%06d", time.Now().Unix()%1000000)
+	}
+	return fmt.Sprintf("%06d", n.Int64())
+}
+
+// GenerateLoginToken generates a unique login token for OTP sessions
+func GenerateLoginToken() string {
+	// Generate 32 bytes of random data
+	bytes := make([]byte, 32)
+	_, err := rand.Read(bytes)
+	if err != nil {
+		// Fallback to timestamp-based token if crypto/rand fails
+		return fmt.Sprintf("login_token_%d_%d", time.Now().UnixNano(), time.Now().Unix())
+	}
+
+	// Convert to hex string
+	return fmt.Sprintf("%x", bytes)
 }

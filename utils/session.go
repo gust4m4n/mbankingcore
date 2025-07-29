@@ -55,7 +55,7 @@ func (sm *SessionManager) CreateSession(userID uint, req models.MultiPlatformLog
 	}
 
 	// Create JWT token with role
-	jwtToken, err := GenerateJWT(userID, req.Email, user.Role)
+	jwtToken, err := GenerateJWT(userID, req.Phone, user.Role)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,6 @@ func (sm *SessionManager) CreateSession(userID uint, req models.MultiPlatformLog
 		Provider:     req.Provider,
 		ProviderID:   req.ProviderID,
 		IPAddress:    ipAddress,
-		UserAgent:    req.DeviceInfo.UserAgent,
 		IsActive:     true,
 		LastActivity: time.Now(),
 		ExpiresAt:    time.Now().Add(24 * time.Hour), // 24 hour expiry
@@ -115,7 +114,7 @@ func (sm *SessionManager) RefreshSession(refreshToken string) (*models.DeviceSes
 	}
 
 	// Generate new JWT token with role
-	newJWTToken, err := GenerateJWT(session.UserID, session.User.Email, session.User.Role)
+	newJWTToken, err := GenerateJWT(session.UserID, session.User.Phone, session.User.Role)
 	if err != nil {
 		return nil, "", err
 	}

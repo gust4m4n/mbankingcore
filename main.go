@@ -42,14 +42,15 @@ func main() {
 	authHandler := handlers.NewAuthHandler(config.DB)
 	articleHandler := handlers.NewArticleHandler(config.DB)
 	photoHandler := handlers.NewPhotoHandler(config.DB)
+	bankAccountHandler := handlers.NewBankAccountHandler(config.DB)
 
 	// API routes
 	api := router.Group("/api")
 	{
 		// Authentication routes (public)
-		api.POST("/register", authHandler.Register)    // Register (renamed from multi-register)
-		api.POST("/login", authHandler.Login)          // Login (renamed from multi-login)
-		api.POST("/refresh", authHandler.RefreshToken) // Refresh token
+		api.POST("/login", authHandler.BankingLogin)              // Banking Login Step 1 - Send OTP
+		api.POST("/login/verify", authHandler.BankingLoginVerify) // Banking Login Step 2 - Verify OTP
+		api.POST("/refresh", authHandler.RefreshToken)            // Refresh token
 
 		// Public onboarding routes (remain public)
 		api.GET("/onboardings", handlers.GetOnboardings)    // Get all onboardings (public)
@@ -74,6 +75,12 @@ func main() {
 			// Profile management
 			protected.GET("/profile", authHandler.Profile)       // Get user profile
 			protected.PUT("/profile", authHandler.UpdateProfile) // Update user profile
+			protected.PUT("/change-pin", authHandler.ChangePIN)  // Change PIN ATM
+
+			// Session management
+			protected.GET("/sessions", authHandler.GetActiveSessions)         // Get active sessions
+			protected.POST("/logout", authHandler.Logout)                     // Logout
+			protected.POST("/logout-others", authHandler.LogoutOtherSessions) // Logout other sessions
 
 			// Article management (all operations require authentication)
 			protected.GET("/articles", articleHandler.GetArticles)          // Get all articles (protected)
@@ -87,6 +94,13 @@ func main() {
 			protected.GET("/photos/:id", photoHandler.GetPhotoByID)   // Get photo by ID (protected)
 			protected.PUT("/photos/:id", photoHandler.UpdatePhoto)    // Update photo (user can update own)
 			protected.DELETE("/photos/:id", photoHandler.DeletePhoto) // Delete photo (user can delete own)
+
+			// Bank account management (authenticated users)
+			protected.GET("/bank-accounts", bankAccountHandler.GetBankAccounts)               // Get user's bank accounts
+			protected.POST("/bank-accounts", bankAccountHandler.CreateBankAccount)            // Create new bank account
+			protected.PUT("/bank-accounts/:id", bankAccountHandler.UpdateBankAccount)         // Update bank account
+			protected.DELETE("/bank-accounts/:id", bankAccountHandler.DeleteBankAccount)      // Delete bank account
+			protected.PUT("/bank-accounts/:id/primary", bankAccountHandler.SetPrimaryAccount) // Set primary account
 
 			// Config management - get only (all authenticated users can read configs)
 			protected.GET("/config/:key", handlers.GetConfig) // Get config value by key (authenticated users)

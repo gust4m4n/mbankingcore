@@ -26,7 +26,6 @@ func CreateUser(c *gin.Context) {
 	// Create new user
 	user := models.User{
 		Name:  request.Name,
-		Email: request.Email,
 		Phone: request.Phone,
 	}
 
@@ -69,11 +68,11 @@ func CreateUser(c *gin.Context) {
 	// Save to database
 	result := config.DB.Create(&user)
 	if result.Error != nil {
-		// Check for duplicate email error
-		if result.Error.Error() == `ERROR: duplicate key value violates unique constraint "uni_users_email" (SQLSTATE 23505)` {
+		// Check for duplicate phone error
+		if result.Error.Error() == `ERROR: duplicate key value violates unique constraint "uni_users_phone" (SQLSTATE 23505)` {
 			c.JSON(409, gin.H{
-				"code":    models.CODE_EMAIL_EXISTS,
-				"message": "Email already exists",
+				"code":    models.CODE_PHONE_EXISTS,
+				"message": "Phone already exists",
 			})
 			return
 		}
@@ -309,9 +308,6 @@ func UpdateUser(c *gin.Context) {
 	if request.Name != "" {
 		updateData["name"] = request.Name
 	}
-	if request.Email != "" {
-		updateData["email"] = request.Email
-	}
 	if request.Phone != "" {
 		updateData["phone"] = request.Phone
 	}
@@ -359,11 +355,11 @@ func UpdateUser(c *gin.Context) {
 	// Update user in database
 	result = config.DB.Model(&user).Updates(updateData)
 	if result.Error != nil {
-		// Check for duplicate email error
-		if result.Error.Error() == `ERROR: duplicate key value violates unique constraint "uni_users_email" (SQLSTATE 23505)` {
+		// Check for duplicate phone error
+		if result.Error.Error() == `ERROR: duplicate key value violates unique constraint "uni_users_phone" (SQLSTATE 23505)` {
 			c.JSON(409, gin.H{
-				"code":    models.CODE_EMAIL_EXISTS,
-				"message": "Email already exists",
+				"code":    models.CODE_PHONE_EXISTS,
+				"message": "Phone already exists",
 			})
 			return
 		}

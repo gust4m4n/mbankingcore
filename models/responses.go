@@ -177,6 +177,10 @@ func EmailExistsResponse() ErrorResponse {
 	return NewErrorResponse(CODE_EMAIL_EXISTS, MSG_EMAIL_EXISTS)
 }
 
+func PhoneExistsResponse() ErrorResponse {
+	return NewErrorResponse(CODE_PHONE_EXISTS, MSG_PHONE_EXISTS)
+}
+
 func RegisterFailedResponse() ErrorResponse {
 	return NewErrorResponse(CODE_REGISTER_FAILED, MSG_REGISTER_FAILED)
 }

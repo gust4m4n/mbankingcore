@@ -7,54 +7,54 @@ import (
 type User struct {
 	ID             uint            `json:"id" gorm:"primaryKey"`
 	Name           string          `json:"name" gorm:"not null"`
-	Email          string          `json:"email" gorm:"unique;not null"`
-	Phone          string          `json:"phone"`
-	Password       string          `json:"-" gorm:""`
+	Phone          string          `json:"phone" gorm:"unique;not null"`
+	MotherName     string          `json:"mother_name" gorm:"not null"`
+	PinAtm         string          `json:"-" gorm:"not null"` // Hidden from JSON
 	Role           string          `json:"role" gorm:"size:20;default:'user'"`
 	GoogleID       string          `json:"google_id" gorm:"size:255"`
 	AppleID        string          `json:"apple_id" gorm:"size:255"`
 	FacebookID     string          `json:"facebook_id" gorm:"size:255"`
-	EmailVerified  bool            `json:"email_verified" gorm:"default:false"`
 	Avatar         string          `json:"avatar" gorm:"size:500"`
+	BankAccounts   []BankAccount   `json:"bank_accounts,omitempty" gorm:"foreignKey:UserID"`
 	DeviceSessions []DeviceSession `json:"device_sessions,omitempty" gorm:"foreignKey:UserID"`
 	CreatedAt      time.Time       `json:"created_at"`
 	UpdatedAt      time.Time       `json:"updated_at"`
 }
 
 type CreateUserRequest struct {
-	Name  string `json:"name" binding:"required"`
-	Email string `json:"email" binding:"required,email"`
-	Phone string `json:"phone"`
-	Role  string `json:"role,omitempty"`
+	Name       string `json:"name" binding:"required"`
+	Phone      string `json:"phone" binding:"required"`
+	MotherName string `json:"mother_name" binding:"required"`
+	PinAtm     string `json:"pin_atm" binding:"required"`
+	Role       string `json:"role,omitempty"`
 }
 
 type UpdateUserRequest struct {
-	Name  string `json:"name,omitempty"`
-	Email string `json:"email,omitempty"`
-	Phone string `json:"phone,omitempty"`
-	Role  string `json:"role,omitempty"`
+	Name       string `json:"name,omitempty"`
+	Phone      string `json:"phone,omitempty"`
+	MotherName string `json:"mother_name,omitempty"`
+	Role       string `json:"role,omitempty"`
 }
 
 // Action-based Request Structure
 type UserActionRequest struct {
 	Action string `json:"action" binding:"required"`
 	Name   string `json:"name,omitempty"`
-	Email  string `json:"email,omitempty"`
 	Phone  string `json:"phone,omitempty"`
 	Role   string `json:"role,omitempty"`
 	ID     uint   `json:"id,omitempty"`
 }
 
 type UserResponse struct {
-	ID            uint      `json:"id"`
-	Name          string    `json:"name"`
-	Email         string    `json:"email"`
-	Phone         string    `json:"phone"`
-	Role          string    `json:"role"`
-	EmailVerified bool      `json:"email_verified"`
-	Avatar        string    `json:"avatar"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
+	ID           uint          `json:"id"`
+	Name         string        `json:"name"`
+	Phone        string        `json:"phone"`
+	MotherName   string        `json:"mother_name"`
+	Role         string        `json:"role"`
+	Avatar       string        `json:"avatar"`
+	BankAccounts []BankAccount `json:"bank_accounts,omitempty"`
+	CreatedAt    time.Time     `json:"created_at"`
+	UpdatedAt    time.Time     `json:"updated_at"`
 }
 
 type UsersListResponse struct {
@@ -66,15 +66,15 @@ type UsersListResponse struct {
 
 func (u *User) ToResponse() UserResponse {
 	return UserResponse{
-		ID:            u.ID,
-		Name:          u.Name,
-		Email:         u.Email,
-		Phone:         u.Phone,
-		Role:          u.Role,
-		EmailVerified: u.EmailVerified,
-		Avatar:        u.Avatar,
-		CreatedAt:     u.CreatedAt,
-		UpdatedAt:     u.UpdatedAt,
+		ID:           u.ID,
+		Name:         u.Name,
+		Phone:        u.Phone,
+		MotherName:   u.MotherName,
+		Role:         u.Role,
+		Avatar:       u.Avatar,
+		BankAccounts: u.BankAccounts,
+		CreatedAt:    u.CreatedAt,
+		UpdatedAt:    u.UpdatedAt,
 	}
 }
 

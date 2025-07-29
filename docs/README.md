@@ -2,7 +2,8 @@
 
 Go RESTful API dengan JWT Authentication menggunakan Gin Framework, GORM, dan PostgreSQL.
 
-> 🍎 **Panduan setup ini khusus untuk macOS menggunakan Homebrew**
+> 🍎 **Panduan setup ini khusus untuk mac      "device_id": "web_browser_123",
+      "device_name": "Chrome Browser"menggunakan Homebrew**
 >
 > 📋 **Untuk dokumentasi API lengkap:** [MBankingCore-API.md](./MBankingCore-API.md)
 >
@@ -186,8 +187,7 @@ curl -X POST http://localhost:8080/api/login \
     "device_info": {
       "device_type": "android",
       "device_id": "android_456",
-      "device_name": "Samsung Galaxy",
-      "user_agent": "MBankingCore-Android-App/1.0.0"
+      "device_name": "Samsung Galaxy"
     }
   }'
 ```
@@ -386,12 +386,12 @@ curl http://localhost:8080/health
 # Register a test user (multi-platform)
 curl -X POST http://localhost:8080/api/register \
   -H "Content-Type: application/json" \
-  -d '{"name":"Test User","email":"test@example.com","password":"ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f","phone":"08123456789","provider":"email","device_info":{"device_type":"web","device_id":"web_browser_123","device_name":"Chrome","user_agent":"Mozilla/5.0"}}'
+  -d '{"name":"Test User","email":"test@example.com","password":"ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f","phone":"08123456789","provider":"email","device_info":{"device_type":"web","device_id":"web_browser_123","device_name":"Chrome"}}'
 
 # Login and get JWT token (multi-platform)
 curl -X POST http://localhost:8080/api/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f","provider":"email","device_info":{"device_type":"web","device_id":"web_browser_123","device_name":"Chrome","user_agent":"Mozilla/5.0"}}'
+  -d '{"email":"test@example.com","password":"ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f","provider":"email","device_info":{"device_type":"web","device_id":"web_browser_123","device_name":"Chrome"}}'
 ```
 
 ## 📊 Monitoring & Logging

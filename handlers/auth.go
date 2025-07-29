@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"mbankingcore/models"
 	"mbankingcore/utils"
@@ -23,18 +25,66 @@ func NewAuthHandler(db *gorm.DB) *AuthHandler {
 	}
 }
 
-// Login handles login from various platforms and devices (renamed from MultiPlatformLogin)
-func (h *AuthHandler) Login(c *gin.Context) {
-	var req models.MultiPlatformLoginRequest
+// BankingLogin handles first step of banking authentication - sends OTP
+func (h *AuthHandler) BankingLogin(c *gin.Context) {
+	var req models.BankingLoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, models.InvalidRequestResponse())
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    400,
+			"message": "Invalid request data",
+			"errors":  err.Error(),
+		})
 		return
 	}
 
-	// Validate required fields based on provider
-	if req.Provider == models.LoginProviderEmail {
-		if req.Email == "" || req.Password == "" {
-			c.JSON(http.StatusBadRequest, models.ValidationFailedResponse())
+	// Additional custom validation
+	if len(req.Name) < 8 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    400,
+			"message": "Name must be at least 8 characters long",
+		})
+		return
+	}
+
+	if len(req.AccountNumber) < 8 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    400,
+			"message": "Account number must be at least 8 characters long",
+		})
+		return
+	}
+
+	if len(req.Phone) < 8 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    400,
+			"message": "Phone number must be at least 8 characters long",
+		})
+		return
+	}
+
+	if len(req.MotherName) < 8 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    400,
+			"message": "Mother name must be at least 8 characters long",
+		})
+		return
+	}
+
+	if len(req.PinAtm) != 6 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    400,
+			"message": "PIN ATM must be exactly 6 digits",
+		})
+		return
+	}
+
+	// Validate PIN is numeric
+	for _, char := range req.PinAtm {
+		if char < '0' || char > '9' {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code":    400,
+				"message": "PIN ATM must contain only numeric digits",
+			})
 			return
 		}
 	}
@@ -48,152 +98,169 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	var user models.User
-	var err error
+	// Check if phone number is already registered
+	var existingUser models.User
+	phoneExists := h.DB.Preload("BankAccounts").Where("phone = ?", req.Phone).First(&existingUser).Error == nil
 
-	switch req.Provider {
-	case models.LoginProviderEmail:
-		user, err = h.authenticateEmail(req.Email, req.Password)
-	case models.LoginProviderGoogle:
-		user, err = h.authenticateGoogle(req.ProviderID, req.Email)
-	case models.LoginProviderApple:
-		user, err = h.authenticateApple(req.ProviderID, req.Email)
-	default:
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    400,
-			"message": "Unsupported login provider",
-		})
-		return
+	if phoneExists {
+		// Phone is registered - validate user data matches
+		if existingUser.Name != req.Name || existingUser.MotherName != req.MotherName {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"code":    401,
+				"message": "User information does not match our records",
+			})
+			return
+		}
+
+		// Check if account number exists for this user
+		var bankAccount models.BankAccount
+		accountExists := h.DB.Where("user_id = ? AND account_number = ?", existingUser.ID, req.AccountNumber).First(&bankAccount).Error == nil
+
+		if !accountExists {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"code":    401,
+				"message": "Account number not found for this user",
+			})
+			return
+		}
+
+		// Verify PIN (compare plain PIN with hashed PIN in database)
+		if err := utils.CheckPassword(existingUser.PinAtm, req.PinAtm); err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"code":    401,
+				"message": "Invalid PIN ATM",
+			})
+			return
+		}
+	} else {
+		// Phone is not registered - will auto-register during OTP verification
+		log.Printf("New phone number %s will be registered after OTP verification", req.Phone)
 	}
 
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, models.InvalidPasswordResponse())
-		return
+	// Generate 6-digit OTP and unique login token
+	otpCode := utils.GenerateOTP()
+	loginToken := utils.GenerateLoginToken()
+
+	// Create OTP session (expires in 5 minutes)
+	// Store PIN in plain text temporarily for verification, will be hashed when saving to user
+	otpSession := models.OTPSession{
+		LoginToken:    loginToken,
+		Phone:         req.Phone,
+		OtpCode:       otpCode,
+		Name:          req.Name,
+		AccountNumber: req.AccountNumber,
+		MotherName:    req.MotherName,
+		PinAtm:        req.PinAtm, // Store plain PIN temporarily for verification
+		DeviceType:    string(req.DeviceInfo.DeviceType),
+		DeviceID:      req.DeviceInfo.DeviceID,
+		DeviceName:    req.DeviceInfo.DeviceName,
+		ExpiresAt:     time.Now().Add(5 * time.Minute),
+		IsUsed:        false,
 	}
 
-	// Check if there's already an active session with the same device info
-	// Must check device_type, device_id, AND device_name to prevent duplicate sessions
-	var existingSession models.DeviceSession
-	err = h.DB.Where("user_id = ? AND device_type = ? AND device_id = ? AND device_name = ? AND is_active = ?",
-		user.ID, req.DeviceInfo.DeviceType, req.DeviceInfo.DeviceID, req.DeviceInfo.DeviceName, true).
-		First(&existingSession).Error
-
-	if err == nil {
-		// Session with same device info already exists
-		c.JSON(http.StatusConflict, gin.H{
-			"code":    409,
-			"message": "Device is already logged in. Please logout from this device first or use a different device.",
-			"data": gin.H{
-				"existing_session": gin.H{
-					"device_type":   existingSession.DeviceType,
-					"device_id":     existingSession.DeviceID,
-					"device_name":   existingSession.DeviceName,
-					"last_activity": existingSession.LastActivity,
-				},
-			},
-		})
-		return
-	}
-
-	// Get client IP
-	ipAddress := utils.GetClientIP(c)
-
-	// Create new device session
-	session, err := h.SessionManager.CreateSession(user.ID, req, ipAddress)
-	if err != nil {
+	if err := h.DB.Create(&otpSession).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, models.InternalServerResponse())
 		return
 	}
 
-	// Remove password from response
-	user.Password = ""
+	// TODO: Send OTP via SMS to req.Phone
+	// For now, we'll log it (in production, integrate with SMS service)
+	log.Printf("OTP for phone %s: %s", req.Phone, otpCode)
 
-	response := models.MultiPlatformLoginResponse{
-		User:         user,
-		AccessToken:  session.SessionToken,
-		RefreshToken: session.RefreshToken,
-		ExpiresIn:    24 * 60 * 60, // 24 hours in seconds
-		SessionID:    session.ID,
-		DeviceInfo:   req.DeviceInfo,
+	var message string
+	if phoneExists {
+		message = "OTP sent to your registered phone number"
+	} else {
+		message = "Phone number will be registered. OTP sent for verification"
 	}
 
 	c.JSON(http.StatusOK, models.Response{
 		Code:    200,
-		Message: "Login successful",
-		Data:    response,
+		Message: message,
+		Data: gin.H{
+			"login_token": loginToken,
+			"expires_in":  300, // 5 minutes
+			"is_new_user": !phoneExists,
+		},
 	})
 }
 
-// Register handles registration with platform info (renamed from RegisterMultiPlatform)
-func (h *AuthHandler) Register(c *gin.Context) {
-	var req struct {
-		Name       string               `json:"name" binding:"required"`
-		Email      string               `json:"email" binding:"required,email"`
-		Phone      string               `json:"phone"`
-		Password   string               `json:"password" binding:"required,min=6"`
-		Role       string               `json:"role"`
-		Provider   models.LoginProvider `json:"provider"`
-		ProviderID string               `json:"provider_id,omitempty"`
-		DeviceInfo models.DeviceInfo    `json:"device_info"`
-	}
-
+// BankingLoginVerify handles second step of banking authentication - simplified for development
+// Currently only validates login_token and always returns success
+func (h *AuthHandler) BankingLoginVerify(c *gin.Context) {
+	var req models.OTPVerifyRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, models.InvalidRequestResponse())
 		return
 	}
 
-	// Check if email already exists
-	var existingUser models.User
-	if err := h.DB.Where("email = ?", req.Email).First(&existingUser).Error; err == nil {
-		c.JSON(http.StatusConflict, models.EmailExistsResponse())
-		return
-	}
+	// Only validate login_token exists and is not used
+	var otpSession models.OTPSession
+	err := h.DB.Where("login_token = ? AND is_used = ?", req.LoginToken, false).
+		First(&otpSession).Error
 
-	// Hash password
-	hashedPassword, err := utils.HashPassword(req.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, models.InternalServerResponse())
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"code":    401,
+			"message": "Invalid login token or session not found",
+		})
 		return
 	}
 
-	// Validate and set role
-	role := req.Role
-	if !models.ValidateRole(role) {
-		role = models.ROLE_USER // Default to user if invalid role provided
+	// Mark OTP as used
+	otpSession.IsUsed = true
+	h.DB.Save(&otpSession)
+
+	// Check if user exists by phone
+	var user models.User
+	userExists := h.DB.Where("phone = ?", otpSession.Phone).First(&user).Error == nil
+
+	if !userExists {
+		// Hash PIN for new user
+		hashedPin, err := utils.HashPassword(otpSession.PinAtm)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, models.InternalServerResponse())
+			return
+		}
+
+		// Auto-register user
+		user = models.User{
+			Name:       otpSession.Name,
+			Phone:      otpSession.Phone,
+			MotherName: otpSession.MotherName,
+			PinAtm:     hashedPin,
+			Role:       models.ROLE_USER,
+		}
+
+		if err := h.DB.Create(&user).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, models.CreateFailedResponse())
+			return
+		}
+
+		// Create bank account for new user
+		bankAccount := models.BankAccount{
+			UserID:        user.ID,
+			AccountNumber: otpSession.AccountNumber,
+			AccountName:   user.Name,
+			BankName:      "Unknown Bank",
+			AccountType:   "saving",
+			IsActive:      true,
+			IsPrimary:     true,
+		}
+
+		if err := h.DB.Create(&bankAccount).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, models.CreateFailedResponse())
+			return
+		}
 	}
 
-	// Create user with platform info
-	user := models.User{
-		Name:          req.Name,
-		Email:         req.Email,
-		Phone:         req.Phone,
-		Password:      hashedPassword,
-		Role:          role,
-		EmailVerified: false,
-	}
-
-	// Set provider-specific fields
-	switch req.Provider {
-	case models.LoginProviderGoogle:
-		user.GoogleID = req.ProviderID
-	case models.LoginProviderApple:
-		user.AppleID = req.ProviderID
-	}
-
-	if err := h.DB.Create(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, models.CreateFailedResponse())
-		return
-	}
-
-	// Create MultiPlatformLoginRequest for session creation
+	// Create device session without validation checks (simplified for development)
 	loginReq := models.MultiPlatformLoginRequest{
-		Email:      req.Email,
-		Provider:   req.Provider,
-		ProviderID: req.ProviderID,
+		Phone:      otpSession.Phone,
+		Provider:   models.LoginProviderEmail,
 		DeviceInfo: req.DeviceInfo,
 	}
 
-	// Create initial device session
 	ipAddress := utils.GetClientIP(c)
 	session, err := h.SessionManager.CreateSession(user.ID, loginReq, ipAddress)
 	if err != nil {
@@ -201,8 +268,8 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	// Remove password from response
-	user.Password = ""
+	// Remove sensitive data from response
+	user.PinAtm = ""
 
 	response := models.MultiPlatformLoginResponse{
 		User:         user,
@@ -213,9 +280,14 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		DeviceInfo:   req.DeviceInfo,
 	}
 
+	message := "Login successful"
+	if !userExists {
+		message = "Account created and login successful"
+	}
+
 	c.JSON(http.StatusOK, models.Response{
 		Code:    200,
-		Message: "User registered successfully",
+		Message: message,
 		Data:    response,
 	})
 }
@@ -389,8 +461,8 @@ func (h *AuthHandler) Profile(c *gin.Context) {
 		return
 	}
 
-	// Remove password from response
-	user.Password = ""
+	// Remove sensitive data from response
+	user.PinAtm = ""
 
 	c.JSON(http.StatusOK, models.UserRetrievedResponse(user))
 }
@@ -433,14 +505,14 @@ func (h *AuthHandler) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	// Remove password from response
-	user.Password = ""
+	// Remove sensitive data from response
+	user.PinAtm = ""
 
 	c.JSON(http.StatusOK, models.UserUpdatedResponse(user))
 }
 
-// ChangePassword changes user password and invalidates all sessions
-func (h *AuthHandler) ChangePassword(c *gin.Context) {
+// ChangePIN changes user PIN ATM and invalidates all sessions
+func (h *AuthHandler) ChangePIN(c *gin.Context) {
 	userID, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, models.UnauthorizedResponse())
@@ -448,8 +520,8 @@ func (h *AuthHandler) ChangePassword(c *gin.Context) {
 	}
 
 	var req struct {
-		CurrentPassword string `json:"current_password" binding:"required"`
-		NewPassword     string `json:"new_password" binding:"required,min=6"`
+		CurrentPIN string `json:"current_pin" binding:"required"`
+		NewPIN     string `json:"new_pin" binding:"required,len=6"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -464,21 +536,24 @@ func (h *AuthHandler) ChangePassword(c *gin.Context) {
 		return
 	}
 
-	// Check current password
-	if err := utils.CheckPassword(user.Password, req.CurrentPassword); err != nil {
-		c.JSON(http.StatusUnauthorized, models.InvalidPasswordResponse())
+	// Check current PIN
+	if err := utils.CheckPassword(user.PinAtm, req.CurrentPIN); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"code":    401,
+			"message": "Invalid current PIN",
+		})
 		return
 	}
 
-	// Hash new password
-	hashedPassword, err := utils.HashPassword(req.NewPassword)
+	// Hash new PIN
+	hashedPIN, err := utils.HashPassword(req.NewPIN)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, models.InternalServerResponse())
 		return
 	}
 
-	// Update password
-	user.Password = hashedPassword
+	// Update PIN
+	user.PinAtm = hashedPIN
 	if err := h.DB.Save(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, models.UpdateFailedResponse())
 		return
@@ -489,68 +564,7 @@ func (h *AuthHandler) ChangePassword(c *gin.Context) {
 
 	c.JSON(http.StatusOK, models.Response{
 		Code:    200,
-		Message: "Password changed successfully. All sessions have been invalidated for security.",
+		Message: "PIN changed successfully. All sessions have been invalidated for security.",
 		Data:    nil,
 	})
-}
-
-// authenticateEmail handles email/password authentication
-func (h *AuthHandler) authenticateEmail(email, password string) (models.User, error) {
-	var user models.User
-	if err := h.DB.Where("email = ?", email).First(&user).Error; err != nil {
-		return user, err
-	}
-
-	// Check password using existing utils
-	if err := utils.CheckPassword(user.Password, password); err != nil {
-		return user, err
-	}
-
-	return user, nil
-}
-
-// authenticateGoogle handles Google SSO authentication
-func (h *AuthHandler) authenticateGoogle(googleID, email string) (models.User, error) {
-	var user models.User
-
-	// First try to find user by Google ID
-	err := h.DB.Where("google_id = ?", googleID).First(&user).Error
-	if err == nil {
-		return user, nil
-	}
-
-	// If not found by Google ID, try by email
-	err = h.DB.Where("email = ?", email).First(&user).Error
-	if err == nil {
-		// Link Google ID to existing user
-		user.GoogleID = googleID
-		h.DB.Save(&user)
-		return user, nil
-	}
-
-	// Return error if user not found
-	return user, gorm.ErrRecordNotFound
-}
-
-// authenticateApple handles Apple SSO authentication
-func (h *AuthHandler) authenticateApple(appleID, email string) (models.User, error) {
-	var user models.User
-
-	// First try to find user by Apple ID
-	err := h.DB.Where("apple_id = ?", appleID).First(&user).Error
-	if err == nil {
-		return user, nil
-	}
-
-	// If not found by Apple ID, try by email
-	err = h.DB.Where("email = ?", email).First(&user).Error
-	if err == nil {
-		// Link Apple ID to existing user
-		user.AppleID = appleID
-		h.DB.Save(&user)
-		return user, nil
-	}
-
-	// Return error if user not found
-	return user, gorm.ErrRecordNotFound
 }

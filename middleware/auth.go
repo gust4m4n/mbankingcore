@@ -56,7 +56,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		// Set user info in context
 		c.Set("userID", claims.UserID)
-		c.Set("email", claims.Email)
+		c.Set("phone", claims.Phone)
 		c.Set("role", claims.Role)
 		c.Next()
 	}
@@ -72,7 +72,7 @@ func OptionalAuth() gin.HandlerFunc {
 				claims, err := utils.ValidateJWT(tokenString)
 				if err == nil {
 					c.Set("userID", claims.UserID)
-					c.Set("email", claims.Email)
+					c.Set("phone", claims.Phone)
 				}
 			}
 		}
@@ -138,7 +138,7 @@ func AdminMiddleware() gin.HandlerFunc {
 
 		// Set user info in context
 		c.Set("userID", claims.UserID)
-		c.Set("email", claims.Email)
+		c.Set("phone", claims.Phone)
 		c.Set("role", claims.Role)
 		c.Next()
 	}
@@ -202,7 +202,7 @@ func OwnerMiddleware() gin.HandlerFunc {
 
 		// Set user info in context
 		c.Set("userID", claims.UserID)
-		c.Set("email", claims.Email)
+		c.Set("phone", claims.Phone)
 		c.Set("role", claims.Role)
 		c.Next()
 	}

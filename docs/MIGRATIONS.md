@@ -83,7 +83,6 @@ device_sessions (
     device_id VARCHAR NOT NULL,
     device_type VARCHAR,
     device_name VARCHAR,
-    user_agent TEXT,
     access_token TEXT,
     refresh_token TEXT,
     expires_at TIMESTAMP,
@@ -162,6 +161,9 @@ config (
 - **Article Management**: CRUD operations untuk artikel dengan author tracking
 - **Photo Gallery**: Sistem upload dan manajemen foto dengan metadata
 - **Configuration Management**: Dynamic app configuration melalui database
+
+### Perubahan Database
+- **Removed user_agent field**: Field `user_agent` telah dihapus dari model `DeviceSession` dan tabel `device_sessions` untuk menyederhanakan struktur data
 
 ### Security Enhancements
 - **Double-Layer Password Protection**: SHA256 (client) + bcrypt (server)
