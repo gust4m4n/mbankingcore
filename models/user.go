@@ -11,9 +11,6 @@ type User struct {
 	MotherName     string          `json:"mother_name" gorm:"not null"`
 	PinAtm         string          `json:"-" gorm:"not null"` // Hidden from JSON
 	Role           string          `json:"role" gorm:"size:20;default:'user'"`
-	GoogleID       string          `json:"google_id" gorm:"size:255"`
-	AppleID        string          `json:"apple_id" gorm:"size:255"`
-	FacebookID     string          `json:"facebook_id" gorm:"size:255"`
 	Avatar         string          `json:"avatar" gorm:"size:500"`
 	BankAccounts   []BankAccount   `json:"bank_accounts,omitempty" gorm:"foreignKey:UserID"`
 	DeviceSessions []DeviceSession `json:"device_sessions,omitempty" gorm:"foreignKey:UserID"`
