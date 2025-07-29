@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "mbankingcore-api-collection",
     "name": "MBankingCore API Collection",
-    "description": "API testing collection for MBankingCore with comprehensive endpoint coverage.\n\n## Features:\n- 🏦 Banking Authentication (2-step OTP process)\n- 📱 Device session management\n- 🔄 Automated token refresh\n- ✅ Comprehensive API coverage\n- 💰 Multi-account banking support\n- 📝 Article management (CRUD)\n- 🎯 Onboarding content management\n- 📸 Photo gallery management\n- ⚙️ Config management system\n- 📋 Terms & Conditions management\n- 🔐 Privacy Policy management\n- 👥 User management (Admin)\n- 🧪 Testing scenarios\n\n## API Coverage (38+ endpoints):\n- **Public APIs** (7 endpoints)\n  - Health Check (1)\n  - Terms & Conditions (2)\n  - Privacy Policy (2)\n  - Onboarding (2)\n- **Banking Authentication APIs** (3 endpoints)\n- **Protected User APIs** (13+ endpoints)\n  - User Profile (2)\n  - Bank Account Management (5)\n  - Article Management (5)\n  - Photo Management (4)\n- **Admin Management APIs** (13+ endpoints)\n\n## Testing Order:\n1. **Public APIs** - No authentication required\n2. **Banking Authentication** - 2-step login process\n3. **Protected APIs** - User profile, bank accounts, content\n4. **Admin APIs** - User management, content management\n\n## Usage:\n1. Import environment file: `MBankingCore-API.postman_environment.json`\n2. **Important**: Update `banking_account_number` to a unique value before testing\n3. Run collection with automated token handling\n4. Test all API endpoints systematically\n\n## Banking Authentication Flow:\n1. Banking Login → Submit credentials and get login_token + OTP\n2. Banking Verify → Submit login_token + OTP and get session tokens\n3. Access protected endpoints → Auto token refresh\n4. Test CRUD operations on bank accounts and other resources\n5. Logout selectively → Per device or all devices\n\n## Important Notes:\n⚠️ **Account Numbers Must Be Unique**: Each account number must be unique across the system. If testing with existing data, ensure you use a unique account number in the environment variables to avoid database constraint violations.\n\n🔑 **Environment Variables**: The collection uses pre-configured variables for testing. Update these values as needed:\n- `banking_account_number`: Use unique 16-digit number\n- `banking_phone`: Use unique phone number\n- `banking_name`: Full name (8+ characters)\n- `banking_mother_name`: Mother's name (8+ characters)\n- `banking_pin_atm`: 6-digit PIN",
+    "description": "API testing collection for MBankingCore with comprehensive endpoint coverage.\n\n## Features:\n- 🏦 Banking Authentication (2-step OTP process)\n- 📱 Device session management\n- 🔄 Automated token refresh\n- ✅ Comprehensive API coverage\n- 💰 Multi-account banking support\n- 📝 Article management (CRUD)\n- 🎯 Onboarding content management\n- 📸 Photo gallery management\n- ⚙️ Config management system\n- 📋 Terms & Conditions management\n- 🔐 Privacy Policy management\n- 👥 User management (Admin)\n- 🧪 Testing scenarios\n\n## API Coverage (44+ endpoints):\n- **Public APIs** (7 endpoints)\n  - Health Check (1)\n  - Terms & Conditions (2)\n  - Privacy Policy (2)\n  - Onboarding (2)\n- **Banking Authentication APIs** (3 endpoints)\n- **Protected User APIs** (18 endpoints)\n  - User Profile (3)\n  - Session Management (3)\n  - Bank Account Management (5)\n  - Article Management (5)\n  - Photo Management (4)\n  - Configuration (1)\n- **Admin Management APIs** (14 endpoints)\n- **Owner Management APIs** (2 endpoints)\n\n## Testing Order:\n1. **Public APIs** - No authentication required\n2. **Banking Authentication** - 2-step login process\n3. **Protected APIs** - User profile, bank accounts, content\n4. **Admin APIs** - User management, content management\n\n## Usage:\n1. Import environment file: `MBankingCore-API.postman_environment.json`\n2. **Important**: Update `banking_account_number` to a unique value before testing\n3. Run collection with automated token handling\n4. Test all API endpoints systematically\n\n## Banking Authentication Flow:\n1. Banking Login → Submit credentials and get login_token + OTP\n2. Banking Verify → Submit login_token + OTP and get session tokens\n3. Access protected endpoints → Auto token refresh\n4. Test CRUD operations on bank accounts and other resources\n5. Logout selectively → Per device or all devices\n\n## Important Notes:\n⚠️ **Account Numbers Must Be Unique**: Each account number must be unique across the system. If testing with existing data, ensure you use a unique account number in the environment variables to avoid database constraint violations.\n\n🔑 **Environment Variables**: The collection uses pre-configured variables for testing. Update these values as needed:\n- `banking_account_number`: Use unique 16-digit number\n- `banking_phone`: Use unique phone number\n- `banking_name`: Full name (8+ characters)\n- `banking_mother_name`: Mother's name (8+ characters)\n- `banking_pin_atm`: 6-digit PIN",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_uid": "12345-mbankingcore"
   },
@@ -327,6 +327,182 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "📋 Public Terms & Conditions",
+      "item": [
+        {
+          "name": "Get Terms & Conditions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/terms-conditions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "terms-conditions"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔐 Public Privacy Policy",
+      "item": [
+        {
+          "name": "Get Privacy Policy",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/privacy-policy",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "privacy-policy"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🎯 Public Onboarding",
+      "item": [
+        {
+          "name": "Get All Onboardings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/onboardings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "onboardings"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Onboarding by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/onboardings/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "onboardings",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
@@ -337,7 +513,7 @@
     },
     {
       "key": "total_endpoints",
-      "value": "41",
+      "value": "44",
       "type": "string"
     }
   ]

@@ -42,29 +42,30 @@ API diorganisir ke dalam bagian-bagian berikut:
 
 - **[Banking Authentication](#5-banking-authentication-apis)** - 2-step banking authentication dengan OTP
 
-### 🛡️ Protected APIs (13 endpoints)
+### 🛡️ Protected APIs (18 endpoints)
 
-- **[User Profile Management](#6-user-profile-apis)** - Manajemen profil user (2 endpoints)
-- **[Bank Account Management](#7-bank-account-management-apis)** - Multi-account banking CRUD (5 endpoints)
-- **[Article Management](#8-article-management-apis)** - Operasi CRUD artikel (5 endpoints)
-- **[Photo Management](#9-photo-management-apis)** - Sistem manajemen foto (4 endpoints)
-- **[Configuration APIs](#10-configuration-apis)** - Read config (1 endpoint)
+- **[User Profile Management](#6-user-profile-apis)** - Manajemen profil user (3 endpoints)
+- **[Session Management](#7-session-management-apis)** - Manajemen sesi device (3 endpoints)
+- **[Bank Account Management](#8-bank-account-management-apis)** - Multi-account banking CRUD (5 endpoints)
+- **[Article Management](#9-article-management-apis)** - Operasi CRUD artikel (5 endpoints)
+- **[Photo Management](#10-photo-management-apis)** - Sistem manajemen foto (4 endpoints)
+- **[Configuration APIs](#11-configuration-apis)** - Read config (1 endpoint)
 
-### 👑 Admin APIs (13 endpoints)
+### 👑 Admin APIs (14 endpoints)
 
-- **[Admin Article Management](#11-admin-article-management)** - Create artikel (1 endpoint)
-- **[Admin Onboarding Management](#12-admin-onboarding-management)** - CRUD onboarding (3 endpoints)
-- **[Admin Photo Management](#13-admin-photo-management)** - Create photo (1 endpoint)
-- **[Admin User Management](#14-admin-user-management)** - Manajemen user (4 endpoints)
-- **[Admin Configuration](#15-admin-configuration-apis)** - Full config management (3 endpoints)
-- **[Admin Terms & Conditions](#16-admin-terms-conditions)** - Set T&C (1 endpoint)
-- **[Admin Privacy Policy](#17-admin-privacy-policy)** - Set Privacy Policy (1 endpoint)
+- **[Admin Article Management](#12-admin-article-management)** - Create artikel (1 endpoint)
+- **[Admin Onboarding Management](#13-admin-onboarding-management)** - CRUD onboarding (3 endpoints)
+- **[Admin Photo Management](#14-admin-photo-management)** - Create photo (1 endpoint)
+- **[Admin User Management](#15-admin-user-management)** - Manajemen user (4 endpoints)
+- **[Admin Configuration](#16-admin-configuration-apis)** - Full config management (3 endpoints)
+- **[Admin Terms & Conditions](#17-admin-terms-conditions)** - Set T&C (1 endpoint)
+- **[Admin Privacy Policy](#18-admin-privacy-policy)** - Set Privacy Policy (1 endpoint)
 
 ### 👨‍💼 Owner-Only APIs (2 endpoints)
 
-- **[Owner User Management](#18-owner-user-management)** - Create & update users dengan roles (2 endpoints)
+- **[Owner User Management](#19-owner-user-management)** - Create & update users dengan roles (2 endpoints)
 
-**Total: 38 Active Endpoints**
+**Total: 44 Active Endpoints**
 
 ---
 
@@ -804,7 +805,172 @@ Content-Type: application/json
 
 ---
 
-## 7. Bank Account Management APIs
+### 6.3 Change PIN ATM
+
+**Endpoint:** `PUT /api/change-pin`  
+**Description:** Change user's PIN ATM and invalidate all sessions  
+**Authentication:** Bearer token required
+
+**Request Headers:**
+
+```
+Authorization: Bearer <access_token>
+Content-Type: application/json
+```
+
+**Request Body:**
+
+```json
+{
+    "old_pin": "123456",
+    "new_pin": "654321"
+}
+```
+
+**Response Success (200):**
+
+```json
+{
+    "code": 200,
+    "message": "PIN changed successfully. Please login again with your new PIN",
+    "data": null
+}
+```
+
+**Response Errors:**
+
+- `300` - Unauthorized access
+- `400` - Invalid current PIN
+- `253` - Invalid request data
+- `250` - Internal server error
+
+---
+
+## 7. Session Management APIs
+
+### 7.1 Get Active Sessions
+
+**Endpoint:** `GET /api/sessions`  
+**Description:** Get all active sessions for current user across all devices  
+**Authentication:** Bearer token required
+
+**Request Headers:**
+
+```
+Authorization: Bearer <access_token>
+```
+
+**Response Success (200):**
+
+```json
+{
+    "code": 200,
+    "message": "Active sessions retrieved successfully",
+    "data": {
+        "sessions": [
+            {
+                "id": 1,
+                "device_type": "android",
+                "device_id": "device123",
+                "device_name": "Samsung Galaxy S23",
+                "ip_address": "192.168.1.1",
+                "user_agent": "MBankingApp/1.0.0",
+                "created_at": "2023-01-01T00:00:00Z",
+                "last_active": "2023-01-01T12:00:00Z",
+                "is_current": true
+            },
+            {
+                "id": 2,
+                "device_type": "ios",
+                "device_id": "device456",
+                "device_name": "iPhone 14",
+                "ip_address": "192.168.1.2",
+                "user_agent": "MBankingApp/1.0.0",
+                "created_at": "2023-01-01T10:00:00Z",
+                "last_active": "2023-01-01T11:00:00Z",
+                "is_current": false
+            }
+        ],
+        "total": 2
+    }
+}
+```
+
+**Response Errors:**
+
+- `300` - Unauthorized access
+- `250` - Internal server error
+
+---
+
+### 7.2 Logout
+
+**Endpoint:** `POST /api/logout`  
+**Description:** Logout from current device or all devices  
+**Authentication:** Bearer token required
+
+**Request Headers:**
+
+```
+Authorization: Bearer <access_token>
+Content-Type: application/json
+```
+
+**Request Body (Optional):**
+
+```json
+{
+    "logout_all": false
+}
+```
+
+**Response Success (200):**
+
+```json
+{
+    "code": 200,
+    "message": "Logged out successfully",
+    "data": null
+}
+```
+
+**Response Errors:**
+
+- `300` - Unauthorized access
+- `250` - Internal server error
+
+---
+
+### 7.3 Logout Other Sessions
+
+**Endpoint:** `POST /api/logout-others`  
+**Description:** Logout from all other sessions except current device  
+**Authentication:** Bearer token required
+
+**Request Headers:**
+
+```
+Authorization: Bearer <access_token>
+```
+
+**Response Success (200):**
+
+```json
+{
+    "code": 200,
+    "message": "Logged out from other devices successfully",
+    "data": null
+}
+```
+
+**Response Errors:**
+
+- `300` - Unauthorized access
+- `250` - Internal server error
+
+---
+
+## 8. Bank Account Management APIs
 
 ### 7.1 Get Bank Accounts
 
@@ -1423,7 +1589,7 @@ Content-Type: application/json
 
 ---
 
-## 7. Article Management APIs
+## 9. Article Management APIs
 
 ### 7.1 Get All Articles
 
@@ -1713,7 +1879,7 @@ Authorization: Bearer <access_token>
 
 ---
 
-## 8. Photo Gallery APIs
+## 10. Photo Management APIs
 
 ### 8.1 Get All Photos
 
@@ -1930,7 +2096,7 @@ Authorization: Bearer <access_token>
 
 ---
 
-## 9. Configuration APIs
+## 11. Configuration APIs
 
 ### 9.1 Get Config by Key
 

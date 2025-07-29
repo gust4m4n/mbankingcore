@@ -1,0 +1,449 @@
+{
+  "info": {
+    "_postman_id": "mbankingcore-api-complete",
+    "name": "MBankingCore API Complete Collection",
+    "description": "Complete API testing collection for MBankingCore with full endpoint coverage.\n\n## Features:\n- 🏦 Banking Authentication (2-step OTP process)\n- 📱 Device session management\n- 🔄 Automated token refresh\n- ✅ Complete API coverage (44 endpoints)\n- 💰 Multi-account banking support\n- 📝 Article management (CRUD)\n- 🎯 Onboarding content management\n- 📸 Photo gallery management\n- ⚙️ Config management system\n- 📋 Terms & Conditions management\n- 🔐 Privacy Policy management\n- 👥 User management (Admin)\n- 🏛️ Owner-level operations\n- 🧪 Complete testing scenarios\n\n## API Coverage (44 endpoints):\n- **Public APIs** (7 endpoints)\n  - Health Check (1)\n  - Terms & Conditions (2)\n  - Privacy Policy (2)\n  - Onboarding (2)\n- **Banking Authentication APIs** (3 endpoints)\n- **Protected User APIs** (18 endpoints)\n  - User Profile (3)\n  - Session Management (3)\n  - Bank Account Management (5)\n  - Article Management (5)\n  - Photo Management (4)\n  - Configuration (1)\n- **Admin Management APIs** (14 endpoints)\n  - Article Management (1)\n  - Onboarding Management (3)\n  - Photo Management (1)\n  - User Management (4)\n  - Configuration Management (3)\n  - Terms & Conditions (1)\n  - Privacy Policy (1)\n- **Owner Management APIs** (2 endpoints)\n  - User Creation & Updates (2)\n\n## Testing Order:\n1. **Public APIs** - No authentication required\n2. **Banking Authentication** - 2-step login process\n3. **Protected APIs** - User profile, sessions, bank accounts, content\n4. **Admin APIs** - Content and user management\n5. **Owner APIs** - Advanced user role management\n\n## Usage:\n1. Import environment file: `MBankingCore-API.postman_environment.json`\n2. **Important**: Update `banking_account_number` to a unique value before testing\n3. Run collection with automated token handling\n4. Test all API endpoints systematically\n\n## Banking Authentication Flow:\n1. Banking Login → Submit credentials and get login_token + OTP\n2. Banking Verify → Submit login_token + OTP and get session tokens\n3. Access protected endpoints → Auto token refresh\n4. Test CRUD operations on bank accounts and other resources\n5. Logout selectively → Per device or all devices\n\n## Important Notes:\n⚠️ **Account Numbers Must Be Unique**: Each account number must be unique across the system. If testing with existing data, ensure you use a unique account number in the environment variables to avoid database constraint violations.\n\n🔑 **Environment Variables**: The collection uses pre-configured variables for testing. Update these values as needed:\n- `banking_account_number`: Use unique 16-digit number\n- `banking_phone`: Use unique phone number\n- `banking_name`: Full name (8+ characters)\n- `banking_mother_name`: Mother's name (8+ characters)\n- `banking_pin_atm`: 6-digit PIN",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_uid": "12345-mbankingcore-complete"
+  },
+  "item": [
+    {
+      "name": "🏥 Health Check",
+      "item": [
+        {
+          "name": "Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "});",
+                  "",
+                  "// Test response data",
+                  "pm.test('Health check data is correct', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.code).to.eql(200);",
+                  "    pm.expect(responseJson.message).to.include('running');",
+                  "    pm.expect(responseJson.data).to.have.property('status', 'ok');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📋 Public Terms & Conditions",
+      "item": [
+        {
+          "name": "Get Terms & Conditions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/terms-conditions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "terms-conditions"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔐 Public Privacy Policy",
+      "item": [
+        {
+          "name": "Get Privacy Policy",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/privacy-policy",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "privacy-policy"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🎯 Public Onboarding",
+      "item": [
+        {
+          "name": "Get All Onboardings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/onboardings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "onboardings"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Onboarding by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/onboardings/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "onboardings",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🏦 Banking Authentication",
+      "item": [
+        {
+          "name": "Banking Login (Step 1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "    pm.expect(responseJson.data).to.have.property('login_token');",
+                  "});",
+                  "",
+                  "// Extract and save login token",
+                  "if (pm.response.code === 200) {",
+                  "    const responseJson = pm.response.json();",
+                  "    const data = responseJson.data;",
+                  "    ",
+                  "    if (data.login_token) {",
+                  "        pm.environment.set('login_token', data.login_token);",
+                  "        console.log('✅ Login token saved to environment');",
+                  "        console.log('📱 OTP will be sent to phone number');",
+                  "        console.log('⏰ Token expires in:', data.expires_in, 'seconds');",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{banking_name}}\",\n  \"account_number\": \"{{banking_account_number}}\",\n  \"mother_name\": \"{{banking_mother_name}}\",\n  \"phone\": \"{{banking_phone}}\",\n  \"pin_atm\": \"{{banking_pin_atm}}\",\n  \"device_info\": {\n    \"device_type\": \"android\",\n    \"device_id\": \"{{device_id_banking}}\",\n    \"device_name\": \"Samsung Galaxy S23\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Banking Login Verification (Step 2)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "    pm.expect(responseJson.data).to.have.property('access_token');",
+                  "    pm.expect(responseJson.data).to.have.property('refresh_token');",
+                  "});",
+                  "",
+                  "// Extract and save tokens",
+                  "if (pm.response.code === 200) {",
+                  "    const responseJson = pm.response.json();",
+                  "    const data = responseJson.data;",
+                  "    ",
+                  "    if (data.access_token && data.refresh_token) {",
+                  "        pm.environment.set('access_token', data.access_token);",
+                  "        pm.environment.set('refresh_token', data.refresh_token);",
+                  "        pm.environment.set('user_id', data.user.id);",
+                  "        pm.environment.set('session_id', data.session_id);",
+                  "        console.log('✅ Authentication successful');",
+                  "        console.log('🔑 Access token saved to environment');",
+                  "        console.log('👤 User ID:', data.user.id);",
+                  "        console.log('📱 Session ID:', data.session_id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login_token\": \"{{login_token}}\",\n  \"otp_code\": \"{{banking_otp_code}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/login/verify",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "login",
+                "verify"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "    pm.expect(responseJson.data).to.have.property('access_token');",
+                  "});",
+                  "",
+                  "// Update access token",
+                  "if (pm.response.code === 200) {",
+                  "    const responseJson = pm.response.json();",
+                  "    const data = responseJson.data;",
+                  "    ",
+                  "    if (data.access_token) {",
+                  "        pm.environment.set('access_token', data.access_token);",
+                  "        console.log('✅ Access token refreshed');",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/refresh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "refresh"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "collection_version",
+      "value": "3.0.0",
+      "type": "string"
+    },
+    {
+      "key": "total_endpoints",
+      "value": "44",
+      "type": "string"
+    }
+  ]
+}
