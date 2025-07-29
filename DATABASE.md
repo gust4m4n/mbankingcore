@@ -37,6 +37,8 @@ CREATE TABLE users (
     phone VARCHAR(255) UNIQUE NOT NULL,
     mother_name VARCHAR(255) NOT NULL,
     pin_atm VARCHAR(255) NOT NULL,  -- bcrypt hashed
+    balance BIGINT DEFAULT 0,  -- User account balance (integer)
+    status INTEGER DEFAULT 1,  -- User status: 0=inactive, 1=active, 2=terblokir
     role VARCHAR(20) DEFAULT 'user',
     avatar VARCHAR(500),
     created_at TIMESTAMP NOT NULL,
@@ -46,6 +48,8 @@ CREATE TABLE users (
 -- Indexes
 CREATE UNIQUE INDEX idx_users_phone ON users(phone);
 CREATE INDEX idx_users_role ON users(role);
+CREATE INDEX idx_users_balance ON users(balance);
+CREATE INDEX idx_users_status ON users(status);
 ```
 
 **Fields:**
@@ -57,6 +61,8 @@ CREATE INDEX idx_users_role ON users(role);
 | `phone` | VARCHAR(255) | UNIQUE, NOT NULL | Phone number (unique identifier) |
 | `mother_name` | VARCHAR(255) | NOT NULL | Mother's name (min 8 characters) |
 | `pin_atm` | VARCHAR(255) | NOT NULL | Hashed PIN ATM (6 digits, bcrypt) |
+| `balance` | BIGINT | DEFAULT 0 | User account balance (integer amount) |
+| `status` | INTEGER | DEFAULT 1 | User status: 0=inactive, 1=active, 2=terblokir |
 | `role` | VARCHAR(20) | DEFAULT 'user' | User role: 'user', 'admin', 'owner' |
 | `avatar` | VARCHAR(500) | NULLABLE | Avatar image URL |
 | `created_at` | TIMESTAMP | NOT NULL | Record creation time |
@@ -67,6 +73,12 @@ CREATE INDEX idx_users_role ON users(role);
 - `user` - Standard banking user (default)
 - `admin` - Administrative user
 - `owner` - System owner (full access)
+
+**Status Values:**
+
+- `0` - Inactive user (cannot login)
+- `1` - Active user (default, normal operation)
+- `2` - Terblokir (blocked, cannot perform transactions)
 
 **Relationships:**
 
@@ -526,6 +538,8 @@ db.AutoMigrate(
 ```sql
 -- User management
 CREATE INDEX idx_users_role ON users(role);
+CREATE INDEX idx_users_balance ON users(balance);
+CREATE INDEX idx_users_status ON users(status);
 
 -- Bank account management  
 CREATE INDEX idx_bank_accounts_user_id ON bank_accounts(user_id);
