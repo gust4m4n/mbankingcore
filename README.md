@@ -4,7 +4,7 @@ Go RESTful API dengan Banking Authentication, JWT, Multi-Device Session Manageme
 
 > � **Mobile Banking Core API** dengan 2-step OTP Authentication
 >
-> 📋 **Untuk dokumentasi API lengkap:** [docs/MBankingCore-API.md](./docs/MBankingCore-API.md)
+> 📋 **Untuk dokumentasi API lengkap:** [MBANKINGCORE-API.md](./MBANKINGCORE-API.md)
 >
 > 🔄 **Banking Authentication:** Sistem autentikasi banking dengan OTP 2-langkah menggunakan login_token
 
@@ -66,20 +66,13 @@ mbankingcore/
 ├── postman/
 │   ├── MBankingCore-API.postman_collection.json    # Postman collection (9 endpoints)
 │   └── MBankingCore-API.postman_environment.json   # Environment variables
-├── docs/
-│   ├── API-Endpoint-Reference.md     # Complete endpoint reference (44 endpoints)
-│   ├── MBankingCore-API.md          # Full API documentation
-│   ├── LOGIN_TOKEN_IMPLEMENTATION.md # Login token security documentation
-│   ├── MIGRATIONS.md                # Database migration guide
-│   ├── POSTMAN_UPDATE_LOG.md        # Postman collection update history
-│   ├── SIMPLIFIED_LOGIN_VERIFY.md   # Login verification guide
-│   └── VALIDATION_IMPLEMENTATION.md # Validation system documentation
 ├── .env                              # Environment variables
 ├── .env.example                      # Environment template
 ├── .gitignore                        # Git ignore rules
 ├── go.mod                           # Go modules
 ├── go.sum                           # Go modules checksum
 ├── main.go                          # Application entry point
+├── MBANKINGCORE-API.md              # Complete API documentation (44 endpoints)
 └── README.md                        # This documentation
 ```
 
@@ -153,10 +146,7 @@ Server akan berjalan di `http://localhost:8080`
 ## 📖 API Documentation
 
 **📋 Untuk dokumentasi API lengkap dengan contoh request/response:**
-👉 **[docs/MBankingCore-API.md](./docs/MBankingCore-API.md)**
-
-**🔗 Referensi endpoint lengkap (44 endpoints):**
-👉 **[docs/API-Endpoint-Reference.md](./docs/API-Endpoint-Reference.md)**
+👉 **[MBANKINGCORE-API.md](./MBANKINGCORE-API.md)**
 
 ## 🏦 Banking Authentication System
 
@@ -551,13 +541,7 @@ createdb mbcdb
 
 ### 📖 Documentation Files
 
-- **[docs/MBankingCore-API.md](./docs/MBankingCore-API.md)** - Complete API documentation with examples
-- **[docs/API-Endpoint-Reference.md](./docs/API-Endpoint-Reference.md)** - Quick reference for all 44 endpoints
-- **[docs/LOGIN_TOKEN_IMPLEMENTATION.md](./docs/LOGIN_TOKEN_IMPLEMENTATION.md)** - Banking authentication security details
-- **[docs/MIGRATIONS.md](./docs/MIGRATIONS.md)** - Database migration guide
-- **[docs/POSTMAN_UPDATE_LOG.md](./docs/POSTMAN_UPDATE_LOG.md)** - Postman collection update history
-- **[docs/SIMPLIFIED_LOGIN_VERIFY.md](./docs/SIMPLIFIED_LOGIN_VERIFY.md)** - Login verification process
-- **[docs/VALIDATION_IMPLEMENTATION.md](./docs/VALIDATION_IMPLEMENTATION.md)** - Input validation system
+- **[MBANKINGCORE-API.md](./MBANKINGCORE-API.md)** - Complete API documentation with examples and endpoint reference (44 endpoints)
 
 ### 🔗 External Resources
 
@@ -573,9 +557,7 @@ createdb mbcdb
 
 ---
 
-**📋 Complete API Documentation:** [docs/MBankingCore-API.md](./docs/MBankingCore-API.md)
-
-**🔗 Quick Endpoint Reference:** [docs/API-Endpoint-Reference.md](./docs/API-Endpoint-Reference.md)
+**📋 Complete API Documentation:** [MBANKINGCORE-API.md](./MBANKINGCORE-API.md)
 
 ---
 
