@@ -68,7 +68,7 @@ func (h *ArticleHandler) GetArticles(c *gin.Context) {
 	// Parse pagination parameters
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	perPage, _ := strconv.Atoi(c.DefaultQuery("per_page", "10"))
-	
+
 	if page < 1 {
 		page = 1
 	}
@@ -252,7 +252,7 @@ func (h *ArticleHandler) GetMyArticles(c *gin.Context) {
 	// Parse pagination parameters
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	perPage, _ := strconv.Atoi(c.DefaultQuery("per_page", "10"))
-	
+
 	if page < 1 {
 		page = 1
 	}

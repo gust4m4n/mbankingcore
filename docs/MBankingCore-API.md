@@ -1,6 +1,6 @@
 # MBankingCore API Documentation
 
-Dokumentasi lengkap untuk RESTful API MBankingCore dengan JWT Authentication.
+Dokumentasi lengkap untuk RESTful API MBankingCore dengan JWT Authentication dan Multi-Device Session Management.
 
 ## 📖 Response Format
 
@@ -31,15 +31,34 @@ Semua API menggunakan format response yang konsisten:
 
 API diorganisir ke dalam bagian-bagian berikut:
 
-- **[Health Check](#1-health-check)** - Status kesehatan server
-- **[Terms & Conditions APIs](#2-terms--conditions-apis)** - Manajemen syarat dan ketentuan
-- **[Privacy Policy APIs](#3-privacy-policy-apis)** - Manajemen kebijakan privasi
-- **[Onboarding Management APIs](#4-onboarding-management-apis)** - Konten onboarding aplikasi
-- **[Authentication APIs](#5-authentication-apis)** - Registrasi user, login, manajemen profil
-- **[User Management APIs](#6-user-management-apis)** - Operasi admin user
-- **[Article Management APIs](#7-article-management-apis)** - Operasi CRUD artikel
-- **[Photo Gallery APIs](#8-photo-gallery-apis)** - Sistem manajemen foto
-- **[Configuration APIs](#9-configuration-apis)** - Manajemen pengaturan aplikasi
+### 🔓 Public APIs (7 endpoints)
+- **[Health Check](#1-health-check)** - Status kesehatan server (1 endpoint)
+- **[Terms & Conditions APIs](#2-terms--conditions-apis)** - Manajemen syarat dan ketentuan (2 endpoints)
+- **[Privacy Policy APIs](#3-privacy-policy-apis)** - Manajemen kebijakan privasi (2 endpoints)
+- **[Onboarding APIs](#4-onboarding-apis)** - Konten onboarding aplikasi (2 endpoints)
+
+### 🔐 Authentication APIs (3 endpoints)
+- **[Authentication](#5-authentication-apis)** - Registrasi, login, refresh token
+
+### 🛡️ Protected APIs (8 endpoints) 
+- **[User Profile Management](#6-user-profile-apis)** - Manajemen profil user (2 endpoints)
+- **[Article Management](#7-article-management-apis)** - Operasi CRUD artikel (5 endpoints)
+- **[Photo Management](#8-photo-management-apis)** - Sistem manajemen foto (4 endpoints)
+- **[Configuration APIs](#9-configuration-apis)** - Read config (1 endpoint)
+
+### 👑 Admin APIs (13 endpoints)
+- **[Admin Article Management](#10-admin-article-management)** - Create artikel (1 endpoint)
+- **[Admin Onboarding Management](#11-admin-onboarding-management)** - CRUD onboarding (3 endpoints)
+- **[Admin Photo Management](#12-admin-photo-management)** - Create photo (1 endpoint)
+- **[Admin User Management](#13-admin-user-management)** - Manajemen user (4 endpoints)
+- **[Admin Configuration](#14-admin-configuration-apis)** - Full config management (3 endpoints)
+- **[Admin Terms & Conditions](#15-admin-terms-conditions)** - Set T&C (1 endpoint)
+- **[Admin Privacy Policy](#16-admin-privacy-policy)** - Set Privacy Policy (1 endpoint)
+
+### 👨‍💼 Owner-Only APIs (2 endpoints)
+- **[Owner User Management](#17-owner-user-management)** - Create & update users dengan roles (2 endpoints)
+
+**Total: 36 Active Endpoints**
 
 ---
 
@@ -472,7 +491,9 @@ Authorization: Bearer <jwt_token>
     "email": "john@example.com",
     "password": "hashed_password_from_client",
     "phone": "+1234567890",
+    "role": "user",
     "provider": "email",
+    "provider_id": "",
     "device_info": {
         "device_type": "android",
         "device_id": "android_device_123",
@@ -509,16 +530,15 @@ Authorization: Bearer <jwt_token>
             "created_at": "2023-01-01T00:00:00Z",
             "updated_at": "2023-01-01T00:00:00Z"
         },
-        "tokens": {
-            "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-            "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-            "expires_at": "2023-01-01T01:00:00Z"
-        },
-        "session": {
-            "session_id": "sess_abc123",
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+        "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+        "expires_in": 86400,
+        "session_id": 1,
+        "device_info": {
             "device_type": "android",
+            "device_id": "android_device_123",
             "device_name": "Samsung Galaxy S21",
-            "created_at": "2023-01-01T00:00:00Z"
+            "user_agent": "MBankingCore-Android-App/1.0.0"
         }
     }
 }
@@ -526,9 +546,9 @@ Authorization: Bearer <jwt_token>
 
 **Response Errors:**
 
-- `250` - Invalid request data
-- `401` - User already exists
-- `402` - User registration failed
+- `306` - Email already exists
+- `253` - Invalid request data
+- `250` - Internal server error
 
 ---
 
@@ -545,6 +565,7 @@ Authorization: Bearer <jwt_token>
     "email": "john@example.com",
     "password": "hashed_password_from_client",
     "provider": "email",
+    "provider_id": "",
     "device_info": {
         "device_type": "ios",
         "device_id": "ios_device_456",
@@ -572,16 +593,32 @@ Authorization: Bearer <jwt_token>
             "created_at": "2023-01-01T00:00:00Z",
             "updated_at": "2023-01-01T00:00:00Z"
         },
-        "tokens": {
-            "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-            "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-            "expires_at": "2023-01-01T01:00:00Z"
-        },
-        "session": {
-            "session_id": "sess_def456",
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+        "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+        "expires_in": 86400,
+        "session_id": 1,
+        "device_info": {
             "device_type": "ios",
+            "device_id": "ios_device_456",
             "device_name": "iPhone 13 Pro",
-            "created_at": "2023-01-01T00:00:00Z"
+            "user_agent": "MBankingCore-iOS-App/1.0.0"
+        }
+    }
+}
+```
+
+**Device Conflict (409):**
+
+```json
+{
+    "code": 409,
+    "message": "Device is already logged in. Please logout from this device first or use a different device.",
+    "data": {
+        "existing_session": {
+            "device_type": "ios",
+            "device_id": "ios_device_456",
+            "device_name": "iPhone 13 Pro",
+            "last_activity": "2023-01-01T00:00:00Z"
         }
     }
 }
@@ -589,9 +626,10 @@ Authorization: Bearer <jwt_token>
 
 **Response Errors:**
 
-- `301` - Invalid credentials
-- `250` - Invalid request data
-- `300` - Authentication required
+- `303` - Invalid email or password
+- `253` - Invalid request data
+- `409` - Device already logged in
+- `250` - Internal server error
 
 ---
 
@@ -599,13 +637,14 @@ Authorization: Bearer <jwt_token>
 
 **Endpoint:** `POST /api/refresh`  
 **Description:** Refresh access token using refresh token  
-**Authentication:** Refresh token required
+**Authentication:** None required
 
-**Request Headers:**
+**Request Body:**
 
-```
-Authorization: Bearer <refresh_token>
-Content-Type: application/json
+```json
+{
+    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
 ```
 
 **Response Success (200):**
@@ -616,15 +655,16 @@ Content-Type: application/json
     "message": "Token refreshed successfully",
     "data": {
         "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-        "expires_at": "2023-01-01T01:00:00Z"
+        "expires_in": 86400,
+        "session_id": 1
     }
 }
 ```
 
 **Response Errors:**
 
-- `302` - Token expired
-- `303` - Token invalid
+- `401` - Invalid or expired refresh token
+- `253` - Invalid request data
 
 ---
 
@@ -645,7 +685,7 @@ Authorization: Bearer <access_token>
 ```json
 {
     "code": 200,
-    "message": "Profile retrieved successfully",
+    "message": "User retrieved successfully",
     "data": {
         "id": 1,
         "name": "John Doe",
@@ -662,8 +702,8 @@ Authorization: Bearer <access_token>
 
 **Response Errors:**
 
-- `300` - Authentication required
-- `450` - Profile not found
+- `300` - Unauthorized access
+- `400` - User not found
 
 ---
 
@@ -685,8 +725,7 @@ Content-Type: application/json
 ```json
 {
     "name": "John Smith",
-    "phone": "+1234567891",
-    "avatar": "https://example.com/avatar.jpg"
+    "phone": "+1234567891"
 }
 ```
 
@@ -695,7 +734,7 @@ Content-Type: application/json
 ```json
 {
     "code": 200,
-    "message": "Profile updated successfully",
+    "message": "User updated successfully",
     "data": {
         "id": 1,
         "name": "John Smith",
@@ -703,7 +742,7 @@ Content-Type: application/json
         "phone": "+1234567891",
         "role": "user",
         "email_verified": false,
-        "avatar": "https://example.com/avatar.jpg",
+        "avatar": null,
         "created_at": "2023-01-01T00:00:00Z",
         "updated_at": "2023-01-01T12:00:00Z"
     }
@@ -712,9 +751,9 @@ Content-Type: application/json
 
 **Response Errors:**
 
-- `452` - Invalid profile data
-- `300` - Authentication required
-- `451` - Profile update failed
+- `253` - Invalid request data
+- `300` - Unauthorized access
+- `403` - Failed to update user
 
 ---
 

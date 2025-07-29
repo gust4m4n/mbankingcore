@@ -46,7 +46,7 @@ func (h *PhotoHandler) GetPhotos(c *gin.Context) {
 	// Parse pagination parameters
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	perPage, _ := strconv.Atoi(c.DefaultQuery("per_page", "10"))
-	
+
 	if page < 1 {
 		page = 1
 	}

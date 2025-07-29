@@ -82,7 +82,7 @@ func UpdateOnboarding(c *gin.Context) {
 
 	// Update fields if provided
 	updates := make(map[string]interface{})
-	
+
 	if req.Image != "" {
 		updates["image"] = req.Image
 	}

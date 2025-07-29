@@ -1,2646 +1,2318 @@
 {
-	"info": {
-		"_postman_id": "mbankingcore-api-collection",
-		"name": "MBankingCore API - Complete Collection",
-		"description": "Complete API testing collection for MBankingCore with comprehensive endpoint coverage.\n\n## Features:\n- 🔐 JWT Authentication (Android, iOS, Web, Desktop)\n- 📱 Device session management\n- 🔄 Automated token refresh\n- ✅ Comprehensive API coverage\n- 📝 Article management (CRUD)\n- 🎯 Onboarding content management\n- 📸 Photo gallery management\n- ⚙️ Config management system\n- 📋 Terms & Conditions management\n- 🔐 Privacy Policy management\n- 👥 User management (Admin)\n- 🧪 Complete testing scenarios\n\n## API Coverage (37 endpoints):\n- **Public APIs** (7 endpoints)\n  - Health Check (1)\n  - Terms & Conditions (2)\n  - Privacy Policy (2)\n  - Onboarding (2)\n- **Authentication APIs** (9 endpoints)\n- **Protected User APIs** (8 endpoints)\n- **Admin Management APIs** (13 endpoints)\n\n## Testing Order:\n1. **Public APIs** - No authentication required\n2. **Authentication** - Register, Login, Token management\n3. **Protected APIs** - User profile, sessions\n4. **Admin APIs** - User management, content management\n\n## Usage:\n1. Import environment file: `MBankingCore-API.postman_environment.json`\n2. Run collection with automated token handling\n3. Test all API endpoints systematically\n\n## Authentication Flow:\n1. Register → Get tokens\n2. Login from different devices → Multiple sessions\n3. Access protected endpoints → Auto token refresh\n4. Test CRUD operations on all resources\n5. Logout selectively → Per device or all devices",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_uid": "12345-mbankingcore"
-	},
-	"item": [
-		{
-			"name": "🏥 Health Check",
-			"item": [
-				{
-					"name": "Health Check",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test response structure",
-									"pm.test('Response has correct structure', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson).to.have.property('code');",
-									"    pm.expect(responseJson).to.have.property('message');",
-									"    pm.expect(responseJson).to.have.property('data');",
-									"    pm.expect(responseJson.data).to.have.property('status');",
-									"});",
-									"",
-									"// Test response content",
-									"pm.test('API is healthy', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson.code).to.eql(200);",
-									"    pm.expect(responseJson.data.status).to.eql('ok');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/health",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"health"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "� Terms & Conditions (Public)",
-			"item": [
-				{
-					"name": "Get Terms & Conditions",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test response structure",
-									"pm.test('Response has correct structure', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson).to.have.property('code');",
-									"    pm.expect(responseJson).to.have.property('message');",
-									"    pm.expect(responseJson).to.have.property('data');",
-									"    pm.expect(responseJson.data).to.have.property('content');",
-									"    pm.expect(responseJson.data).to.have.property('updated_at');",
-									"});",
-									"",
-									"// Test content",
-									"pm.test('Terms content is present', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson.data.content).to.be.a('string');",
-									"    pm.expect(responseJson.data.content.length).to.be.above(0);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/terms-conditions",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"terms-conditions"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Set Terms & Conditions (Admin)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200 or 201', function () {",
-									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
-									"});",
-									"",
-									"// Test response structure",
-									"pm.test('Response has correct structure', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson).to.have.property('code');",
-									"    pm.expect(responseJson).to.have.property('message');",
-									"    pm.expect(responseJson).to.have.property('data');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"content\": \"# Terms and Conditions\\n\\n## 1. Introduction\\nWelcome to MBankingCore API. By using our service, you agree to comply with and be bound by the following terms and conditions.\\n\\n## 2. Use License\\nPermission is granted to temporarily access our service for personal, non-commercial transitory viewing only.\\n\\n## 3. Disclaimer\\nThe materials on our service are provided on an 'as is' basis. We make no warranties, expressed or implied.\\n\\n## 4. Limitations\\nIn no event shall MBankingCore or its suppliers be liable for any damages arising out of the use or inability to use our service.\\n\\n## 5. Accuracy of Materials\\nThe materials appearing on our service could include technical, typographical, or photographic errors.\\n\\n## 6. Contact Information\\nFor questions about these Terms and Conditions, please contact our support team.\\n\\n---\\n*Last updated: July 2025*\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/terms-conditions",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"terms-conditions"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "�🔐 Privacy Policy (Public)",
-			"item": [
-				{
-					"name": "Get Privacy Policy",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test response structure",
-									"pm.test('Response has correct structure', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson).to.have.property('code');",
-									"    pm.expect(responseJson).to.have.property('message');",
-									"    pm.expect(responseJson).to.have.property('data');",
-									"    pm.expect(responseJson.data).to.have.property('content');",
-									"    pm.expect(responseJson.data).to.have.property('updated_at');",
-									"});",
-									"",
-									"// Test content",
-									"pm.test('Privacy policy content is present', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson.data.content).to.be.a('string');",
-									"    pm.expect(responseJson.data.content.length).to.be.above(0);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/privacy-policy",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"privacy-policy"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Set Privacy Policy (Admin)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200 or 201', function () {",
-									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
-									"});",
-									"",
-									"// Test response structure",
-									"pm.test('Response has correct structure', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson).to.have.property('code');",
-									"    pm.expect(responseJson).to.have.property('message');",
-									"    pm.expect(responseJson).to.have.property('data');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"content\": \"# Privacy Policy\\n\\n## Data Collection\\nWe collect the following data:\\n- User information\\n- Usage analytics\\n\\n## Data Usage\\nWe use your data to:\\n- Provide our services\\n- Improve user experience\\n\\n## Contact\\nFor privacy questions, contact us at privacy@example.com\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/privacy-policy",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"privacy-policy"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "🎯 Onboarding (Public)",
-			"item": [
-				{
-					"name": "Get All Onboardings (Public)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test response structure",
-									"pm.test('Response has correct structure', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson).to.have.property('code');",
-									"    pm.expect(responseJson).to.have.property('message');",
-									"    pm.expect(responseJson).to.have.property('data');",
-									"    pm.expect(responseJson.data).to.have.property('onboardings');",
-									"});",
-									"",
-									"// Test pagination",
-									"pm.test('Has pagination info', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson.data).to.have.property('page');",
-									"    pm.expect(responseJson.data).to.have.property('per_page');",
-									"    pm.expect(responseJson.data).to.have.property('total');",
-									"});",
-									"",
-									"// Save first onboarding ID for detail testing",
-									"if (pm.response.code === 200) {",
-									"    const responseJson = pm.response.json();",
-									"    if (responseJson.data.onboardings && responseJson.data.onboardings.length > 0) {",
-									"        pm.environment.set('onboarding_id', responseJson.data.onboardings[0].id);",
-									"    }",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/onboardings?page=1&per_page=10",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"onboardings"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "per_page",
-									"value": "10"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Onboarding by ID (Public)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test response structure",
-									"pm.test('Response has correct structure', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson).to.have.property('code');",
-									"    pm.expect(responseJson).to.have.property('message');",
-									"    pm.expect(responseJson).to.have.property('data');",
-									"    pm.expect(responseJson.data).to.have.property('id');",
-									"    pm.expect(responseJson.data).to.have.property('title');",
-									"    pm.expect(responseJson.data).to.have.property('description');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/onboardings/{{onboarding_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"onboardings",
-								"{{onboarding_id}}"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "🔐 Authentication",
-			"item": [
-				{
-					"name": "Register User",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test response structure",
-									"pm.test('Response has correct structure', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson).to.have.property('code');",
-									"    pm.expect(responseJson).to.have.property('message');",
-									"    pm.expect(responseJson).to.have.property('data');",
-									"});",
-									"",
-									"// Extract and save tokens",
-									"if (pm.response.code === 200) {",
-									"    const responseJson = pm.response.json();",
-									"    const data = responseJson.data;",
-									"    ",
-									"    if (data.tokens) {",
-									"        pm.environment.set('access_token', data.tokens.access_token);",
-									"        pm.environment.set('refresh_token', data.tokens.refresh_token);",
-									"    }",
-									"    ",
-									"    if (data.user) {",
-									"        pm.environment.set('user_id', data.user.id);",
-									"    }",
-									"    ",
-									"    if (data.session) {",
-									"        pm.environment.set('session_id', data.session.session_id);",
-									"    }",
-									"    ",
-									"    console.log('✅ User registered successfully');",
-									"    console.log('🎫 Access token saved to environment');",
-									"    console.log('🔄 Refresh token saved to environment');",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"// Generate unique device ID for this test run",
-									"const deviceId = 'web_' + Date.now();",
-									"pm.environment.set('device_id_web', deviceId);",
-									"console.log('🌐 Generated Web Device ID:', deviceId);"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"{{test_name}}\",\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{sha256_password}}\",\n  \"phone\": \"{{test_phone}}\",\n  \"provider\": \"email\",\n  \"device_info\": {\n    \"device_type\": \"web\",\n    \"device_id\": \"{{device_id_web}}\",\n    \"device_name\": \"Chrome Browser\",\n    \"user_agent\": \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36\"\n  }\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/register",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"register"
-							]
-						},
-						"description": "Register a new user with device session tracking.\n\n**Features:**\n- Creates user account with device session\n- Returns access & refresh tokens\n- Device-specific session tracking\n- Automatic token extraction to environment\n\n**Device Info:**\n- device_type: web, android, ios, desktop\n- Unique device_id for session tracking\n- Device metadata for identification"
-					},
-					"response": []
-				},
-				{
-					"name": "Login (Android)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test response structure",
-									"pm.test('Response has correct structure', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson).to.have.property('code');",
-									"    pm.expect(responseJson).to.have.property('message');",
-									"    pm.expect(responseJson).to.have.property('data');",
-									"});",
-									"",
-									"// Extract and save Android tokens",
-									"if (pm.response.code === 200) {",
-									"    const responseJson = pm.response.json();",
-									"    const data = responseJson.data;",
-									"    ",
-									"    if (data.tokens) {",
-									"        pm.environment.set('android_access_token', data.tokens.access_token);",
-									"        pm.environment.set('android_refresh_token', data.tokens.refresh_token);",
-									"    }",
-									"    ",
-									"    if (data.session) {",
-									"        pm.environment.set('android_session_id', data.session.session_id);",
-									"    }",
-									"    ",
-									"    console.log('✅ Android login successful');",
-									"    console.log('📱 Android tokens saved to environment');",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"// Generate unique Android device ID",
-									"const deviceId = 'android_' + Date.now();",
-									"pm.environment.set('device_id_android', deviceId);",
-									"console.log('📱 Generated Android Device ID:', deviceId);"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{sha256_password}}\",\n  \"provider\": \"email\",\n  \"device_info\": {\n    \"device_type\": \"android\",\n    \"device_id\": \"{{device_id_android}}\",\n    \"device_name\": \"Samsung Galaxy S23\",\n    \"user_agent\": \"MBankingCore-Android-App/1.0.0\"\n  }\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/login",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"login"
-							]
-						},
-						"description": "Login from Android device - creates separate session.\n\n**Multi-Device Testing:**\n- Different device_id from web registration\n- Separate token pair for Android device\n- Concurrent sessions with web device\n- Independent session management"
-					},
-					"response": []
-				},
-				{
-					"name": "Login (iOS)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Extract and save iOS tokens",
-									"if (pm.response.code === 200) {",
-									"    const responseJson = pm.response.json();",
-									"    const data = responseJson.data;",
-									"    ",
-									"    if (data.tokens) {",
-									"        pm.environment.set('ios_access_token', data.tokens.access_token);",
-									"        pm.environment.set('ios_refresh_token', data.tokens.refresh_token);",
-									"    }",
-									"    ",
-									"    if (data.session) {",
-									"        pm.environment.set('ios_session_id', data.session.session_id);",
-									"    }",
-									"    ",
-									"    console.log('✅ iOS login successful');",
-									"    console.log('📱 iOS tokens saved to environment');",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"// Generate unique iOS device ID",
-									"const deviceId = 'ios_' + Date.now();",
-									"pm.environment.set('device_id_ios', deviceId);",
-									"console.log('📱 Generated iOS Device ID:', deviceId);"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{sha256_password}}\",\n  \"provider\": \"email\",\n  \"device_info\": {\n    \"device_type\": \"ios\",\n    \"device_id\": \"{{device_id_ios}}\",\n    \"device_name\": \"iPhone 14 Pro\",\n    \"user_agent\": \"MBankingCore-iOS-App/1.0.0\"\n  }\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/login",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"login"
-							]
-						},
-						"description": "Login from iOS device - creates third concurrent session.\n\n**Now we have:**\n- Web session (from registration)\n- Android session\n- iOS session\n\nAll active simultaneously for the same user."
-					},
-					"response": []
-				},
-				{
-					"name": "Get User Sessions",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test sessions array",
-									"pm.test('Response contains sessions array', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson.data).to.have.property('sessions');",
-									"    pm.expect(responseJson.data.sessions).to.be.an('array');",
-									"});",
-									"",
-									"// Count active sessions",
-									"if (pm.response.code === 200) {",
-									"    const responseJson = pm.response.json();",
-									"    const sessions = responseJson.data.sessions;",
-									"    ",
-									"    console.log('🔍 Active Sessions Count:', sessions.length);",
-									"    sessions.forEach((session, index) => {",
-									"        console.log(`📱 Session ${index + 1}:`, session.device_type, '-', session.device_name);",
-									"    });",
-									"    ",
-									"    pm.test('Has multiple active sessions', function () {",
-									"        pm.expect(sessions.length).to.be.greaterThan(0);",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/sessions",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"sessions"
-							]
-						},
-						"description": "Get all active sessions for current user.\n\n**Expected Result:**\n- List of all device sessions\n- device_type information for each session\n- Device metadata\n- Session status and timestamps"
-					},
-					"response": []
-				},
-				{
-					"name": "Refresh Token (Android)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Update Android tokens",
-									"if (pm.response.code === 200) {",
-									"    const responseJson = pm.response.json();",
-									"    const data = responseJson.data;",
-									"    ",
-									"    if (data.access_token) {",
-									"        pm.environment.set('android_access_token', data.access_token);",
-									"    }",
-									"    ",
-									"    if (data.refresh_token) {",
-									"        pm.environment.set('android_refresh_token', data.refresh_token);",
-									"    }",
-									"    ",
-									"    console.log('✅ Android tokens refreshed successfully');",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"refresh_token\": \"{{android_refresh_token}}\",\n  \"device_id\": \"{{device_id_android}}\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/refresh",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"refresh"
-							]
-						},
-						"description": "Refresh access token for Android device.\n\n**Device-Specific Refresh:**\n- Uses Android device refresh token\n- Only refreshes Android session tokens\n- Other device sessions remain unaffected"
-					},
-					"response": []
-				}
-			],
-			"description": "Authentication endpoints with device session management."
-		},
-		{
-			"name": "👤 User Profile",
-			"item": [
-				{
-					"name": "Get User Profile",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test user data structure",
-									"pm.test('Response contains user data', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson.data).to.have.property('user');",
-									"    pm.expect(responseJson.data.user).to.have.property('email');",
-									"    pm.expect(responseJson.data.user.email).to.equal('{{test_email}}');",
-									"});",
-									"",
-									"console.log('✅ User profile retrieved successfully');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/user/profile",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"user",
-								"profile"
-							]
-						},
-						"description": "Get current user's profile information."
-					},
-					"response": []
-				},
-				{
-					"name": "Update User Profile",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"console.log('✅ User profile updated successfully');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"{{test_name}} Updated\",\n  \"phone\": \"{{test_phone}}\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/user/profile",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"user",
-								"profile"
-							]
-						},
-						"description": "Update user profile information."
-					},
-					"response": []
-				},
-				{
-					"name": "Change Password",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test that all sessions are invalidated",
-									"pm.test('All sessions invalidated message', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson.message).to.include('invalidated');",
-									"});",
-									"",
-									"console.log('✅ Password changed successfully');",
-									"console.log('🚫 All device sessions have been invalidated');",
-									"",
-									"// Clear all tokens since sessions are invalidated",
-									"pm.environment.unset('access_token');",
-									"pm.environment.unset('refresh_token');",
-									"pm.environment.unset('android_access_token');",
-									"pm.environment.unset('android_refresh_token');",
-									"pm.environment.unset('ios_access_token');",
-									"pm.environment.unset('ios_refresh_token');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"current_password\": \"{{sha256_password}}\",\n  \"new_password\": \"{{new_sha256_password}}\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/user/password",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"user",
-								"password"
-							]
-						},
-						"description": "Change user password. This will invalidate ALL device sessions for security.\n\n**Security Feature:**\n- All active sessions across all devices are terminated\n- User must re-login on all devices\n- Prevents unauthorized access if password was compromised"
-					},
-					"response": []
-				}
-			],
-			"description": "User profile management endpoints."
-		},
-		{
-			"name": "🚪 Logout & Session Management",
-			"item": [
-				{
-					"name": "Logout Single Device (Android)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"console.log('✅ Android device logged out successfully');",
-									"console.log('🌐 Web and iOS sessions should remain active');",
-									"",
-									"// Clear Android tokens",
-									"pm.environment.unset('android_access_token');",
-									"pm.environment.unset('android_refresh_token');",
-									"pm.environment.unset('android_session_id');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{android_access_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"device_id\": \"{{device_id_android}}\",\n  \"logout_all\": false\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/logout",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"logout"
-							]
-						},
-						"description": "Logout from Android device only.\n\n**Selective Logout:**\n- Only terminates Android device session\n- Web and iOS sessions remain active\n- Demonstrates device-specific session management"
-					},
-					"response": []
-				},
-				{
-					"name": "Verify Sessions After Single Logout",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Verify session count decreased",
-									"if (pm.response.code === 200) {",
-									"    const responseJson = pm.response.json();",
-									"    const sessions = responseJson.data.sessions;",
-									"    ",
-									"    console.log('🔍 Remaining Sessions Count:', sessions.length);",
-									"    sessions.forEach((session, index) => {",
-									"        console.log(`📱 Active Session ${index + 1}:`, session.device_type, '-', session.device_name);",
-									"    });",
-									"    ",
-									"    pm.test('Android session should be removed', function () {",
-									"        const androidSessions = sessions.filter(s => s.device_type === 'android');",
-									"        pm.expect(androidSessions.length).to.equal(0);",
-									"    });",
-									"    ",
-									"    pm.test('Other sessions should remain', function () {",
-									"        pm.expect(sessions.length).to.be.greaterThan(0);",
-									"    });",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/sessions",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"sessions"
-							]
-						},
-						"description": "Verify that Android session is removed but others remain active."
-					},
-					"response": []
-				},
-				{
-					"name": "Logout All Devices",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"console.log('✅ All devices logged out successfully');",
-									"console.log('🚫 All sessions terminated');",
-									"",
-									"// Clear all remaining tokens",
-									"pm.environment.unset('access_token');",
-									"pm.environment.unset('refresh_token');",
-									"pm.environment.unset('ios_access_token');",
-									"pm.environment.unset('ios_refresh_token');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"logout_all\": true\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/logout",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"logout"
-							]
-						},
-						"description": "Logout from ALL devices.\n\n**Global Logout:**\n- Terminates all active sessions\n- Invalidates all tokens across all devices\n- Complete security logout"
-					},
-					"response": []
-				}
-			],
-			"description": "Session management and logout endpoints with selective device control."
-		},
-		{
-			"name": "👥 User Management (Admin)",
-			"item": [
-				{
-					"name": "Get All Users",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test users array",
-									"pm.test('Response contains users array', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson.data).to.have.property('users');",
-									"    pm.expect(responseJson.data.users).to.be.an('array');",
-									"});",
-									"",
-									"console.log('✅ Users list retrieved successfully');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/users",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"users"
-							]
-						},
-						"description": "Get list of all users (requires admin authentication)."
-					},
-					"response": []
-				},
-				{
-					"name": "Get Admin Users List",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test response structure",
-									"pm.test('Response has correct structure', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson).to.have.property('code');",
-									"    pm.expect(responseJson).to.have.property('message');",
-									"    pm.expect(responseJson).to.have.property('data');",
-									"    pm.expect(responseJson.data).to.have.property('users');",
-									"    pm.expect(responseJson.data).to.have.property('page');",
-									"    pm.expect(responseJson.data).to.have.property('per_page');",
-									"    pm.expect(responseJson.data).to.have.property('total');",
-									"});",
-									"",
-									"// Test that users are admin/owner role",
-									"pm.test('All users have admin or owner role', function () {",
-									"    const responseJson = pm.response.json();",
-									"    if (responseJson.data.users && responseJson.data.users.length > 0) {",
-									"        responseJson.data.users.forEach(user => {",
-									"            pm.expect(['admin', 'owner']).to.include(user.role);",
-									"        });",
-									"    }",
-									"});",
-									"",
-									"console.log('✅ Admin users list retrieved successfully');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/admin/users?page=1&per_page=10",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"admin",
-								"users"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "per_page",
-									"value": "10"
-								}
-							]
-						},
-						"description": "Get list of admin/owner users only (requires admin authentication). Supports pagination."
-					},
-					"response": []
-				},
-				{
-					"name": "Get User by ID",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"console.log('✅ User retrieved by ID successfully');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/users/{{user_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"users",
-								"{{user_id}}"
-							]
-						},
-						"description": "Get specific user by ID (uses user_id from environment)."
-					},
-					"response": []
-				},
-				{
-					"name": "Update User by ID",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"console.log('✅ User updated by ID successfully');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Admin Updated Name\",\n  \"phone\": \"+9876543210\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/users/{{user_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"users",
-								"{{user_id}}"
-							]
-						},
-						"description": "Update specific user by ID (admin operation)."
-					},
-					"response": []
-				},
-				{
-					"name": "Delete User by ID",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"console.log('✅ User deleted by ID successfully');",
-									"console.log('⚠️  All user sessions have been terminated');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/users/{{user_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"users",
-								"{{user_id}}"
-							]
-						},
-						"description": "Delete specific user by ID (admin operation).\n\n**⚠️ Warning:** This will delete the user and all associated device sessions."
-					},
-					"response": []
-				}
-			],
-			"description": "User management endpoints for admin operations."
-		},
-		{
-			"name": "📝 Article Management",
-			"item": [
-				{
-					"name": "Get All Articles (Public)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test response structure",
-									"pm.test('Response has articles array', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson.data).to.have.property('articles');",
-									"    pm.expect(responseJson.data).to.have.property('total');",
-									"    pm.expect(responseJson.data).to.have.property('page');",
-									"    pm.expect(responseJson.data).to.have.property('per_page');",
-									"});",
-									"",
-									"console.log('✅ Articles retrieved successfully');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/articles?page=1&per_page=10",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"articles"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "per_page",
-									"value": "10"
-								}
-							]
-						},
-						"description": "Get all articles with pagination. Public endpoint - no authentication required."
-					},
-					"response": []
-				},
-				{
-					"name": "Get Article by ID (Public)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test article structure",
-									"pm.test('Response has article data', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson.data).to.have.property('id');",
-									"    pm.expect(responseJson.data).to.have.property('title');",
-									"    pm.expect(responseJson.data).to.have.property('content');",
-									"    pm.expect(responseJson.data).to.have.property('author');",
-									"});",
-									"",
-									"console.log('✅ Article retrieved successfully');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/articles/1",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"articles",
-								"1"
-							]
-						},
-						"description": "Get specific article by ID. Public endpoint - no authentication required."
-					},
-					"response": []
-				},
-				{
-					"name": "Create Article",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 201', function () {",
-									"    pm.response.to.have.status(201);",
-									"});",
-									"",
-									"// Save article ID for future use",
-									"if (pm.response.code === 201) {",
-									"    const responseJson = pm.response.json();",
-									"    pm.environment.set('created_article_id', responseJson.data.id);",
-									"}",
-									"",
-									"console.log('✅ Article created successfully');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"title\": \"Sample Article from Postman\",\n  \"image\": \"https://example.com/sample-image.jpg\",\n  \"content\": \"This is a sample article created from Postman collection for testing purposes.\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/articles",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"articles"
-							]
-						},
-						"description": "Create a new article. Requires authentication."
-					},
-					"response": []
-				},
-				{
-					"name": "Update Article",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"console.log('✅ Article updated successfully');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"title\": \"Updated Article Title\",\n  \"image\": \"https://example.com/updated-image.jpg\",\n  \"content\": \"This article has been updated with new content.\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/articles/{{created_article_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"articles",
-								"{{created_article_id}}"
-							]
-						},
-						"description": "Update an existing article. Only the article author can update it."
-					},
-					"response": []
-				},
-				{
-					"name": "Get My Articles",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"console.log('✅ My articles retrieved successfully');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/my-articles?page=1&per_page=10",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"my-articles"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "per_page",
-									"value": "10"
-								}
-							]
-						},
-						"description": "Get articles created by current authenticated user."
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Article",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"console.log('✅ Article deleted successfully');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/articles/{{created_article_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"articles",
-								"{{created_article_id}}"
-							]
-						},
-						"description": "Delete an article. Only the article author can delete it."
-					},
-					"response": []
-				}
-			],
-			"description": "Article management endpoints with CRUD operations."
-		},
-		{
-			"name": "🎯 Onboarding Management",
-			"item": [
-				{
-					"name": "Get All Onboardings (Public)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test response structure",
-									"pm.test('Response has onboardings array', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson.data).to.have.property('onboardings');",
-									"});",
-									"",
-									"console.log('✅ Onboardings retrieved successfully');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/onboardings",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"onboardings"
-							]
-						},
-						"description": "Get all onboarding items. Public endpoint - no authentication required."
-					},
-					"response": []
-				},
-				{
-					"name": "Get Onboarding by ID (Public)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test onboarding structure",
-									"pm.test('Response has onboarding data', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson.data).to.have.property('id');",
-									"    pm.expect(responseJson.data).to.have.property('title');",
-									"    pm.expect(responseJson.data).to.have.property('description');",
-									"    pm.expect(responseJson.data).to.have.property('image');",
-									"});",
-									"",
-									"console.log('✅ Onboarding retrieved successfully');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/onboardings/1",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"onboardings",
-								"1"
-							]
-						},
-						"description": "Get specific onboarding by ID. Public endpoint - no authentication required."
-					},
-					"response": []
-				},
-				{
-					"name": "Create Onboarding",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 201', function () {",
-									"    pm.response.to.have.status(201);",
-									"});",
-									"",
-									"// Save onboarding ID for future use",
-									"if (pm.response.code === 201) {",
-									"    const responseJson = pm.response.json();",
-									"    pm.environment.set('created_onboarding_id', responseJson.data.id);",
-									"}",
-									"",
-									"console.log('✅ Onboarding created successfully');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"image\": \"https://example.com/onboarding-sample.jpg\",\n  \"title\": \"Welcome to Our App\",\n  \"description\": \"Discover amazing features and get started with our platform today!\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/onboardings",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"onboardings"
-							]
-						},
-						"description": "Create a new onboarding item. Requires authentication."
-					},
-					"response": []
-				},
-				{
-					"name": "Update Onboarding",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"console.log('✅ Onboarding updated successfully');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"image\": \"https://example.com/updated-onboarding.jpg\",\n  \"title\": \"Updated Welcome Message\",\n  \"description\": \"Updated description with new information about our features.\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/onboardings/{{created_onboarding_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"onboardings",
-								"{{created_onboarding_id}}"
-							]
-						},
-						"description": "Update an existing onboarding item."
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Onboarding",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"console.log('✅ Onboarding deleted successfully');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/onboardings/{{created_onboarding_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"onboardings",
-								"{{created_onboarding_id}}"
-							]
-						},
-						"description": "Delete an onboarding item."
-					},
-					"response": []
-				}
-			],
-			"description": "Onboarding management endpoints for app introduction content."
-		},
-		{
-			"name": "📸 Photo Gallery",
-			"item": [
-				{
-					"name": "Get All Photos (Public)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test response structure",
-									"pm.test('Response has photos array', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson.data).to.have.property('photos');",
-									"    pm.expect(responseJson.data).to.have.property('total');",
-									"    pm.expect(responseJson.data).to.have.property('page');",
-									"    pm.expect(responseJson.data).to.have.property('per_page');",
-									"});",
-									"",
-									"console.log('✅ Photos retrieved successfully');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/photos?page=1&per_page=10",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"photos"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "per_page",
-									"value": "10"
-								}
-							]
-						},
-						"description": "Get all photos with pagination. Public endpoint - no authentication required."
-					},
-					"response": []
-				},
-				{
-					"name": "Get Photo by ID (Public)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test photo structure",
-									"pm.test('Response has photo data', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson.data).to.have.property('id');",
-									"    pm.expect(responseJson.data).to.have.property('image');",
-									"    pm.expect(responseJson.data).to.have.property('created_at');",
-									"});",
-									"",
-									"console.log('✅ Photo retrieved successfully');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/photos/1",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"photos",
-								"1"
-							]
-						},
-						"description": "Get specific photo by ID. Public endpoint - no authentication required."
-					},
-					"response": []
-				},
-				{
-					"name": "Create Photo",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 201', function () {",
-									"    pm.response.to.have.status(201);",
-									"});",
-									"",
-									"// Save photo ID for future use",
-									"if (pm.response.code === 201) {",
-									"    const responseJson = pm.response.json();",
-									"    pm.environment.set('created_photo_id', responseJson.data.id);",
-									"}",
-									"",
-									"console.log('✅ Photo created successfully');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"image\": \"https://example.com/sample-photo.jpg\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/photos",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"photos"
-							]
-						},
-						"description": "Create a new photo. Requires authentication."
-					},
-					"response": []
-				},
-				{
-					"name": "Update Photo",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"console.log('✅ Photo updated successfully');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"image\": \"https://example.com/updated-photo.jpg\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/photos/{{created_photo_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"photos",
-								"{{created_photo_id}}"
-							]
-						},
-						"description": "Update an existing photo."
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Photo",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"console.log('✅ Photo deleted successfully');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/photos/{{created_photo_id}}",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"api",
-								"photos",
-								"{{created_photo_id}}"
-							]
-						},
-						"description": "Delete a photo."
-					},
-					"response": []
-				}
-			],
-			"description": "Photo gallery management endpoints with minimal structure."
-		},
-		{
-			"name": "⚙️ Config Management",
-			"item": [
-				{
-					"name": "Get Config by Key",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test response structure",
-									"pm.test('Response has correct structure', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson).to.have.property('code');",
-									"    pm.expect(responseJson).to.have.property('message');",
-									"    pm.expect(responseJson).to.have.property('data');",
-									"});",
-									"",
-									"console.log('✅ Config retrieved successfully');"
-								]
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{access_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/config/{{config_key}}",
-							"host": ["{{base_url}}"],
-							"path": ["api", "config", "{{config_key}}"]
-						},
-						"description": "Get config value by key (authenticated users)."
-					},
-					"response": []
-				},
-				{
-					"name": "Set Config",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200 or 201', function () {",
-									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
-									"});",
-									"",
-									"// Test response structure",
-									"pm.test('Response has correct structure', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson).to.have.property('code');",
-									"    pm.expect(responseJson).to.have.property('message');",
-									"    pm.expect(responseJson).to.have.property('data');",
-									"});",
-									"",
-									"console.log('✅ Config set successfully');"
-								]
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{access_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"key\": \"app_version\",\n    \"value\": \"1.0.0\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/config",
-							"host": ["{{base_url}}"],
-							"path": ["api", "config"]
-						},
-						"description": "Set config value (admin/owner only)."
-					},
-					"response": []
-				},
-				{
-					"name": "Get All Configs (Admin)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test response structure",
-									"pm.test('Response has correct structure', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson).to.have.property('code');",
-									"    pm.expect(responseJson).to.have.property('message');",
-									"    pm.expect(responseJson).to.have.property('data');",
-									"});",
-									"",
-									"console.log('✅ All configs retrieved successfully');"
-								]
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{access_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/admin/configs",
-							"host": ["{{base_url}}"],
-							"path": ["api", "admin", "configs"]
-						},
-						"description": "Get all configs (admin/owner only)."
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Config",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"console.log('✅ Config deleted successfully');"
-								]
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{access_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/config/{{config_key}}",
-							"host": ["{{base_url}}"],
-							"path": ["api", "config", "{{config_key}}"]
-						},
-						"description": "Delete config by key (admin/owner only)."
-					},
-					"response": []
-				}
-			],
-			"description": "Configuration management endpoints for app settings."
-		},
-		{
-			"name": "📋 Terms & Conditions",
-			"item": [
-				{
-					"name": "Get Terms & Conditions",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test response structure",
-									"pm.test('Response has correct structure', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson).to.have.property('code');",
-									"    pm.expect(responseJson).to.have.property('message');",
-									"    pm.expect(responseJson).to.have.property('data');",
-									"});",
-									"",
-									"// Test data structure",
-									"pm.test('Data contains content and updated_at', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson.data).to.have.property('content');",
-									"    pm.expect(responseJson.data).to.have.property('updated_at');",
-									"});",
-									"",
-									"console.log('✅ Terms & Conditions retrieved successfully');"
-								]
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/terms-conditions",
-							"host": ["{{base_url}}"],
-							"path": ["api", "terms-conditions"]
-						},
-						"description": "Get current terms and conditions (public endpoint)."
-					},
-					"response": []
-				},
-				{
-					"name": "Set Terms & Conditions (Admin)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200 or 201', function () {",
-									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
-									"});",
-									"",
-									"// Test response structure",
-									"pm.test('Response has correct structure', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson).to.have.property('code');",
-									"    pm.expect(responseJson).to.have.property('message');",
-									"    pm.expect(responseJson).to.have.property('data');",
-									"});",
-									"",
-									"console.log('✅ Terms & Conditions set successfully');"
-								]
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{access_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"content\": \"# Terms and Conditions\\n\\nLast updated: [Date]\\n\\n## 1. Acceptance of Terms\\n\\nBy accessing and using this service, you accept and agree to be bound by the terms and provision of this agreement.\\n\\n## 2. Privacy Policy\\n\\nYour privacy is important to us. Please review our Privacy Policy.\\n\\n## 3. User Accounts\\n\\nUsers are responsible for maintaining the confidentiality of their account information.\\n\\n## 4. Prohibited Uses\\n\\nYou may not use our service for any illegal or unauthorized purpose.\\n\\n## 5. Contact Information\\n\\nFor questions about these Terms, please contact us.\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/terms-conditions",
-							"host": ["{{base_url}}"],
-							"path": ["api", "terms-conditions"]
-						},
-						"description": "Set or update terms and conditions content (admin/owner only)."
-					},
-					"response": []
-				}
-			],
-			"description": "Terms & Conditions management endpoints."
-		},
-		{
-			"name": "🔐 Privacy Policy",
-			"item": [
-				{
-					"name": "Get Privacy Policy",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test response structure",
-									"pm.test('Response has correct structure', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson).to.have.property('code');",
-									"    pm.expect(responseJson).to.have.property('message');",
-									"    pm.expect(responseJson).to.have.property('data');",
-									"});",
-									"",
-									"// Test data structure",
-									"pm.test('Data contains content and updated_at', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson.data).to.have.property('content');",
-									"    pm.expect(responseJson.data).to.have.property('updated_at');",
-									"});",
-									"",
-									"console.log('✅ Privacy Policy retrieved successfully');"
-								]
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/privacy-policy",
-							"host": ["{{base_url}}"],
-							"path": ["api", "privacy-policy"]
-						},
-						"description": "Get current privacy policy (public endpoint)."
-					},
-					"response": []
-				},
-				{
-					"name": "Set Privacy Policy (Admin)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200 or 201', function () {",
-									"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
-									"});",
-									"",
-									"// Test response structure",
-									"pm.test('Response has correct structure', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson).to.have.property('code');",
-									"    pm.expect(responseJson).to.have.property('message');",
-									"    pm.expect(responseJson).to.have.property('data');",
-									"});",
-									"",
-									"console.log('✅ Privacy Policy set successfully');"
-								]
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{access_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"content\": \"# Privacy Policy\\n\\nLast updated: [Date]\\n\\n## 1. Information We Collect\\n\\nWe collect information you provide directly to us, such as when you create an account.\\n\\n## 2. How We Use Your Information\\n\\nWe use the information we collect to provide, maintain, and improve our services.\\n\\n## 3. Information Sharing\\n\\nWe do not share your personal information with third parties except as described in this policy.\\n\\n## 4. Data Security\\n\\nWe implement appropriate security measures to protect your personal information.\\n\\n## 5. Your Rights\\n\\nYou have the right to access, update, or delete your personal information.\\n\\n## 6. Contact Us\\n\\nIf you have questions about this Privacy Policy, please contact us.\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/privacy-policy",
-							"host": ["{{base_url}}"],
-							"path": ["api", "privacy-policy"]
-						},
-						"description": "Set or update privacy policy content (admin/owner only)."
-					},
-					"response": []
-				}
-			],
-			"description": "Privacy Policy management endpoints."
-		},
-		{
-			"name": "🏥 Health Check",
-			"item": [
-				{
-					"name": "Health Check",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"// Test response status",
-									"pm.test('Status code is 200', function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Test health status",
-									"pm.test('API is healthy', function () {",
-									"    const responseJson = pm.response.json();",
-									"    pm.expect(responseJson.data.status).to.equal('healthy');",
-									"});",
-									"",
-									"console.log('✅ API health check passed');"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/health",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"health"
-							]
-						},
-						"description": "Health check endpoint to verify API status."
-					},
-					"response": []
-				}
-			],
-			"description": "System health and status endpoints."
-		}
-	],
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					"// Global pre-request script",
-					"console.log('🚀 Starting API request...');",
-					"",
-					"// Check if base_url is set",
-					"if (!pm.environment.get('base_url')) {",
-					"    console.log('⚠️  base_url not set in environment');",
-					"}"
-				]
-			}
-		},
-		{
-			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					"// Global test script",
-					"const responseTime = pm.response.responseTime;",
-					"console.log('⏱️  Response time:', responseTime + 'ms');",
-					"",
-					"// Test response time is reasonable",
-					"pm.test('Response time is less than 5000ms', function () {",
-					"    pm.expect(responseTime).to.be.below(5000);",
-					"});",
-					"",
-					"// Test response has correct content type for JSON responses",
-					"if (pm.response.code !== 204) {",
-					"    pm.test('Content-Type is application/json', function () {",
-					"        pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
-					"    });",
-					"}"
-				]
-			}
-		}
-	],
-	"variable": [
-		{
-			"key": "collection_name",
-			"value": "MBankingCore API - Complete Collection",
-			"type": "string"
-		},
-		{
-			"key": "version",
-			"value": "3.0.0",
-			"type": "string"
-		},
-		{
-			"key": "total_endpoints",
-			"value": "39",
-			"type": "string"
-		}
-	]
+  "info": {
+    "_postman_id": "mbankingcore-api-collection",
+    "name": "MBankingCore API Collection",
+    "description": "API testing collection for MBankingCore with comprehensive endpoint coverage.\n\n## Features:\n- 🔐 JWT Authentication (Android, iOS, Web, Desktop)\n- 📱 Device session management\n- 🔄 Automated token refresh\n- ✅ Comprehensive API coverage\n- 📝 Article management (CRUD)\n- 🎯 Onboarding content management\n- 📸 Photo gallery management\n- ⚙️ Config management system\n- 📋 Terms & Conditions management\n- 🔐 Privacy Policy management\n- 👥 User management (Admin)\n- 🧪 Testing scenarios\n\n## API Coverage (41 endpoints):\n- **Public APIs** (7 endpoints)\n  - Health Check (1)\n  - Terms & Conditions (2)\n  - Privacy Policy (2)\n  - Onboarding (2)\n- **Authentication APIs** (9 endpoints)\n- **Protected User APIs** (8 endpoints)\n- **Admin Management APIs** (13 endpoints)\n\n## Testing Order:\n1. **Public APIs** - No authentication required\n2. **Authentication** - Register, Login, Token management\n3. **Protected APIs** - User profile, sessions\n4. **Admin APIs** - User management, content management\n\n## Usage:\n1. Import environment file: `MBankingCore-API.postman_environment.json`\n2. Run collection with automated token handling\n3. Test all API endpoints systematically\n\n## Authentication Flow:\n1. Register → Get tokens\n2. Login from different devices → Multiple sessions\n3. Access protected endpoints → Auto token refresh\n4. Test CRUD operations on all resources\n5. Logout selectively → Per device or all devices",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_uid": "12345-mbankingcore"
+  },
+  "item": [
+    {
+      "name": "🏥 Health Check",
+      "item": [
+        {
+          "name": "Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "    pm.expect(responseJson.data).to.have.property('status');",
+                  "});",
+                  "",
+                  "// Test response content",
+                  "pm.test('API is healthy', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.code).to.eql(200);",
+                  "    pm.expect(responseJson.data.status).to.eql('ok');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "� Terms & Conditions (Public)",
+      "item": [
+        {
+          "name": "Get Terms & Conditions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "    pm.expect(responseJson.data).to.have.property('content');",
+                  "    pm.expect(responseJson.data).to.have.property('updated_at');",
+                  "});",
+                  "",
+                  "// Test content",
+                  "pm.test('Terms content is present', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data.content).to.be.a('string');",
+                  "    pm.expect(responseJson.data.content.length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/terms-conditions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "terms-conditions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Set Terms & Conditions (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200 or 201', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"content\": \"# Terms and Conditions\\n\\n## 1. Introduction\\nWelcome to MBankingCore API. By using our service, you agree to comply with and be bound by the following terms and conditions.\\n\\n## 2. Use License\\nPermission is granted to temporarily access our service for personal, non-commercial transitory viewing only.\\n\\n## 3. Disclaimer\\nThe materials on our service are provided on an 'as is' basis. We make no warranties, expressed or implied.\\n\\n## 4. Limitations\\nIn no event shall MBankingCore or its suppliers be liable for any damages arising out of the use or inability to use our service.\\n\\n## 5. Accuracy of Materials\\nThe materials appearing on our service could include technical, typographical, or photographic errors.\\n\\n## 6. Contact Information\\nFor questions about these Terms and Conditions, please contact our support team.\\n\\n---\\n*Last updated: July 2025*\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/terms-conditions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "terms-conditions"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "�🔐 Privacy Policy (Public)",
+      "item": [
+        {
+          "name": "Get Privacy Policy",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "    pm.expect(responseJson.data).to.have.property('content');",
+                  "    pm.expect(responseJson.data).to.have.property('updated_at');",
+                  "});",
+                  "",
+                  "// Test content",
+                  "pm.test('Privacy policy content is present', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data.content).to.be.a('string');",
+                  "    pm.expect(responseJson.data.content.length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/privacy-policy",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "privacy-policy"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Set Privacy Policy (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200 or 201', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"content\": \"# Privacy Policy\\n\\n## Data Collection\\nWe collect the following data:\\n- User information\\n- Usage analytics\\n\\n## Data Usage\\nWe use your data to:\\n- Provide our services\\n- Improve user experience\\n\\n## Contact\\nFor privacy questions, contact us at privacy@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/privacy-policy",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "privacy-policy"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🎯 Onboarding (Public)",
+      "item": [
+        {
+          "name": "Get All Onboardings (Public)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "    pm.expect(responseJson.data).to.have.property('onboardings');",
+                  "});",
+                  "",
+                  "// Test pagination",
+                  "pm.test('Has pagination info', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data).to.have.property('page');",
+                  "    pm.expect(responseJson.data).to.have.property('per_page');",
+                  "    pm.expect(responseJson.data).to.have.property('total');",
+                  "});",
+                  "",
+                  "// Save first onboarding ID for detail testing",
+                  "if (pm.response.code === 200) {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.data.onboardings && responseJson.data.onboardings.length > 0) {",
+                  "        pm.environment.set('onboarding_id', responseJson.data.onboardings[0].id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/onboardings?page=1&per_page=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "onboardings"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Onboarding by ID (Public)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "    pm.expect(responseJson.data).to.have.property('id');",
+                  "    pm.expect(responseJson.data).to.have.property('title');",
+                  "    pm.expect(responseJson.data).to.have.property('description');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/onboardings/{{onboarding_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "onboardings",
+                "{{onboarding_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔐 Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "});",
+                  "",
+                  "// Extract and save tokens",
+                  "if (pm.response.code === 200) {",
+                  "    const responseJson = pm.response.json();",
+                  "    const data = responseJson.data;",
+                  "    ",
+                  "    if (data.tokens) {",
+                  "        pm.environment.set('access_token', data.tokens.access_token);",
+                  "        pm.environment.set('refresh_token', data.tokens.refresh_token);",
+                  "    }",
+                  "    ",
+                  "    if (data.user) {",
+                  "        pm.environment.set('user_id', data.user.id);",
+                  "    }",
+                  "    ",
+                  "    if (data.session) {",
+                  "        pm.environment.set('session_id', data.session.session_id);",
+                  "    }",
+                  "    ",
+                  "    console.log('✅ User registered successfully');",
+                  "    console.log('🎫 Access token saved to environment');",
+                  "    console.log('🔄 Refresh token saved to environment');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Generate unique device ID for this test run",
+                  "const deviceId = 'web_' + Date.now();",
+                  "pm.environment.set('device_id_web', deviceId);",
+                  "console.log('🌐 Generated Web Device ID:', deviceId);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{test_name}}\",\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{sha256_password}}\",\n  \"phone\": \"{{test_phone}}\",\n  \"provider\": \"email\",\n  \"device_info\": {\n    \"device_type\": \"web\",\n    \"device_id\": \"{{device_id_web}}\",\n    \"device_name\": \"Chrome Browser\",\n    \"user_agent\": \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "register"
+              ]
+            },
+            "description": "Register a new user with device session tracking.\n\n**Features:**\n- Creates user account with device session\n- Returns access & refresh tokens\n- Device-specific session tracking\n- Automatic token extraction to environment\n\n**Device Info:**\n- device_type: web, android, ios, desktop\n- Unique device_id for session tracking\n- Device metadata for identification"
+          },
+          "response": []
+        },
+        {
+          "name": "Login (Android)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "});",
+                  "",
+                  "// Extract and save Android tokens",
+                  "if (pm.response.code === 200) {",
+                  "    const responseJson = pm.response.json();",
+                  "    const data = responseJson.data;",
+                  "    ",
+                  "    if (data.tokens) {",
+                  "        pm.environment.set('android_access_token', data.tokens.access_token);",
+                  "        pm.environment.set('android_refresh_token', data.tokens.refresh_token);",
+                  "    }",
+                  "    ",
+                  "    if (data.session) {",
+                  "        pm.environment.set('android_session_id', data.session.session_id);",
+                  "    }",
+                  "    ",
+                  "    console.log('✅ Android login successful');",
+                  "    console.log('📱 Android tokens saved to environment');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Generate unique Android device ID",
+                  "const deviceId = 'android_' + Date.now();",
+                  "pm.environment.set('device_id_android', deviceId);",
+                  "console.log('📱 Generated Android Device ID:', deviceId);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{sha256_password}}\",\n  \"provider\": \"email\",\n  \"device_info\": {\n    \"device_type\": \"android\",\n    \"device_id\": \"{{device_id_android}}\",\n    \"device_name\": \"Samsung Galaxy S23\",\n    \"user_agent\": \"MBankingCore-Android-App/1.0.0\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            },
+            "description": "Login from Android device - creates separate session.\n\n**Multi-Device Testing:**\n- Different device_id from web registration\n- Separate token pair for Android device\n- Concurrent sessions with web device\n- Independent session management"
+          },
+          "response": []
+        },
+        {
+          "name": "Login (iOS)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Extract and save iOS tokens",
+                  "if (pm.response.code === 200) {",
+                  "    const responseJson = pm.response.json();",
+                  "    const data = responseJson.data;",
+                  "    ",
+                  "    if (data.tokens) {",
+                  "        pm.environment.set('ios_access_token', data.tokens.access_token);",
+                  "        pm.environment.set('ios_refresh_token', data.tokens.refresh_token);",
+                  "    }",
+                  "    ",
+                  "    if (data.session) {",
+                  "        pm.environment.set('ios_session_id', data.session.session_id);",
+                  "    }",
+                  "    ",
+                  "    console.log('✅ iOS login successful');",
+                  "    console.log('📱 iOS tokens saved to environment');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Generate unique iOS device ID",
+                  "const deviceId = 'ios_' + Date.now();",
+                  "pm.environment.set('device_id_ios', deviceId);",
+                  "console.log('📱 Generated iOS Device ID:', deviceId);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{sha256_password}}\",\n  \"provider\": \"email\",\n  \"device_info\": {\n    \"device_type\": \"ios\",\n    \"device_id\": \"{{device_id_ios}}\",\n    \"device_name\": \"iPhone 14 Pro\",\n    \"user_agent\": \"MBankingCore-iOS-App/1.0.0\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            },
+            "description": "Login from iOS device - creates third concurrent session.\n\n**Now we have:**\n- Web session (from registration)\n- Android session\n- iOS session\n\nAll active simultaneously for the same user."
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Sessions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test sessions array",
+                  "pm.test('Response contains sessions array', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data).to.have.property('sessions');",
+                  "    pm.expect(responseJson.data.sessions).to.be.an('array');",
+                  "});",
+                  "",
+                  "// Count active sessions",
+                  "if (pm.response.code === 200) {",
+                  "    const responseJson = pm.response.json();",
+                  "    const sessions = responseJson.data.sessions;",
+                  "    ",
+                  "    console.log('🔍 Active Sessions Count:', sessions.length);",
+                  "    sessions.forEach((session, index) => {",
+                  "        console.log(`📱 Session ${index + 1}:`, session.device_type, '-', session.device_name);",
+                  "    });",
+                  "    ",
+                  "    pm.test('Has multiple active sessions', function () {",
+                  "        pm.expect(sessions.length).to.be.greaterThan(0);",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/sessions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "sessions"
+              ]
+            },
+            "description": "Get all active sessions for current user.\n\n**Expected Result:**\n- List of all device sessions\n- device_type information for each session\n- Device metadata\n- Session status and timestamps"
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token (Android)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Update Android tokens",
+                  "if (pm.response.code === 200) {",
+                  "    const responseJson = pm.response.json();",
+                  "    const data = responseJson.data;",
+                  "    ",
+                  "    if (data.access_token) {",
+                  "        pm.environment.set('android_access_token', data.access_token);",
+                  "    }",
+                  "    ",
+                  "    if (data.refresh_token) {",
+                  "        pm.environment.set('android_refresh_token', data.refresh_token);",
+                  "    }",
+                  "    ",
+                  "    console.log('✅ Android tokens refreshed successfully');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{android_refresh_token}}\",\n  \"device_id\": \"{{device_id_android}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/refresh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "refresh"
+              ]
+            },
+            "description": "Refresh access token for Android device.\n\n**Device-Specific Refresh:**\n- Uses Android device refresh token\n- Only refreshes Android session tokens\n- Other device sessions remain unaffected"
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication endpoints with device session management."
+    },
+    {
+      "name": "👤 User Profile",
+      "item": [
+        {
+          "name": "Get User Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test user data structure",
+                  "pm.test('Response contains user data', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data).to.have.property('user');",
+                  "    pm.expect(responseJson.data.user).to.have.property('email');",
+                  "    pm.expect(responseJson.data.user.email).to.equal('{{test_email}}');",
+                  "});",
+                  "",
+                  "console.log('✅ User profile retrieved successfully');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/user/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "profile"
+              ]
+            },
+            "description": "Get current user's profile information."
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log('✅ User profile updated successfully');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{test_name}} Updated\",\n  \"phone\": \"{{test_phone}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/user/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "profile"
+              ]
+            },
+            "description": "Update user profile information."
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test that all sessions are invalidated",
+                  "pm.test('All sessions invalidated message', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.message).to.include('invalidated');",
+                  "});",
+                  "",
+                  "console.log('✅ Password changed successfully');",
+                  "console.log('🚫 All device sessions have been invalidated');",
+                  "",
+                  "// Clear all tokens since sessions are invalidated",
+                  "pm.environment.unset('access_token');",
+                  "pm.environment.unset('refresh_token');",
+                  "pm.environment.unset('android_access_token');",
+                  "pm.environment.unset('android_refresh_token');",
+                  "pm.environment.unset('ios_access_token');",
+                  "pm.environment.unset('ios_refresh_token');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current_password\": \"{{sha256_password}}\",\n  \"new_password\": \"{{new_sha256_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/user/password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "user",
+                "password"
+              ]
+            },
+            "description": "Change user password. This will invalidate ALL device sessions for security.\n\n**Security Feature:**\n- All active sessions across all devices are terminated\n- User must re-login on all devices\n- Prevents unauthorized access if password was compromised"
+          },
+          "response": []
+        }
+      ],
+      "description": "User profile management endpoints."
+    },
+    {
+      "name": "🚪 Logout & Session Management",
+      "item": [
+        {
+          "name": "Logout Single Device (Android)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log('✅ Android device logged out successfully');",
+                  "console.log('🌐 Web and iOS sessions should remain active');",
+                  "",
+                  "// Clear Android tokens",
+                  "pm.environment.unset('android_access_token');",
+                  "pm.environment.unset('android_refresh_token');",
+                  "pm.environment.unset('android_session_id');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{android_access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"device_id\": \"{{device_id_android}}\",\n  \"logout_all\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "logout"
+              ]
+            },
+            "description": "Logout from Android device only.\n\n**Selective Logout:**\n- Only terminates Android device session\n- Web and iOS sessions remain active\n- Demonstrates device-specific session management"
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Sessions After Single Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Verify session count decreased",
+                  "if (pm.response.code === 200) {",
+                  "    const responseJson = pm.response.json();",
+                  "    const sessions = responseJson.data.sessions;",
+                  "    ",
+                  "    console.log('🔍 Remaining Sessions Count:', sessions.length);",
+                  "    sessions.forEach((session, index) => {",
+                  "        console.log(`📱 Active Session ${index + 1}:`, session.device_type, '-', session.device_name);",
+                  "    });",
+                  "    ",
+                  "    pm.test('Android session should be removed', function () {",
+                  "        const androidSessions = sessions.filter(s => s.device_type === 'android');",
+                  "        pm.expect(androidSessions.length).to.equal(0);",
+                  "    });",
+                  "    ",
+                  "    pm.test('Other sessions should remain', function () {",
+                  "        pm.expect(sessions.length).to.be.greaterThan(0);",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/sessions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "sessions"
+              ]
+            },
+            "description": "Verify that Android session is removed but others remain active."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout All Devices",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log('✅ All devices logged out successfully');",
+                  "console.log('🚫 All sessions terminated');",
+                  "",
+                  "// Clear all remaining tokens",
+                  "pm.environment.unset('access_token');",
+                  "pm.environment.unset('refresh_token');",
+                  "pm.environment.unset('ios_access_token');",
+                  "pm.environment.unset('ios_refresh_token');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"logout_all\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "logout"
+              ]
+            },
+            "description": "Logout from ALL devices.\n\n**Global Logout:**\n- Terminates all active sessions\n- Invalidates all tokens across all devices\n- Full security logout"
+          },
+          "response": []
+        }
+      ],
+      "description": "Session management and logout endpoints with selective device control."
+    },
+    {
+      "name": "👥 User Management (Admin)",
+      "item": [
+        {
+          "name": "Get All Users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test users array",
+                  "pm.test('Response contains users array', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data).to.have.property('users');",
+                  "    pm.expect(responseJson.data.users).to.be.an('array');",
+                  "});",
+                  "",
+                  "console.log('✅ Users list retrieved successfully');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            },
+            "description": "Get list of all users (requires admin authentication)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Admin Users List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "    pm.expect(responseJson.data).to.have.property('users');",
+                  "    pm.expect(responseJson.data).to.have.property('page');",
+                  "    pm.expect(responseJson.data).to.have.property('per_page');",
+                  "    pm.expect(responseJson.data).to.have.property('total');",
+                  "});",
+                  "",
+                  "// Test that users are admin/owner role",
+                  "pm.test('All users have admin or owner role', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.data.users && responseJson.data.users.length > 0) {",
+                  "        responseJson.data.users.forEach(user => {",
+                  "            pm.expect(['admin', 'owner']).to.include(user.role);",
+                  "        });",
+                  "    }",
+                  "});",
+                  "",
+                  "console.log('✅ Admin users list retrieved successfully');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/users?page=1&per_page=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get list of admin/owner users only (requires admin authentication). Supports pagination."
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log('✅ User retrieved by ID successfully');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{user_id}}"
+              ]
+            },
+            "description": "Get specific user by ID (uses user_id from environment)."
+          },
+          "response": []
+        },
+        {
+          "name": "Update User by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log('✅ User updated by ID successfully');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Admin Updated Name\",\n  \"phone\": \"+9876543210\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{user_id}}"
+              ]
+            },
+            "description": "Update specific user by ID (admin operation)."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log('✅ User deleted by ID successfully');",
+                  "console.log('⚠️  All user sessions have been terminated');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{user_id}}"
+              ]
+            },
+            "description": "Delete specific user by ID (admin operation).\n\n**⚠️ Warning:** This will delete the user and all associated device sessions."
+          },
+          "response": []
+        }
+      ],
+      "description": "User management endpoints for admin operations."
+    },
+    {
+      "name": "📝 Article Management",
+      "item": [
+        {
+          "name": "Get All Articles (Public)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has articles array', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data).to.have.property('articles');",
+                  "    pm.expect(responseJson.data).to.have.property('total');",
+                  "    pm.expect(responseJson.data).to.have.property('page');",
+                  "    pm.expect(responseJson.data).to.have.property('per_page');",
+                  "});",
+                  "",
+                  "console.log('✅ Articles retrieved successfully');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/articles?page=1&per_page=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "articles"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get all articles with pagination. Public endpoint - no authentication required."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Article by ID (Public)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test article structure",
+                  "pm.test('Response has article data', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data).to.have.property('id');",
+                  "    pm.expect(responseJson.data).to.have.property('title');",
+                  "    pm.expect(responseJson.data).to.have.property('content');",
+                  "    pm.expect(responseJson.data).to.have.property('author');",
+                  "});",
+                  "",
+                  "console.log('✅ Article retrieved successfully');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/articles/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "articles",
+                "1"
+              ]
+            },
+            "description": "Get specific article by ID. Public endpoint - no authentication required."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Article",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Save article ID for future use",
+                  "if (pm.response.code === 201) {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.environment.set('created_article_id', responseJson.data.id);",
+                  "}",
+                  "",
+                  "console.log('✅ Article created successfully');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Sample Article from Postman\",\n  \"image\": \"https://example.com/sample-image.jpg\",\n  \"content\": \"This is a sample article created from Postman collection for testing purposes.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/articles",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "articles"
+              ]
+            },
+            "description": "Create a new article. Requires authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Article",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log('✅ Article updated successfully');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Article Title\",\n  \"image\": \"https://example.com/updated-image.jpg\",\n  \"content\": \"This article has been updated with new content.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/articles/{{created_article_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "articles",
+                "{{created_article_id}}"
+              ]
+            },
+            "description": "Update an existing article. Only the article author can update it."
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Articles",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log('✅ My articles retrieved successfully');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/my-articles?page=1&per_page=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "my-articles"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get articles created by current authenticated user."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Article",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log('✅ Article deleted successfully');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/articles/{{created_article_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "articles",
+                "{{created_article_id}}"
+              ]
+            },
+            "description": "Delete an article. Only the article author can delete it."
+          },
+          "response": []
+        }
+      ],
+      "description": "Article management endpoints with CRUD operations."
+    },
+    {
+      "name": "🎯 Onboarding Management",
+      "item": [
+        {
+          "name": "Create Onboarding",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Save onboarding ID for future use",
+                  "if (pm.response.code === 201) {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.environment.set('created_onboarding_id', responseJson.data.id);",
+                  "}",
+                  "",
+                  "console.log('✅ Onboarding created successfully');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"image\": \"https://example.com/onboarding-sample.jpg\",\n  \"title\": \"Welcome to Our App\",\n  \"description\": \"Discover amazing features and get started with our platform today!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/onboardings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "onboardings"
+              ]
+            },
+            "description": "Create a new onboarding item. Requires authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Onboarding",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log('✅ Onboarding updated successfully');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"image\": \"https://example.com/updated-onboarding.jpg\",\n  \"title\": \"Updated Welcome Message\",\n  \"description\": \"Updated description with new information about our features.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/onboardings/{{created_onboarding_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "onboardings",
+                "{{created_onboarding_id}}"
+              ]
+            },
+            "description": "Update an existing onboarding item."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Onboarding",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log('✅ Onboarding deleted successfully');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/onboardings/{{created_onboarding_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "onboardings",
+                "{{created_onboarding_id}}"
+              ]
+            },
+            "description": "Delete an onboarding item."
+          },
+          "response": []
+        }
+      ],
+      "description": "Onboarding management endpoints for app introduction content."
+    },
+    {
+      "name": "📸 Photo Gallery",
+      "item": [
+        {
+          "name": "Get All Photos (Public)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has photos array', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data).to.have.property('photos');",
+                  "    pm.expect(responseJson.data).to.have.property('total');",
+                  "    pm.expect(responseJson.data).to.have.property('page');",
+                  "    pm.expect(responseJson.data).to.have.property('per_page');",
+                  "});",
+                  "",
+                  "console.log('✅ Photos retrieved successfully');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/photos?page=1&per_page=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "photos"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get all photos with pagination. Public endpoint - no authentication required."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Photo by ID (Public)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test photo structure",
+                  "pm.test('Response has photo data', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data).to.have.property('id');",
+                  "    pm.expect(responseJson.data).to.have.property('image');",
+                  "    pm.expect(responseJson.data).to.have.property('created_at');",
+                  "});",
+                  "",
+                  "console.log('✅ Photo retrieved successfully');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/photos/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "photos",
+                "1"
+              ]
+            },
+            "description": "Get specific photo by ID. Public endpoint - no authentication required."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Photo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "// Save photo ID for future use",
+                  "if (pm.response.code === 201) {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.environment.set('created_photo_id', responseJson.data.id);",
+                  "}",
+                  "",
+                  "console.log('✅ Photo created successfully');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"image\": \"https://example.com/sample-photo.jpg\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/photos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "photos"
+              ]
+            },
+            "description": "Create a new photo. Requires authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Photo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log('✅ Photo updated successfully');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"image\": \"https://example.com/updated-photo.jpg\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/photos/{{created_photo_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "photos",
+                "{{created_photo_id}}"
+              ]
+            },
+            "description": "Update an existing photo."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Photo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log('✅ Photo deleted successfully');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/photos/{{created_photo_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "photos",
+                "{{created_photo_id}}"
+              ]
+            },
+            "description": "Delete a photo."
+          },
+          "response": []
+        }
+      ],
+      "description": "Photo gallery management endpoints with minimal structure."
+    },
+    {
+      "name": "⚙️ Config Management",
+      "item": [
+        {
+          "name": "Get Config by Key",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "});",
+                  "",
+                  "console.log('✅ Config retrieved successfully');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/config/{{config_key}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "config",
+                "{{config_key}}"
+              ]
+            },
+            "description": "Get config value by key (authenticated users)."
+          },
+          "response": []
+        },
+        {
+          "name": "Set Config",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200 or 201', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "});",
+                  "",
+                  "console.log('✅ Config set successfully');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"key\": \"app_version\",\n    \"value\": \"1.0.0\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/config",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "config"
+              ]
+            },
+            "description": "Set config value (admin/owner only)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Configs (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Test response structure",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "});",
+                  "",
+                  "console.log('✅ All configs retrieved successfully');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/admin/configs",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "configs"
+              ]
+            },
+            "description": "Get all configs (admin/owner only)."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Config",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test response status",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "console.log('✅ Config deleted successfully');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/config/{{config_key}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "config",
+                "{{config_key}}"
+              ]
+            },
+            "description": "Delete config by key (admin/owner only)."
+          },
+          "response": []
+        }
+      ],
+      "description": "Configuration management endpoints for app settings."
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global pre-request script",
+          "console.log('🚀 Starting API request...');",
+          "",
+          "// Check if base_url is set",
+          "if (!pm.environment.get('base_url')) {",
+          "    console.log('⚠️  base_url not set in environment');",
+          "}"
+        ]
+      }
+    },
+    "// Test response structure",
+    "pm.test('Response has correct structure', function () {",
+    "    const responseJson = pm.response.json();",
+    "    pm.expect(responseJson).to.have.property('code');",
+    "    pm.expect(responseJson).to.have.property('message');",
+    "    pm.expect(responseJson).to.have.property('data');",
+    "});",
+    "",
+    "// Test data structure",
+    "pm.test('Data contains content and updated_at', function () {",
+    "    const responseJson = pm.response.json();",
+    "    pm.expect(responseJson.data).to.have.property('content');",
+    "    pm.expect(responseJson.data).to.have.property('updated_at');",
+    "});",
+    "",
+    "console.log('✅ Terms & Conditions retrieved successfully');"
+  ],
+  "variable": [
+    {
+      "key": "collection_name",
+      "value": "MBankingCore API Collection",
+      "type": "string"
+    },
+    {
+      "key": "version",
+      "value": "3.0.0",
+      "type": "string"
+    },
+    {
+      "key": "total_endpoints",
+      "value": "41",
+      "type": "string"
+    }
+  ]
 }

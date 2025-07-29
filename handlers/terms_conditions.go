@@ -13,10 +13,10 @@ import (
 // GetTermsConditions retrieves the currently active terms and conditions from config
 func GetTermsConditions(c *gin.Context) {
 	db := config.GetDB()
-	
+
 	var configTnc models.Config
 	err := db.Where("key = ?", "tnc").First(&configTnc).Error
-	
+
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, models.NewErrorResponse(http.StatusNotFound, "Terms and conditions not found"))
@@ -28,7 +28,7 @@ func GetTermsConditions(c *gin.Context) {
 
 	// Return terms content from config
 	c.JSON(http.StatusOK, models.NewSuccessResponse(http.StatusOK, "Terms and conditions retrieved successfully", gin.H{
-		"content": configTnc.Value,
+		"content":    configTnc.Value,
 		"updated_at": configTnc.UpdatedAt,
 	}))
 }
@@ -38,7 +38,7 @@ func SetTermsConditions(c *gin.Context) {
 	var request struct {
 		Content string `json:"content" binding:"required"`
 	}
-	
+
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, models.NewErrorResponse(http.StatusBadRequest, err.Error()))
 		return
@@ -68,7 +68,7 @@ func SetTermsConditions(c *gin.Context) {
 		}
 
 		c.JSON(http.StatusCreated, models.NewSuccessResponse(http.StatusCreated, "Terms and conditions created successfully", gin.H{
-			"content": configTnc.Value,
+			"content":    configTnc.Value,
 			"updated_at": configTnc.UpdatedAt,
 		}))
 	} else {
@@ -81,7 +81,7 @@ func SetTermsConditions(c *gin.Context) {
 		}
 
 		c.JSON(http.StatusOK, models.NewSuccessResponse(http.StatusOK, "Terms and conditions updated successfully", gin.H{
-			"content": existingConfig.Value,
+			"content":    existingConfig.Value,
 			"updated_at": existingConfig.UpdatedAt,
 		}))
 	}
