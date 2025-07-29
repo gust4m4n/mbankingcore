@@ -1,25 +1,27 @@
-# MBankingCore - Panduan Setup macOS
+# MBankingCore - Mobile Banking Core API
 
-Go RESTful API dengan JWT Authentication menggunakan Gin Framework, GORM, dan PostgreSQL.
+Go RESTful API dengan Banking Authentication, JWT, Multi-Device Session Management menggunakan Gin Framework, GORM, dan PostgreSQL.
 
-> 🍎 **Panduan setup ini khusus untuk mac      "device_id": "web_browser_123",
-      "device_name": "Chrome Browser"menggunakan Homebrew**
+> � **Mobile Banking Core API** dengan 2-step OTP Authentication
 >
-> 📋 **Untuk dokumentasi API lengkap:** [MBankingCore-API.md](./MBankingCore-API.md)
+> 📋 **Untuk dokumentasi API lengkap:** [docs/MBankingCore-API.md](./docs/MBankingCore-API.md)
 >
-> ⚠️ **Pembaruan API Endpoints:** API endpoints telah disederhanakan - `/api/register`, `/api/login`, `/api/refresh` (sebelumnya `/api/v1/auth/multi-*`)
+> 🔄 **Banking Authentication:** Sistem autentikasi banking dengan OTP 2-langkah menggunakan login_token
 
 ## 🏗️ Gambaran Arsitektur
 
 ### Fitur Utama
 
-- 🔐 **Multi-Platform JWT Authentication** (Android, iOS, Web, Desktop)
+- 🏦 **Banking Authentication** (2-step OTP process dengan login_token)
 - 📱 **Multi-Device Session Management** (Login dari multiple devices)
-- 🔐 **SSO Provider Support** (Google, Apple, Facebook - Siap)
-- 🔒 **Double-Layer Security** (SHA256 + bcrypt password hashing)
+- � **Multi-Account Banking Support** (CRUD bank accounts)
+- � **JWT Authentication** dengan refresh token
 - 🎯 **Selective Logout** (Per device atau semua device)
-- 👥 **User Management** (Operasi CRUD)
-- ⚡ **RESTful API** dengan response format konsisten
+- 👥 **User Management** dengan role-based access (User, Admin, Owner)
+- 📝 **Content Management** (Articles, Photos, Onboarding)
+- ⚙️ **Configuration Management** (Dynamic app configuration)
+- 📋 **Terms & Conditions** dan **Privacy Policy** management
+- ⚡ **RESTful API** dengan response format konsisten (44 endpoints)
 - 🗄️ **PostgreSQL Database** dengan GORM ORM
 - 🔄 **Auto Database Migration**
 - 🌐 **CORS Support**
@@ -30,57 +32,55 @@ Go RESTful API dengan JWT Authentication menggunakan Gin Framework, GORM, dan Po
 
 ```
 mbankingcore/
+├── cmd/
+│   └── migrate/
+│       └── main.go              # Database migration utility
 ├── config/
-│   └── database.go              # Database configuration & connection
+│   ├── database.go              # Database configuration & connection
+│   └── migrations.go            # Migration management
 ├── handlers/
-│   ├── auth.go                  # Multi-platform authentication handlers (consolidated)
-│   └── user.go                  # User CRUD handlers
+│   ├── article.go               # Article CRUD handlers
+│   ├── auth.go                  # Banking authentication handlers
+│   ├── bank_account.go          # Bank account management
+│   ├── config.go                # Configuration handlers
+│   ├── onboarding.go            # Onboarding content handlers
+│   ├── photo.go                 # Photo management handlers
+│   ├── privacy_policy.go        # Privacy policy handlers
+│   ├── terms_conditions.go      # Terms & conditions handlers
+│   └── user.go                  # User management handlers
 ├── middleware/
 │   └── auth.go                  # JWT authentication middleware
 ├── models/
-│   ├── constants.go             # Response codes & messages constants
+│   ├── article.go               # Article model & structures
+│   ├── bank_account.go          # Bank account model
+│   ├── config.go                # Configuration model
+│   ├── constants.go             # Response codes & messages
+│   ├── device_session.go        # Device session model
+│   ├── onboarding.go            # Onboarding model
+│   ├── photo.go                 # Photo model
 │   ├── responses.go             # Response helper functions
 │   └── user.go                  # User model & request structures
 ├── utils/
 │   ├── auth.go                  # JWT utilities & password hashing
 │   └── session.go               # Session management utilities
 ├── postman/
-│   ├── MBankingCore-API.postman_collection.json
-│   └── MBankingCore-API.postman_environment.json
-├── docs/                        # 📚 Dokumentasi lengkap
-│   ├── README.md               # Setup guide (file ini)
-│   ├── MBankingCore-API.md     # API documentation
-│   └── MIGRATIONS.md           # Database migration guide
-├── .env                         # Environment variables
-├── .env.example                 # Environment template
-mbankingcore/
-├── config/
-│   └── database.go              # Database configuration & connection
-├── handlers/
-│   ├── auth.go                  # Multi-platform authentication handlers (consolidated)
-│   └── user.go                  # User CRUD handlers
-├── middleware/
-│   └── auth.go                  # JWT authentication middleware
-├── models/
-│   ├── constants.go             # Response codes & messages constants
-│   ├── responses.go             # Response helper functions
-│   └── user.go                  # User model & request structures
-├── utils/
-│   ├── auth.go                  # JWT utilities & password hashing
-│   └── session.go               # Session management utilities
-├── postman/
-│   ├── MBankingCore-API.postman_collection.json
-│   └── MBankingCore-API.postman_environment.json
+│   ├── MBankingCore-API.postman_collection.json    # Postman collection (9 endpoints)
+│   └── MBankingCore-API.postman_environment.json   # Environment variables
 ├── docs/
-│   ├── MBANKINGCORE-APIS.md       # API Documentation
-│   └── README.md                # This documentation
-├── .env                         # Environment variables
-├── .env.example                 # Environment template
-├── .gitignore                   # Git ignore rules
-├── go.mod                       # Go modules
-├── go.sum                       # Go modules checksum
-├── main.go                      # Application entry point
-└── README.md                    # Root documentation
+│   ├── API-Endpoint-Reference.md     # Complete endpoint reference (44 endpoints)
+│   ├── MBankingCore-API.md          # Full API documentation
+│   ├── LOGIN_TOKEN_IMPLEMENTATION.md # Login token security documentation
+│   ├── MIGRATIONS.md                # Database migration guide
+│   ├── POSTMAN_UPDATE_LOG.md        # Postman collection update history
+│   ├── SIMPLIFIED_LOGIN_VERIFY.md   # Login verification guide
+│   └── VALIDATION_IMPLEMENTATION.md # Validation system documentation
+├── .env                              # Environment variables
+├── .env.example                      # Environment template
+├── .gitignore                        # Git ignore rules
+├── go.mod                           # Go modules
+├── go.sum                           # Go modules checksum
+├── main.go                          # Application entry point
+└── README.md                        # This documentation
 ```
 
 ## 📋 Prerequisites (macOS)
@@ -153,49 +153,79 @@ Server akan berjalan di `http://localhost:8080`
 ## 📖 API Documentation
 
 **📋 Untuk dokumentasi API lengkap dengan contoh request/response:**
-👉 **[MBANKINGCORE-APIS.md](./MBANKINGCORE-APIS.md)**
+👉 **[docs/MBankingCore-API.md](./docs/MBankingCore-API.md)**
 
-## 🧪 Testing Multi-Platform Authentication
+**🔗 Referensi endpoint lengkap (44 endpoints):**
+👉 **[docs/API-Endpoint-Reference.md](./docs/API-Endpoint-Reference.md)**
+
+## 🏦 Banking Authentication System
+
+MBankingCore menggunakan sistem autentikasi banking dengan 2-step OTP process yang aman:
+
+### 🔐 Authentication Flow
+
+1. **Banking Login (Step 1)** - `POST /api/login`
+   - Submit: name, account_number, mother_name, phone, pin_atm, device_info
+   - Receive: login_token (expires in 5 minutes)
+   - OTP dikirim ke nomor telepon
+
+2. **Banking Login Verification (Step 2)** - `POST /api/login/verify`
+   - Submit: login_token + otp_code
+   - Receive: access_token, refresh_token, user info
+
+3. **Access Protected APIs** dengan Bearer token
+   - Header: `Authorization: Bearer <access_token>`
+
+4. **Token Refresh** - `POST /api/refresh`
+   - Submit: refresh_token
+   - Receive: new access_token
+
+### 🔑 Key Security Features
+
+- **login_token**: Temporary token (5 menit) untuk verifikasi OTP
+- **Unique Account Numbers**: Setiap account number harus unik
+- **Multi-Device Support**: Login dari berbagai device secara bersamaan
+- **Selective Logout**: Logout per device atau semua device
+- **Auto-Registration**: Nomor baru otomatis terdaftar setelah verifikasi OTP
+
+## 🧪 Testing Banking Authentication
 
 ### Quick Test dengan cURL
 
-#### 1. Register User
-
-```bash
-curl -X POST http://localhost:8080/api/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "test@example.com",
-    "password": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f",
-    "device_info": {
-      "device_type": "web",
-      "device_id": "browser_123",
-      "device_name": "Chrome Browser",
-      "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"
-    }
-  }'
-```
-
-#### 2. Login User
+#### 1. Banking Login (Step 1) - Send OTP
 
 ```bash
 curl -X POST http://localhost:8080/api/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "test@example.com",
-    "password": "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f",
+    "name": "John Doe Smith",
+    "account_number": "1234567890123456",
+    "mother_name": "Jane Doe Smith", 
+    "phone": "081234567890",
+    "pin_atm": "123456",
     "device_info": {
       "device_type": "android",
-      "device_id": "android_456",
-      "device_name": "Samsung Galaxy"
+      "device_id": "android_test_123",
+      "device_name": "Samsung Galaxy S23"
     }
   }'
 ```
 
-#### 3. Get Active Sessions
+#### 2. Banking Login Verification (Step 2) - Verify OTP
 
 ```bash
-curl -X GET http://localhost:8080/api/sessions \
+curl -X POST http://localhost:8080/api/login/verify \
+  -H "Content-Type: application/json" \
+  -d '{
+    "login_token": "your_login_token_from_step1",
+    "otp_code": "123456"
+  }'
+```
+
+#### 3. Access Protected Endpoint
+
+```bash
+curl -X GET http://localhost:8080/api/profile \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
@@ -205,15 +235,27 @@ Import koleksi Postman untuk testing yang lebih komprehensif:
 
 1. **Import Collection**: `postman/MBankingCore-API.postman_collection.json`
 2. **Import Environment**: `postman/MBankingCore-API.postman_environment.json`
-3. **Run Collection**: Test semua endpoints dengan automated token management
+3. **Update Environment Variables**: Pastikan `banking_account_number` unik
+4. **Run Collection**: Test semua endpoints dengan automated token management
 
 **Fitur Postman Collection:**
 
-- ✅ Automated token handling & refresh
-- 📱 Multi-device scenarios (Android, iOS, Web)
-- 🔄 Session management testing
-- 🧪 Comprehensive API coverage
-- 📊 Test result validation
+- ✅ **Banking Authentication Flow** (2-step OTP process)
+- ✅ **Automated token handling** & refresh
+- 📱 **Multi-device scenarios** (Android, iOS, Web, Desktop)
+- 🔄 **Session management** testing
+- 🏦 **Bank account management** (CRUD operations)
+- 📝 **Content management** (Articles, Photos, Onboarding)
+- 🧪 **9 ready-to-use endpoints** dari total 44 available
+- 📊 **Test result validation**
+
+**Environment Variables yang Diperlukan:**
+- `banking_account_number`: Gunakan nomor unik 16-digit
+- `banking_phone`: Nomor telepon untuk OTP
+- `banking_name`: Nama lengkap (min. 8 karakter)
+- `banking_mother_name`: Nama ibu (min. 8 karakter)
+- `banking_pin_atm`: PIN 6-digit
+- `banking_otp_code`: Kode OTP (untuk testing, gunakan 6-digit apapun)
 
 ## 🔧 Development Guide
 
@@ -281,31 +323,41 @@ export DB_PASSWORD=your_secure_password
 
 ## 🔐 Security Implementation
 
-### Multi-Platform Authentication Security
+### Banking Authentication Security
 
-#### Double-Layer Password Protection
+#### 2-Step OTP Authentication Process
 
 ```
-Client-Side: SHA256 Hash
- ↓
-Server-Side: bcrypt Hash + Salt
- ↓ 
-Database: bcrypt(SHA256(password))
+Step 1: Banking Login
+Client → Server: Credentials + Device Info
+Server → Client: login_token (5 min expiry)
+Server → SMS: OTP Code
+
+Step 2: OTP Verification  
+Client → Server: login_token + OTP
+Server → Client: access_token + refresh_token
 ```
 
-#### Device Session Management
+#### Multi-Device Session Management
 
-- **Unique Device IDs**: Each device gets tracked individually
+- **Device-Specific Sessions**: Each device gets unique session tracking
 - **Session Isolation**: Sessions per device, tidak saling mempengaruhi
 - **Selective Logout**: Bisa logout per device atau semua device
-- **Token Refresh**: Access token + Refresh token per device
+- **Auto Session Cleanup**: Expired sessions otomatis dibersihkan
 
 #### JWT Token Strategy
 
-- **Access Token**: Short-lived (15 menit)
+- **Access Token**: Short-lived (24 jam)
 - **Refresh Token**: Long-lived (7 hari)  
 - **Device-Specific**: Token terikat dengan device_id
-- **Auto-Invalidation**: Password change invalidates semua sessions
+- **Auto-Invalidation**: PIN change invalidates semua sessions
+
+#### Banking Security Features
+
+- **Unique Account Numbers**: Database constraint untuk mencegah duplikasi
+- **PIN ATM Protection**: bcrypt hashing untuk PIN storage
+- **OTP Security**: Random 6-digit OTP dengan expiry time
+- **login_token**: Temporary secure token dengan crypto/rand generation
 
 ### Security Best Practices
 
@@ -325,56 +377,20 @@ Database: bcrypt(SHA256(password))
 - Use strong database passwords
 - Enable SSL for production database connections
 - Implement database connection pooling
+- Account number uniqueness constraints
 
 #### API Security
 
-- Implement rate limiting
-- Add request validation middleware
+- Banking authentication with OTP verification
+- JWT token-based authorization
+- Multi-device session management
+- Request validation middleware
 - Use HTTPS in production
 - Implement proper CORS configuration
 
 ## 🧪 Testing & Validation
 
-### Unit Testing
-
-```bash
-# Run tests
-go test ./...
-
-# Run tests with coverage
-go test -cover ./...
-
-# Run specific test
-go test ./handlers -v
-```
-
-### Load Testing
-
-```bash
-# Install artillery for load testing
-npm install -g artillery
-
-# Create artillery test config
-# Then run load test
-artillery run load-test.yml
-```
-
-### API Testing dengan Postman
-
-1. Import collection: `postman/MBankingCore-API.postman_collection.json`
-2. Import environment: `postman/MBankingCore-API.postman_environment.json`
-3. Run collection dengan Newman:
-
-```bash
-# Install Newman
-npm install -g newman
-
-# Run Postman tests
-newman run postman/MBankingCore-API.postman_collection.json \
-  -e postman/MBankingCore-API.postman_environment.json
-```
-
-### Quick Testing dengan cURL
+### Manual Testing dengan cURL
 
 ```bash
 # Start server first
@@ -383,15 +399,31 @@ go run main.go
 # Test health check
 curl http://localhost:8080/health
 
-# Register a test user (multi-platform)
-curl -X POST http://localhost:8080/api/register \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Test User","email":"test@example.com","password":"ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f","phone":"08123456789","provider":"email","device_info":{"device_type":"web","device_id":"web_browser_123","device_name":"Chrome"}}'
-
-# Login and get JWT token (multi-platform)
+# Banking Login Step 1 (Send OTP)
 curl -X POST http://localhost:8080/api/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f","provider":"email","device_info":{"device_type":"web","device_id":"web_browser_123","device_name":"Chrome"}}'
+  -d '{"name":"Test User","account_number":"1234567890123456","mother_name":"Test Mother","phone":"081234567890","pin_atm":"123456","device_info":{"device_type":"android","device_id":"test_device_123","device_name":"Test Device"}}'
+
+# Banking Login Step 2 (Verify OTP) - use login_token from Step 1
+curl -X POST http://localhost:8080/api/login/verify \
+  -H "Content-Type: application/json" \
+  -d '{"login_token":"your_login_token_here","otp_code":"123456"}'
+```
+
+### Postman Collection Testing
+
+1. Import collection: `postman/MBankingCore-API.postman_collection.json`
+2. Import environment: `postman/MBankingCore-API.postman_environment.json`
+3. Update `banking_account_number` dengan nomor unik
+4. Run collection dengan Newman:
+
+```bash
+# Install Newman
+npm install -g newman
+
+# Run Postman tests
+newman run postman/MBankingCore-API.postman_collection.json \
+  -e postman/MBankingCore-API.postman_environment.json
 ```
 
 ## 📊 Monitoring & Logging
@@ -515,7 +547,19 @@ createdb mbcdb
 - Check token expiration time
 - Validate token format
 
-## 📚 Additional Resources
+## 📚 Additional Resources & Documentation
+
+### 📖 Documentation Files
+
+- **[docs/MBankingCore-API.md](./docs/MBankingCore-API.md)** - Complete API documentation with examples
+- **[docs/API-Endpoint-Reference.md](./docs/API-Endpoint-Reference.md)** - Quick reference for all 44 endpoints
+- **[docs/LOGIN_TOKEN_IMPLEMENTATION.md](./docs/LOGIN_TOKEN_IMPLEMENTATION.md)** - Banking authentication security details
+- **[docs/MIGRATIONS.md](./docs/MIGRATIONS.md)** - Database migration guide
+- **[docs/POSTMAN_UPDATE_LOG.md](./docs/POSTMAN_UPDATE_LOG.md)** - Postman collection update history
+- **[docs/SIMPLIFIED_LOGIN_VERIFY.md](./docs/SIMPLIFIED_LOGIN_VERIFY.md)** - Login verification process
+- **[docs/VALIDATION_IMPLEMENTATION.md](./docs/VALIDATION_IMPLEMENTATION.md)** - Input validation system
+
+### 🔗 External Resources
 
 - [Go Documentation](https://golang.org/doc/)
 - [Gin Framework](https://gin-gonic.com/)
@@ -527,17 +571,12 @@ createdb mbcdb
 
 - **Gustaman** - Initial work
 
-## 🔗 Links
+---
 
-- [Go Documentation](https://golang.org/doc/)
-- [Gin Framework](https://gin-gonic.com/)
-- [GORM](https://gorm.io/)
-- [JWT Go](https://github.com/golang-jwt/jwt)
+**📋 Complete API Documentation:** [docs/MBankingCore-API.md](./docs/MBankingCore-API.md)
+
+**🔗 Quick Endpoint Reference:** [docs/API-Endpoint-Reference.md](./docs/API-Endpoint-Reference.md)
 
 ---
 
-**📋 API Documentation:** [MBANKINGCORE-APIS.md](./MBANKINGCORE-APIS.md)
-
----
-
-## Happy Coding! 🚀
+## Happy Banking! 🏦🚀

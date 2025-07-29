@@ -526,6 +526,7 @@ Authorization: Bearer <jwt_token>
 - `device_info` (required): Device information object
 
 **Validation Rules:**
+
 - Name: minimum 8 characters
 - Account number: minimum 8 characters
 - Phone: minimum 8 characters
