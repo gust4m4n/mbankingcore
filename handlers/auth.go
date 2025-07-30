@@ -229,7 +229,6 @@ func (h *AuthHandler) BankingLoginVerify(c *gin.Context) {
 			Phone:      otpSession.Phone,
 			MotherName: otpSession.MotherName,
 			PinAtm:     hashedPin,
-			Role:       models.ROLE_USER,
 		}
 
 		if err := h.DB.Create(&user).Error; err != nil {

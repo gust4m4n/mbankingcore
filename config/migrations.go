@@ -3,9 +3,11 @@ package config
 import (
 	"log"
 	"mbankingcore/models"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
-// RunMigrations handles all database migrations and initial setup
+// RunMigrations handles database migrations and initial setup
 func RunMigrations() error {
 	log.Println("Starting database migrations...")
 
@@ -18,6 +20,7 @@ func RunMigrations() error {
 	// Step 1: Auto-migrate all models
 	err := DB.AutoMigrate(
 		&models.User{},
+		&models.Admin{},
 		&models.BankAccount{},
 		&models.DeviceSession{},
 		&models.OTPSession{},
@@ -76,23 +79,10 @@ func runCustomMigrations() error {
 	return nil
 }
 
-// migrateUserRoles ensures all users have proper role values
+// migrateUserRoles - deprecated, roles removed from system
 func migrateUserRoles() error {
 	log.Println("Migrating user roles...")
-
-	// Update existing users without roles to have default 'user' role
-	result := DB.Model(&models.User{}).Where("role IS NULL OR role = ''").Update("role", models.ROLE_USER)
-	if result.Error != nil {
-		log.Printf("Error updating user roles: %v", result.Error)
-		return result.Error
-	}
-
-	if result.RowsAffected > 0 {
-		log.Printf("✅ Updated %d users with default role", result.RowsAffected)
-	} else {
-		log.Println("✅ All users already have proper roles")
-	}
-
+	log.Println("✅ Role migration skipped - roles removed from system")
 	return nil
 }
 
@@ -239,6 +229,11 @@ func migrateAccountNumbers() error {
 func seedInitialData() error {
 	log.Println("Seeding initial data...")
 
+	// Seed initial admin users
+	if err := seedInitialAdmins(); err != nil {
+		return err
+	}
+
 	// Seed initial configuration values
 	if err := seedInitialConfigs(); err != nil {
 		return err
@@ -251,6 +246,65 @@ func seedInitialData() error {
 
 	log.Println("✅ Initial data seeding completed")
 	return nil
+}
+
+// seedInitialAdmins creates default admin users
+func seedInitialAdmins() error {
+	log.Println("Seeding initial admin users...")
+
+	// Check if admin users already exist
+	var count int64
+	DB.Model(&models.Admin{}).Count(&count)
+
+	if count > 0 {
+		log.Println("✅ Admin users already exist")
+		return nil
+	}
+
+	// Hash default password
+	hashedPassword, err := hashPassword("admin123")
+	if err != nil {
+		log.Printf("Failed to hash default admin password: %v", err)
+		return err
+	}
+
+	// Create default super admin
+	superAdmin := models.Admin{
+		Name:     "Super Admin",
+		Email:    "admin@mbankingcore.com",
+		Password: hashedPassword,
+		Role:     models.ADMIN_ROLE_SUPER,
+		Status:   models.ADMIN_STATUS_ACTIVE,
+	}
+
+	if err := DB.Create(&superAdmin).Error; err != nil {
+		log.Printf("Failed to create super admin: %v", err)
+		return err
+	}
+
+	log.Println("✅ Created default super admin (email: admin@mbankingcore.com, password: admin123)")
+	log.Println("⚠️  IMPORTANT: Change the default admin password in production!")
+
+	return nil
+}
+
+// hashPassword is a helper function for password hashing
+func hashPassword(password string) (string, error) {
+	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(hashedBytes), nil
+}
+
+// hashPasswordBytes performs the actual bcrypt hashing
+func hashPasswordBytes(password []byte) ([]byte, error) {
+	return bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
+}
+
+// hashPasswordWithCost performs bcrypt hashing with specified cost
+func hashPasswordWithCost(password []byte, cost int) ([]byte, error) {
+	return bcrypt.GenerateFromPassword(password, cost)
 }
 
 // seedInitialConfigs creates essential configuration entries

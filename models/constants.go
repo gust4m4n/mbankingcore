@@ -215,10 +215,3 @@ const (
 	MSG_ADMIN_REQUIRED           = "Admin privileges required"
 	MSG_OWNER_REQUIRED           = "Owner privileges required"
 )
-
-// User Roles
-const (
-	ROLE_USER  = "user"
-	ROLE_ADMIN = "admin"
-	ROLE_OWNER = "owner"
-)

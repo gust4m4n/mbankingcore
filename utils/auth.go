@@ -25,7 +25,6 @@ func getJWTSecret() []byte {
 type Claims struct {
 	UserID uint   `json:"user_id"`
 	Phone  string `json:"phone"`
-	Role   string `json:"role"`
 	jwt.RegisteredClaims
 }
 
@@ -46,13 +45,12 @@ func CheckPassword(storedBcryptHash, clientSHA256Hash string) error {
 }
 
 // GenerateJWT generates a JWT token for the user
-func GenerateJWT(userID uint, phone, role string) (string, error) {
+func GenerateJWT(userID uint, phone string) (string, error) {
 	expirationTime := time.Now().Add(24 * time.Hour) // Token expires in 24 hours
 
 	claims := &Claims{
 		UserID: userID,
 		Phone:  phone,
-		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},

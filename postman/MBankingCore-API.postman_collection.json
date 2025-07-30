@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "mbankingcore-api-collection",
     "name": "MBankingCore API Collection",
-    "description": "API testing collection for MBankingCore with comprehensive endpoint coverage.\n\n## Features:\n- 🏦 Banking Authentication (2-step OTP process)\n- 📱 Device session management\n- 🔄 Automated token refresh\n- ✅ Comprehensive API coverage\n- 💰 Multi-account banking support\n- 📝 Article management (CRUD)\n- 🎯 Onboarding content management\n- 📸 Photo gallery management\n- ⚙️ Config management system\n- 📋 Terms & Conditions management\n- 🔐 Privacy Policy management\n- 👥 User management (Admin)\n- 🧪 Testing scenarios\n\n## API Coverage (44+ endpoints):\n- **Public APIs** (7 endpoints)\n  - Health Check (1)\n  - Terms & Conditions (2)\n  - Privacy Policy (2)\n  - Onboarding (2)\n- **Banking Authentication APIs** (3 endpoints)\n- **Protected User APIs** (18 endpoints)\n  - User Profile (3)\n  - Session Management (3)\n  - Bank Account Management (5)\n  - Article Management (5)\n  - Photo Management (4)\n  - Configuration (1)\n- **Admin Management APIs** (14 endpoints)\n- **Owner Management APIs** (2 endpoints)\n\n## Testing Order:\n1. **Public APIs** - No authentication required\n2. **Banking Authentication** - 2-step login process\n3. **Protected APIs** - User profile, bank accounts, content\n4. **Admin APIs** - User management, content management\n\n## Usage:\n1. Import environment file: `MBankingCore-API.postman_environment.json`\n2. **Important**: Update `banking_account_number` to a unique value before testing\n3. Run collection with automated token handling\n4. Test all API endpoints systematically\n\n## Banking Authentication Flow:\n1. Banking Login → Submit credentials and get login_token + OTP\n2. Banking Verify → Submit login_token + OTP and get session tokens\n3. Access protected endpoints → Auto token refresh\n4. Test CRUD operations on bank accounts and other resources\n5. Logout selectively → Per device or all devices\n\n## Important Notes:\n⚠️ **Account Numbers Must Be Unique**: Each account number must be unique across the system. If testing with existing data, ensure you use a unique account number in the environment variables to avoid database constraint violations.\n\n🔑 **Environment Variables**: The collection uses pre-configured variables for testing. Update these values as needed:\n- `banking_account_number`: Use unique 16-digit number\n- `banking_phone`: Use unique phone number\n- `banking_name`: Full name (8+ characters)\n- `banking_mother_name`: Mother's name (8+ characters)\n- `banking_pin_atm`: 6-digit PIN",
+    "description": "API testing collection for MBankingCore with comprehensive endpoint coverage.\n\n## Features:\n- 🏦 Banking Authentication (2-step OTP process)\n- 📱 Device session management\n- 🔄 Automated token refresh\n- ✅ Comprehensive API coverage\n- 💰 Multi-account banking support\n- 📝 Article management (CRUD)\n- 🎯 Onboarding content management\n- 📸 Photo gallery management\n- ⚙️ Config management system\n- 📋 Terms & Conditions management\n- 🔐 Privacy Policy management\n- 👥 User management (Admin)\n- 🔧 Admin management system\n- 🧪 Testing scenarios\n\n## API Coverage (51+ endpoints):\n- **Public APIs** (7 endpoints)\n  - Health Check (1)\n  - Terms & Conditions (2)\n  - Privacy Policy (2)\n  - Onboarding (2)\n- **Banking Authentication APIs** (3 endpoints)\n- **Protected User APIs** (18 endpoints)\n  - User Profile (3)\n  - Session Management (3)\n  - Bank Account Management (5)\n  - Article Management (5)\n  - Photo Management (4)\n  - Configuration (1)\n- **Admin Management APIs** (7 endpoints)\n  - Admin Authentication (2)\n  - Admin CRUD Operations (5)\n- **Owner Management APIs** (16 endpoints)\n  - User Management (4)\n  - Content Management (12)\n\n## Testing Order:\n1. **Public APIs** - No authentication required\n2. **Banking Authentication** - 2-step login process\n3. **Protected APIs** - User profile, bank accounts, content\n4. **Admin APIs** - Admin login, admin management\n5. **Owner APIs** - User management, content management\n\n## Usage:\n1. Import environment file: `MBankingCore-API.postman_environment.json`\n2. **Important**: Update `banking_account_number` to a unique value before testing\n3. Run collection with automated token handling\n4. Test all API endpoints systematically\n\n## Banking Authentication Flow:\n1. Banking Login → Submit credentials and get login_token + OTP\n2. Banking Verify → Submit login_token + OTP and get session tokens\n3. Access protected endpoints → Auto token refresh\n4. Test CRUD operations on bank accounts and other resources\n5. Logout selectively → Per device or all devices\n\n## Admin Authentication Flow:\n1. Admin Login → Submit admin credentials and get admin access_token\n2. Access admin endpoints → Create, read, update, delete admin accounts\n3. Admin Logout → Invalidate admin session\n\n## Important Notes:\n⚠️ **Account Numbers Must Be Unique**: Each account number must be unique across the system. If testing with existing data, ensure you use a unique account number in the environment variables to avoid database constraint violations.\n\n🔑 **Environment Variables**: The collection uses pre-configured variables for testing. Update these values as needed:\n- `banking_account_number`: Use unique 16-digit number\n- `banking_phone`: Use unique phone number\n- `banking_name`: Full name (8+ characters)\n- `banking_mother_name`: Mother's name (8+ characters)\n- `banking_pin_atm`: 6-digit PIN\n- `admin_email`: Admin email (default: admin@mbankingcore.com)\n- `admin_password`: Admin password (default: admin123)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_uid": "12345-mbankingcore"
   },
@@ -1350,7 +1350,350 @@
       ]
     },
     {
-      "name": "🔄 Token Refresh",
+      "name": "� Admin Management",
+      "description": "Admin authentication and CRUD operations for managing administrators",
+      "item": [
+        {
+          "name": "Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has admin data and token', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "    pm.expect(responseJson.data).to.have.property('admin');",
+                  "    pm.expect(responseJson.data).to.have.property('access_token');",
+                  "    pm.expect(responseJson.data).to.have.property('expires_in');",
+                  "});",
+                  "",
+                  "// Save admin token",
+                  "pm.test('Save admin token to environment', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.data && responseJson.data.access_token) {",
+                  "        pm.environment.set('admin_token', responseJson.data.access_token);",
+                  "    }",
+                  "    if (responseJson.data && responseJson.data.admin) {",
+                  "        pm.environment.set('admin_id', responseJson.data.admin.id);",
+                  "        pm.environment.set('admin_email', responseJson.data.admin.email);",
+                  "        pm.environment.set('admin_role', responseJson.data.admin.role);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Admin Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response confirms logout', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson.message).to.include('logout');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/logout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "logout"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Admins",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has admins list', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "    pm.expect(responseJson.data).to.have.property('admins');",
+                  "    pm.expect(responseJson.data).to.have.property('total');",
+                  "    pm.expect(responseJson.data).to.have.property('page');",
+                  "    pm.expect(responseJson.data).to.have.property('per_page');",
+                  "    pm.expect(responseJson.data.admins).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/admins?page=1&per_page=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "admins"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Admin by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has admin data', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "    pm.expect(responseJson.data).to.have.property('id');",
+                  "    pm.expect(responseJson.data).to.have.property('name');",
+                  "    pm.expect(responseJson.data).to.have.property('email');",
+                  "    pm.expect(responseJson.data).to.have.property('role');",
+                  "    pm.expect(responseJson.data).to.have.property('status');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/admins/{{admin_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "admins", "{{admin_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has created admin data', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "    pm.expect(responseJson.data).to.have.property('id');",
+                  "    pm.expect(responseJson.data).to.have.property('name');",
+                  "    pm.expect(responseJson.data).to.have.property('email');",
+                  "    pm.expect(responseJson.data).to.have.property('role');",
+                  "    pm.expect(responseJson.data).to.have.property('status');",
+                  "});",
+                  "",
+                  "// Save created admin ID for further testing",
+                  "pm.test('Save created admin ID', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.data && responseJson.data.id) {",
+                  "        pm.environment.set('created_admin_id', responseJson.data.id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{new_admin_name}}\",\n  \"email\": \"{{new_admin_email}}\",\n  \"password\": \"{{new_admin_password}}\",\n  \"role\": \"{{new_admin_role}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/admins",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "admins"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has updated admin data', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "    pm.expect(responseJson.data).to.have.property('id');",
+                  "    pm.expect(responseJson.data).to.have.property('name');",
+                  "    pm.expect(responseJson.data).to.have.property('email');",
+                  "    pm.expect(responseJson.data).to.have.property('role');",
+                  "    pm.expect(responseJson.data).to.have.property('status');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{updated_admin_name}}\",\n  \"email\": \"{{updated_admin_email}}\",\n  \"role\": \"{{updated_admin_role}}\",\n  \"status\": {{updated_admin_status}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/admins/{{created_admin_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "admins", "{{created_admin_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response confirms deletion', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson.message).to.include('deleted');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/admins/{{created_admin_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "admins", "{{created_admin_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "�🔄 Token Refresh",
       "item": [
         {
           "name": "Refresh Access Token",
@@ -1417,12 +1760,17 @@
     },
     {
       "key": "total_endpoints",
-      "value": "44",
+      "value": "51",
       "type": "string"
     },
     {
       "key": "protected_endpoints",
-      "value": "18",
+      "value": "25",
+      "type": "string"
+    },
+    {
+      "key": "admin_endpoints",
+      "value": "7",
       "type": "string"
     }
   ]

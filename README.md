@@ -14,14 +14,15 @@ Go RESTful API dengan Banking Authentication, JWT, Multi-Device Session Manageme
 
 - 🏦 **Banking Authentication** (2-step OTP process dengan login_token)
 - 📱 **Multi-Device Session Management** (Login dari multiple devices)
-- � **Multi-Account Banking Support** (CRUD bank accounts)
-- � **JWT Authentication** dengan refresh token
+- 💼 **Multi-Account Banking Support** (CRUD bank accounts)
+- 🔑 **JWT Authentication** dengan refresh token
 - 🎯 **Selective Logout** (Per device atau semua device)
 - 👥 **User Management** dengan role-based access (User, Admin, Owner)
-- 📝 **Content Management** (Articles, Photos, Onboarding)
+- � **Admin Management System** (Admin authentication & CRUD)
+- �📝 **Content Management** (Articles, Photos, Onboarding)
 - ⚙️ **Configuration Management** (Dynamic app configuration)
 - 📋 **Terms & Conditions** dan **Privacy Policy** management
-- ⚡ **RESTful API** dengan response format konsisten (44 endpoints)
+- ⚡ **RESTful API** dengan response format konsisten (51 endpoints)
 - 🗄️ **PostgreSQL Database** dengan GORM ORM
 - 🔄 **Auto Database Migration**
 - 🌐 **CORS Support**
@@ -39,6 +40,7 @@ mbankingcore/
 │   ├── database.go              # Database configuration & connection
 │   └── migrations.go            # Migration management
 ├── handlers/
+│   ├── admin.go                 # Admin management handlers (NEW)
 │   ├── article.go               # Article CRUD handlers
 │   ├── auth.go                  # Banking authentication handlers
 │   ├── bank_account.go          # Bank account management
@@ -49,8 +51,10 @@ mbankingcore/
 │   ├── terms_conditions.go      # Terms & conditions handlers
 │   └── user.go                  # User management handlers
 ├── middleware/
+│   ├── admin_auth.go            # Admin authentication middleware (NEW)
 │   └── auth.go                  # JWT authentication middleware
 ├── models/
+│   ├── admin.go                 # Admin model & structures (NEW)
 │   ├── article.go               # Article model & structures
 │   ├── bank_account.go          # Bank account model
 │   ├── config.go                # Configuration model
@@ -61,10 +65,11 @@ mbankingcore/
 │   ├── responses.go             # Response helper functions
 │   └── user.go                  # User model & request structures
 ├── utils/
+│   ├── admin_auth.go            # Admin JWT utilities (NEW)
 │   ├── auth.go                  # JWT utilities & password hashing
 │   └── session.go               # Session management utilities
 ├── postman/
-│   ├── MBankingCore-API.postman_collection.json    # Postman collection (9 endpoints)
+│   ├── MBankingCore-API.postman_collection.json    # Postman collection (51 endpoints)
 │   └── MBankingCore-API.postman_environment.json   # Environment variables
 ├── .env                              # Environment variables
 ├── .env.example                      # Environment template
@@ -72,7 +77,7 @@ mbankingcore/
 ├── go.mod                           # Go modules
 ├── go.sum                           # Go modules checksum
 ├── main.go                          # Application entry point
-├── MBANKINGCORE-API.md              # Complete API documentation (44 endpoints)
+├── MBANKINGCORE-API.md              # Complete API documentation (51 endpoints)
 └── README.md                        # This documentation
 ```
 
@@ -178,6 +183,65 @@ MBankingCore menggunakan sistem autentikasi banking dengan 2-step OTP process ya
 - **Selective Logout**: Logout per device atau semua device
 - **Auto-Registration**: Nomor baru otomatis terdaftar setelah verifikasi OTP
 
+## 🔧 Admin Management System
+
+MBankingCore dilengkapi dengan sistem manajemen admin yang komprehensif untuk mengelola administrator aplikasi.
+
+### 👑 Admin Authentication Flow
+
+1. **Admin Login** - `POST /api/admin/login`
+   - Submit: email, password
+   - Receive: admin_token (expires in 24 hours), admin profile
+
+2. **Access Admin APIs** dengan Bearer token
+   - Header: `Authorization: Bearer <admin_token>`
+
+3. **Admin Logout** - `POST /api/admin/logout`
+   - Invalidate admin session
+
+### 🔒 Admin Security Features
+
+- **JWT-based Authentication**: Separate token system untuk admin
+- **Role-based Access Control**: Super Admin vs Admin permissions
+- **Password Encryption**: bcrypt hashing untuk password security
+- **Status Management**: Active, Inactive, Blocked admin states
+- **Self-Protection**: Admin tidak bisa menghapus akun sendiri
+- **Email Uniqueness**: Validasi email unik untuk setiap admin
+
+### 👥 Admin Roles & Permissions
+
+**Super Admin:**
+- Full access to all admin operations
+- Can create, update, delete other admins
+- Can manage system configurations
+
+**Admin:**
+- Limited access to admin operations
+- Cannot manage other admin accounts
+- Can access admin-protected content endpoints
+
+### 📋 Admin Management Endpoints (7 endpoints)
+
+| Endpoint | Method | Path | Access Level |
+|----------|--------|------|--------------|
+| Admin Login | `POST` | `/api/admin/login` | Public (Credentials Required) |
+| Admin Logout | `POST` | `/api/admin/logout` | Admin Authentication |
+| Get All Admins | `GET` | `/api/admin/admins` | Admin Authentication |
+| Get Admin by ID | `GET` | `/api/admin/admins/:id` | Admin Authentication |
+| Create Admin | `POST` | `/api/admin/admins` | Super Admin Only |
+| Update Admin | `PUT` | `/api/admin/admins/:id` | Super Admin Only |
+| Delete Admin | `DELETE` | `/api/admin/admins/:id` | Super Admin Only |
+
+### 🔑 Default Admin Credentials
+
+**Super Admin Account:**
+- Email: `admin@mbankingcore.com`
+- Password: `admin123`
+- Role: `super`
+- Status: `active`
+
+⚠️ **Production Warning**: Change default credentials immediately in production!
+
 ## 🧪 Testing Banking Authentication
 
 ### Quick Test dengan cURL
@@ -219,6 +283,49 @@ curl -X GET http://localhost:8080/api/profile \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
+## 🧪 Testing Admin Authentication
+
+### Quick Test dengan cURL
+
+#### 1. Admin Login
+
+```bash
+curl -X POST http://localhost:8080/api/admin/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@mbankingcore.com",
+    "password": "admin123"
+  }'
+```
+
+#### 2. Get All Admins
+
+```bash
+curl -X GET http://localhost:8080/api/admin/admins \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
+```
+
+#### 3. Create New Admin (Super Admin only)
+
+```bash
+curl -X POST http://localhost:8080/api/admin/admins \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Test Admin",
+    "email": "test@mbankingcore.com",
+    "password": "password123",
+    "role": "admin"
+  }'
+```
+
+#### 4. Admin Logout
+
+```bash
+curl -X POST http://localhost:8080/api/admin/logout \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
+```
+
 ### Postman Testing
 
 Import koleksi Postman untuk testing yang lebih komprehensif:
@@ -231,21 +338,31 @@ Import koleksi Postman untuk testing yang lebih komprehensif:
 **Fitur Postman Collection:**
 
 - ✅ **Banking Authentication Flow** (2-step OTP process)
+- ✅ **Admin Authentication Flow** (Admin login/logout)
 - ✅ **Automated token handling** & refresh
 - 📱 **Multi-device scenarios** (Android, iOS, Web, Desktop)
 - 🔄 **Session management** testing
 - 🏦 **Bank account management** (CRUD operations)
-- 📝 **Content management** (Articles, Photos, Onboarding)
-- 🧪 **9 ready-to-use endpoints** dari total 44 available
+- � **Admin management** (Admin CRUD operations)
+- �📝 **Content management** (Articles, Photos, Onboarding)
+- 🧪 **51 ready-to-use endpoints** (Complete API coverage)
 - 📊 **Test result validation**
 
 **Environment Variables yang Diperlukan:**
+
+**Banking Variables:**
 - `banking_account_number`: Gunakan nomor unik 16-digit
 - `banking_phone`: Nomor telepon untuk OTP
 - `banking_name`: Nama lengkap (min. 8 karakter)
 - `banking_mother_name`: Nama ibu (min. 8 karakter)
 - `banking_pin_atm`: PIN 6-digit
 - `banking_otp_code`: Kode OTP (untuk testing, gunakan 6-digit apapun)
+
+**Admin Variables:**
+- `admin_email`: Email admin (default: admin@mbankingcore.com)
+- `admin_password`: Password admin (default: admin123)
+- `new_admin_name`: Nama admin baru untuk testing
+- `new_admin_email`: Email admin baru untuk testing
 
 ## 🔧 Development Guide
 
@@ -398,6 +515,15 @@ curl -X POST http://localhost:8080/api/login \
 curl -X POST http://localhost:8080/api/login/verify \
   -H "Content-Type: application/json" \
   -d '{"login_token":"your_login_token_here","otp_code":"123456"}'
+
+# Admin Login
+curl -X POST http://localhost:8080/api/admin/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@mbankingcore.com","password":"admin123"}'
+
+# Get All Admins (use admin_token from above)
+curl -X GET http://localhost:8080/api/admin/admins \
+  -H "Authorization: Bearer your_admin_token_here"
 ```
 
 ### Postman Collection Testing
@@ -541,7 +667,7 @@ createdb mbcdb
 
 ### 📖 Documentation Files
 
-- **[MBANKINGCORE-API.md](./MBANKINGCORE-API.md)** - Complete API documentation with examples and endpoint reference (44 endpoints)
+- **[MBANKINGCORE-API.md](./MBANKINGCORE-API.md)** - Complete API documentation with examples and endpoint reference (51 endpoints)
 
 ### 🔗 External Resources
 

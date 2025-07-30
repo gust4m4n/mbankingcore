@@ -43,6 +43,7 @@ func main() {
 	articleHandler := handlers.NewArticleHandler(config.DB)
 	photoHandler := handlers.NewPhotoHandler(config.DB)
 	bankAccountHandler := handlers.NewBankAccountHandler(config.DB)
+	adminHandler := handlers.NewAdminHandler(config.DB)
 
 	// API routes
 	api := router.Group("/api")
@@ -59,16 +60,33 @@ func main() {
 		// Public terms and conditions routes (config-based)
 		api.GET("/terms-conditions", handlers.GetTermsConditions) // Get terms and conditions from config (public)
 
-		// Admin terms and conditions management (config-based)
-		api.POST("/terms-conditions", middleware.AdminMiddleware(), handlers.SetTermsConditions) // Set terms and conditions content (admin/owner only)
+		// Terms and conditions management (authenticated users)
+		api.POST("/terms-conditions", middleware.AuthMiddleware(), handlers.SetTermsConditions) // Set terms and conditions content (authenticated users)
 
 		// Public privacy policy routes (config-based)
 		api.GET("/privacy-policy", handlers.GetPrivacyPolicy) // Get privacy policy from config (public)
 
-		// Admin privacy policy management (config-based)
-		api.POST("/privacy-policy", middleware.AdminMiddleware(), handlers.SetPrivacyPolicy) // Set privacy policy content (admin/owner only)
+		// Privacy policy management (authenticated users)
+		api.POST("/privacy-policy", middleware.AuthMiddleware(), handlers.SetPrivacyPolicy) // Set privacy policy content (authenticated users)
 
-		// Protected routes (require authentication)
+		// Admin authentication routes (public)
+		admin := api.Group("/admin")
+		{
+			admin.POST("/login", adminHandler.AdminLogin)   // Admin login
+			admin.POST("/logout", adminHandler.AdminLogout) // Admin logout
+
+			// Admin protected routes
+			adminProtected := admin.Group("/")
+			adminProtected.Use(middleware.AdminAuthMiddleware())
+			{
+				// Admin management
+				adminProtected.GET("/admins", adminHandler.GetAdmins)          // Get all admins
+				adminProtected.GET("/admins/:id", adminHandler.GetAdminByID)   // Get admin by ID
+				adminProtected.POST("/admins", adminHandler.CreateAdmin)       // Create new admin
+				adminProtected.PUT("/admins/:id", adminHandler.UpdateAdmin)    // Update admin
+				adminProtected.DELETE("/admins/:id", adminHandler.DeleteAdmin) // Delete admin
+			}
+		} // Protected routes (require authentication)
 		protected := api.Group("/")
 		protected.Use(middleware.AuthMiddleware())
 		{
@@ -102,42 +120,33 @@ func main() {
 			protected.DELETE("/bank-accounts/:id", bankAccountHandler.DeleteBankAccount)      // Delete bank account
 			protected.PUT("/bank-accounts/:id/primary", bankAccountHandler.SetPrimaryAccount) // Set primary account
 
+			// Article management (authenticated users)
+			protected.POST("/articles", articleHandler.CreateArticle) // Create article (authenticated users)
+
+			// Onboarding management (authenticated users)
+			protected.POST("/onboardings", handlers.CreateOnboarding)       // Create onboarding (authenticated users)
+			protected.PUT("/onboardings/:id", handlers.UpdateOnboarding)    // Update onboarding (authenticated users)
+			protected.DELETE("/onboardings/:id", handlers.DeleteOnboarding) // Delete onboarding (authenticated users)
+
+			// Photo management (authenticated users)
+			protected.POST("/photos", photoHandler.CreatePhoto) // Create photo (authenticated users)
+
+			// User management - basic operations (authenticated users)
+			protected.GET("/users", handlers.ListUsers)         // List all users (authenticated users)
+			protected.GET("/users/:id", handlers.GetUserByID)   // Get user by ID (authenticated users)
+			protected.DELETE("/users/:id", handlers.DeleteUser) // Delete user by ID (authenticated users)
+
+			// Config management (authenticated users)
+			protected.POST("/config", handlers.SetConfig)           // Set config value (authenticated users)
+			protected.GET("/configs", handlers.GetAllConfigs)       // Get all configs (authenticated users)
+			protected.DELETE("/config/:key", handlers.DeleteConfig) // Delete config by key (authenticated users)
+
+			// User management - CRUD operations (authenticated users)
+			protected.POST("/users", handlers.CreateUser)    // Create user (authenticated users)
+			protected.PUT("/users/:id", handlers.UpdateUser) // Update user by ID (authenticated users)
+
 			// Config management - get only (all authenticated users can read configs)
 			protected.GET("/config/:key", handlers.GetConfig) // Get config value by key (authenticated users)
-		} // Admin-only routes (require admin or owner role)
-		admin := api.Group("/")
-		admin.Use(middleware.AdminMiddleware())
-		{
-			// Article management (admin/owner only)
-			admin.POST("/articles", articleHandler.CreateArticle) // Create article (admin/owner only)
-
-			// Onboarding management (admin/owner only)
-			admin.POST("/onboardings", handlers.CreateOnboarding)       // Create onboarding (admin/owner only)
-			admin.PUT("/onboardings/:id", handlers.UpdateOnboarding)    // Update onboarding (admin/owner only)
-			admin.DELETE("/onboardings/:id", handlers.DeleteOnboarding) // Delete onboarding (admin/owner only)
-
-			// Photo management (admin/owner only)
-			admin.POST("/photos", photoHandler.CreatePhoto) // Create photo (admin/owner only)
-
-			// User management - basic operations (admin/owner only)
-			admin.GET("/users", handlers.ListUsers)            // List all users (admin/owner only)
-			admin.GET("/admin/users", handlers.ListAdminUsers) // List admin and owner users (admin/owner only)
-			admin.GET("/users/:id", handlers.GetUserByID)      // Get user by ID (admin/owner only)
-			admin.DELETE("/users/:id", handlers.DeleteUser)    // Delete user by ID (admin/owner only)
-
-			// Config management (admin/owner only)
-			admin.POST("/config", handlers.SetConfig)           // Set config value (admin/owner only)
-			admin.GET("/admin/configs", handlers.GetAllConfigs) // Get all configs (admin/owner only)
-			admin.DELETE("/config/:key", handlers.DeleteConfig) // Delete config by key (admin/owner only)
-		}
-
-		// Owner-only routes (require owner role)
-		owner := api.Group("/")
-		owner.Use(middleware.OwnerMiddleware())
-		{
-			// User management - role changes (owner only)
-			owner.POST("/users", handlers.CreateUser)    // Create user (owner only - can set any role)
-			owner.PUT("/users/:id", handlers.UpdateUser) // Update user by ID (owner only - can change roles)
 		}
 	}
 

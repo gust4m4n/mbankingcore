@@ -48,14 +48,14 @@ func (sm *SessionManager) CreateSession(userID uint, req models.MultiPlatformLog
 		return nil, err
 	}
 
-	// Get user to fetch role for JWT
+	// Get user for JWT creation
 	var user models.User
 	if err := sm.DB.First(&user, userID).Error; err != nil {
 		return nil, err
 	}
 
-	// Create JWT token with role
-	jwtToken, err := GenerateJWT(userID, req.Phone, user.Role)
+	// Create JWT token without role
+	jwtToken, err := GenerateJWT(userID, req.Phone)
 	if err != nil {
 		return nil, err
 	}
@@ -113,8 +113,8 @@ func (sm *SessionManager) RefreshSession(refreshToken string) (*models.DeviceSes
 		return nil, "", err
 	}
 
-	// Generate new JWT token with role
-	newJWTToken, err := GenerateJWT(session.UserID, session.User.Phone, session.User.Role)
+	// Generate new JWT token
+	newJWTToken, err := GenerateJWT(session.UserID, session.User.Phone)
 	if err != nil {
 		return nil, "", err
 	}

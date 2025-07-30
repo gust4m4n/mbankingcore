@@ -51,27 +51,28 @@ API diorganisir ke dalam bagian-bagian berikut:
 - **[Photo Management](#10-photo-management-apis)** - Sistem manajemen foto (4 endpoints)
 - **[Configuration APIs](#11-configuration-apis)** - Read config (1 endpoint)
 
-### 👑 Admin APIs (14 endpoints)
+### 👑 Admin APIs (21 endpoints)
 
-- **[Admin Article Management](#12-admin-article-management)** - Create artikel (1 endpoint)
-- **[Admin Onboarding Management](#13-admin-onboarding-management)** - CRUD onboarding (3 endpoints)
-- **[Admin Photo Management](#14-admin-photo-management)** - Create photo (1 endpoint)
-- **[Admin User Management](#15-admin-user-management)** - Manajemen user (4 endpoints)
-- **[Admin Configuration](#16-admin-configuration-apis)** - Full config management (3 endpoints)
-- **[Admin Terms & Conditions](#17-admin-terms-conditions)** - Set T&C (1 endpoint)
-- **[Admin Privacy Policy](#18-admin-privacy-policy)** - Set Privacy Policy (1 endpoint)
+- **[Admin Management](#12-admin-management-apis)** - Admin authentication & CRUD (7 endpoints)
+- **[Admin Article Management](#13-admin-article-management)** - Create artikel (1 endpoint)
+- **[Admin Onboarding Management](#14-admin-onboarding-management)** - CRUD onboarding (3 endpoints)
+- **[Admin Photo Management](#15-admin-photo-management)** - Create photo (1 endpoint)
+- **[Admin User Management](#16-admin-user-management)** - Manajemen user (4 endpoints)
+- **[Admin Configuration](#17-admin-configuration-apis)** - Full config management (3 endpoints)
+- **[Admin Terms & Conditions](#18-admin-terms-conditions)** - Set T&C (1 endpoint)
+- **[Admin Privacy Policy](#19-admin-privacy-policy)** - Set Privacy Policy (1 endpoint)
 
 ### 👨‍💼 Owner-Only APIs (2 endpoints)
 
-- **[Owner User Management](#19-owner-user-management)** - Create & update users dengan roles (2 endpoints)
+- **[Owner User Management](#20-owner-user-management)** - Create & update users dengan roles (2 endpoints)
 
-**Total: 44 Active Endpoints**
+**Total: 51 Active Endpoints**
 
 ---
 
 # � API Endpoint Quick Reference
 
-This section provides a complete list of all 44 available API endpoints organized by access level.
+This section provides a complete list of all 51 available API endpoints organized by access level.
 
 ## 🔓 Public APIs (7 endpoints)
 
@@ -130,7 +131,17 @@ This section provides a complete list of all 44 available API endpoints organize
 
 - `GET /api/config/:key` - Get config value by key
 
-## 👑 Admin APIs (14 endpoints)
+## 👑 Admin APIs (21 endpoints)
+
+### Admin Management (7 endpoints)
+
+- `POST /api/admin/login` - Admin login
+- `POST /api/admin/logout` - Admin logout
+- `GET /api/admin/admins` - Get all admins (Admin only)
+- `GET /api/admin/admins/:id` - Get admin by ID (Admin only)
+- `POST /api/admin/admins` - Create admin (Super Admin only)
+- `PUT /api/admin/admins/:id` - Update admin (Super Admin only)
+- `DELETE /api/admin/admins/:id` - Delete admin (Super Admin only)
 
 ### Article Management (1 endpoint)
 
@@ -2418,6 +2429,369 @@ Authorization: Bearer <access_token>
 
 ---
 
+## 12. Admin Management APIs
+
+**🔧 Admin System**: Complete admin authentication and CRUD management system with role-based access control.
+
+### 12.1 Admin Login
+
+**Endpoint:** `POST /api/admin/login`  
+**Access:** Public (Admin Credentials Required)  
+**Description:** Authenticate admin users and get access token
+
+**Request Body:**
+
+```json
+{
+    "email": "admin@mbankingcore.com",
+    "password": "admin123"
+}
+```
+
+**Response Success (200):**
+
+```json
+{
+    "code": 200,
+    "message": "Admin login successful",
+    "data": {
+        "admin": {
+            "id": 1,
+            "name": "Super Admin",
+            "email": "admin@mbankingcore.com",
+            "role": "super",
+            "status": 1,
+            "avatar": "",
+            "last_login": "2025-07-30T10:05:20.484234+07:00",
+            "created_at": "2025-07-30T09:58:58.74129+07:00",
+            "updated_at": "2025-07-30T10:05:20.48451+07:00"
+        },
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+        "expires_in": 86400
+    }
+}
+```
+
+**Response Errors:**
+
+- `303` - Invalid email or password
+- `750` - Admin account is inactive
+- `751` - Admin account is blocked
+
+---
+
+### 12.2 Admin Logout
+
+**Endpoint:** `POST /api/admin/logout`  
+**Access:** Admin Authentication Required  
+**Description:** Logout admin session and invalidate token
+
+**Request Headers:**
+
+```
+Authorization: Bearer <admin_access_token>
+```
+
+**Response Success (200):**
+
+```json
+{
+    "code": 200,
+    "message": "Admin logout successful",
+    "data": null
+}
+```
+
+**Response Errors:**
+
+- `301` - Invalid or expired admin token
+- `304` - Authorization token required
+
+---
+
+### 12.3 Get All Admins
+
+**Endpoint:** `GET /api/admin/admins`  
+**Access:** Admin Authentication Required  
+**Description:** Retrieve paginated list of all admin accounts
+
+**Request Headers:**
+
+```
+Authorization: Bearer <admin_access_token>
+```
+
+**Query Parameters:**
+
+- `page` (optional): Page number (default: 1)
+- `per_page` (optional): Items per page (default: 10)
+
+**Response Success (200):**
+
+```json
+{
+    "code": 200,
+    "message": "Admins retrieved successfully",
+    "data": {
+        "admins": [
+            {
+                "id": 1,
+                "name": "Super Admin",
+                "email": "admin@mbankingcore.com",
+                "role": "super",
+                "status": 1,
+                "avatar": "",
+                "last_login": "2025-07-30T10:05:20.484234+07:00",
+                "created_at": "2025-07-30T09:58:58.74129+07:00",
+                "updated_at": "2025-07-30T10:05:20.48451+07:00"
+            }
+        ],
+        "total": 1,
+        "page": 1,
+        "per_page": 10
+    }
+}
+```
+
+**Response Errors:**
+
+- `301` - Invalid or expired admin token
+- `750` - Access forbidden - insufficient permissions
+
+---
+
+### 12.4 Get Admin by ID
+
+**Endpoint:** `GET /api/admin/admins/:id`  
+**Access:** Admin Authentication Required  
+**Description:** Retrieve specific admin account details
+
+**Request Headers:**
+
+```
+Authorization: Bearer <admin_access_token>
+```
+
+**Path Parameters:**
+
+- `id`: Admin ID
+
+**Response Success (200):**
+
+```json
+{
+    "code": 200,
+    "message": "Admin retrieved successfully",
+    "data": {
+        "id": 1,
+        "name": "Super Admin",
+        "email": "admin@mbankingcore.com",
+        "role": "super",
+        "status": 1,
+        "avatar": "",
+        "last_login": "2025-07-30T10:05:20.484234+07:00",
+        "created_at": "2025-07-30T09:58:58.74129+07:00",
+        "updated_at": "2025-07-30T10:05:20.48451+07:00"
+    }
+}
+```
+
+**Response Errors:**
+
+- `301` - Invalid or expired admin token
+- `400` - Admin not found
+- `750` - Access forbidden - insufficient permissions
+
+---
+
+### 12.5 Create Admin
+
+**Endpoint:** `POST /api/admin/admins`  
+**Access:** Super Admin Authentication Required  
+**Description:** Create new admin account (Super Admin only)
+
+**Request Headers:**
+
+```
+Authorization: Bearer <admin_access_token>
+Content-Type: application/json
+```
+
+**Request Body:**
+
+```json
+{
+    "name": "Test Admin",
+    "email": "test@mbankingcore.com",
+    "password": "password123",
+    "role": "admin"
+}
+```
+
+**Field Validations:**
+
+- `name`: Required, minimum 3 characters
+- `email`: Required, valid email format, unique
+- `password`: Required, minimum 6 characters
+- `role`: Required, must be "admin" or "super"
+
+**Response Success (201):**
+
+```json
+{
+    "code": 201,
+    "message": "Admin created successfully",
+    "data": {
+        "id": 2,
+        "name": "Test Admin",
+        "email": "test@mbankingcore.com",
+        "role": "admin",
+        "status": 1,
+        "avatar": "",
+        "created_at": "2025-07-30T10:01:50.720778+07:00",
+        "updated_at": "2025-07-30T10:01:50.720778+07:00"
+    }
+}
+```
+
+**Response Errors:**
+
+- `301` - Invalid or expired admin token
+- `306` - Email already exists
+- `252` - Validation failed
+- `753` - Super Admin privileges required
+
+---
+
+### 12.6 Update Admin
+
+**Endpoint:** `PUT /api/admin/admins/:id`  
+**Access:** Super Admin Authentication Required  
+**Description:** Update admin account details (Super Admin only)
+
+**Request Headers:**
+
+```
+Authorization: Bearer <admin_access_token>
+Content-Type: application/json
+```
+
+**Path Parameters:**
+
+- `id`: Admin ID to update
+
+**Request Body:**
+
+```json
+{
+    "name": "Updated Test Admin",
+    "email": "test@mbankingcore.com",
+    "role": "admin",
+    "status": 1,
+    "password": "newpassword123"
+}
+```
+
+**Field Notes:**
+
+- `password`: Optional, only include if changing password
+- `status`: 1 = Active, 0 = Inactive, 2 = Blocked
+
+**Response Success (200):**
+
+```json
+{
+    "code": 200,
+    "message": "Admin updated successfully",
+    "data": {
+        "id": 2,
+        "name": "Updated Test Admin",
+        "email": "test@mbankingcore.com",
+        "role": "admin",
+        "status": 1,
+        "avatar": "",
+        "last_login": null,
+        "created_at": "2025-07-30T10:01:50.720778+07:00",
+        "updated_at": "2025-07-30T10:15:30.123456+07:00"
+    }
+}
+```
+
+**Response Errors:**
+
+- `301` - Invalid or expired admin token
+- `400` - Admin not found
+- `306` - Email already exists (if changing email)
+- `252` - Validation failed
+- `753` - Super Admin privileges required
+
+---
+
+### 12.7 Delete Admin
+
+**Endpoint:** `DELETE /api/admin/admins/:id`  
+**Access:** Super Admin Authentication Required  
+**Description:** Delete admin account (Super Admin only, cannot delete self)
+
+**Request Headers:**
+
+```
+Authorization: Bearer <admin_access_token>
+```
+
+**Path Parameters:**
+
+- `id`: Admin ID to delete
+
+**Response Success (200):**
+
+```json
+{
+    "code": 200,
+    "message": "Admin deleted successfully",
+    "data": null
+}
+```
+
+**Response Errors:**
+
+- `301` - Invalid or expired admin token
+- `400` - Admin not found
+- `750` - Cannot delete yourself
+- `753` - Super Admin privileges required
+
+---
+
+## Admin System Features
+
+### Role-Based Access Control
+
+**Super Admin:**
+- Full access to all admin operations
+- Can create, read, update, delete other admins
+- Cannot delete themselves
+
+**Admin:**
+- Can view admin list and details
+- Cannot manage other admin accounts
+- Standard admin operations only
+
+### Security Features
+
+- JWT-based authentication with 24-hour expiration
+- Password encryption using bcrypt
+- Role-based middleware protection
+- Self-deletion prevention
+- Email uniqueness validation
+
+### Admin Status Management
+
+- **Active (1):** Admin can login and perform operations
+- **Inactive (0):** Admin cannot login
+- **Blocked (2):** Admin account is blocked
+
+---
+
 ## Common Response Codes
 
 The API uses a hierarchical error code system where each feature has its own unique range of 50 numbers. This provides better error categorization and debugging capabilities.
@@ -2497,6 +2871,19 @@ The API uses a hierarchical error code system where each feature has its own uni
 - `605` - Invalid configuration key
 - `606` - Invalid configuration value
 
+#### Admin Management (650-699) - Admin Endpoints
+
+- `650` - Admin not found
+- `651` - Failed to create admin
+- `652` - Failed to update admin
+- `653` - Failed to delete admin
+- `654` - Failed to retrieve admin
+- `655` - Invalid admin role
+- `656` - Admin email already exists
+- `657` - Cannot delete yourself
+- `658` - Admin account inactive
+- `659` - Admin account blocked
+
 #### Permissions (750-799)
 
 - `750` - Access forbidden - insufficient permissions
@@ -2542,6 +2929,6 @@ For technical support or questions about the API, please contact the development
 
 ---
 
-**Last Updated:** July 24, 2025  
+**Last Updated:** July 30, 2025  
 **API Version:** 1.0  
-**Documentation Version:** 3.1
+**Documentation Version:** 4.0
