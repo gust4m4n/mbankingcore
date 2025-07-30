@@ -42,7 +42,7 @@ API diorganisir ke dalam bagian-bagian berikut:
 
 - **[Banking Authentication](#5-banking-authentication-apis)** - 2-step banking authentication dengan OTP
 
-### 🛡️ Protected APIs (23 endpoints)
+### 🛡️ Protected APIs (19 endpoints)
 
 - **[User Profile Management](#6-user-profile-apis)** - Manajemen profil user (3 endpoints)
 - **[Session Management](#7-session-management-apis)** - Manajemen sesi device (3 endpoints)
@@ -50,7 +50,6 @@ API diorganisir ke dalam bagian-bagian berikut:
 - **[Transaction Management](#9-transaction-management-apis)** - Topup, withdraw, transfer, history (4 endpoints)
 - **[Article Management](#10-article-management-apis)** - Operasi CRUD artikel (5 endpoints)
 - **[Photo Management](#11-photo-management-apis)** - Sistem manajemen foto (4 endpoints)
-- **[Configuration APIs](#12-configuration-apis)** - Read config (1 endpoint)
 
 ### 👑 Admin APIs (25 endpoints)
 
@@ -60,7 +59,7 @@ API diorganisir ke dalam bagian-bagian berikut:
 - **[Admin Onboarding Management](#16-admin-onboarding-management)** - CRUD onboarding (3 endpoints)
 - **[Admin Photo Management](#17-admin-photo-management)** - Create photo (1 endpoint)
 - **[Admin User Management](#18-admin-user-management)** - Manajemen user (3 endpoints)
-- **[Admin Configuration](#19-admin-configuration-apis)** - Full config management (3 endpoints)
+- **[Admin Configuration](#19-admin-configuration-apis)** - Full config management (4 endpoints)
 - **[Admin Audit Trails](#20-admin-audit-trails)** - System activity & login monitoring (2 endpoints)
 - **[Admin Terms & Conditions](#21-admin-terms-conditions)** - Set T&C (1 endpoint)
 - **[Admin Privacy Policy](#22-admin-privacy-policy)** - Set Privacy Policy (1 endpoint)
@@ -89,7 +88,7 @@ This section provides a complete list of all 58 available API endpoints organize
 - `POST /api/login/verify` - Banking login step 2 (verify OTP)
 - `POST /api/refresh` - Refresh access token
 
-## 🛡️ Protected APIs (23 endpoints)
+## 🛡️ Protected APIs (19 endpoints)
 
 ### User Profile Management (3 endpoints)
 
@@ -133,11 +132,7 @@ This section provides a complete list of all 58 available API endpoints organize
 - `PUT /api/photos/:id` - Update photo (own only)
 - `DELETE /api/photos/:id` - Delete photo (own only)
 
-### Configuration (1 endpoint)
-
-- `GET /api/config/:key` - Get config value by key
-
-## 👑 Admin APIs (25 endpoints)
+## 👑 Admin APIs (29 endpoints)
 
 ### Admin Management (7 endpoints)
 
@@ -174,11 +169,12 @@ This section provides a complete list of all 58 available API endpoints organize
 - `GET /api/users/:id` - Get user by ID (Admin/Owner only)
 - `DELETE /api/users/:id` - Delete user by ID (Admin/Owner only)
 
-### Configuration Management (3 endpoints)
+### Configuration Management (4 endpoints)
 
-- `POST /api/config` - Set config value (Admin/Owner only)
-- `GET /api/configs` - Get all configs (Admin/Owner only)
-- `DELETE /api/config/:key` - Delete config by key (Admin/Owner only)
+- `POST /api/admin/config` - Set config value (Admin only)
+- `GET /api/admin/configs` - Get all configs (Admin only)
+- `GET /api/admin/config/:key` - Get config value by key (Admin only)
+- `DELETE /api/admin/config/:key` - Delete config by key (Admin only)
 
 ### Audit Trails (2 endpoints)
 
@@ -2380,18 +2376,18 @@ Authorization: Bearer <access_token>
 
 ---
 
-## 11. Configuration APIs
+## 19. Admin Configuration APIs
 
-### 9.1 Get Config by Key
+### 19.1 Get Config by Key (Admin Only)
 
-**Endpoint:** `GET /api/config/{key}`  
-**Access:** Authenticated users  
-**Description:** Retrieve configuration value by key
+**Endpoint:** `GET /api/admin/config/{key}`  
+**Access:** Admin only  
+**Description:** Retrieve configuration value by key (admin access required)
 
 **Request Headers:**
 
 ```
-Authorization: Bearer <access_token>
+Authorization: Bearer <admin_access_token>
 ```
 
 **Path Parameters:**
@@ -2415,21 +2411,22 @@ Authorization: Bearer <access_token>
 **Response Errors:**
 
 - `401` - Unauthorized
+- `403` - Admin privileges required
 - `404` - Configuration not found
 - `500` - Failed to retrieve configuration
 
 ---
 
-### 9.2 Set Config (Admin Only)
+### 19.2 Set Config (Admin Only)
 
-**Endpoint:** `POST /api/config`  
-**Access:** Admin/Owner only  
-**Description:** Set or update configuration value
+**Endpoint:** `POST /api/admin/config`  
+**Access:** Admin only  
+**Description:** Set or update configuration value (admin access required)
 
 **Request Headers:**
 
 ```
-Authorization: Bearer <access_token>
+Authorization: Bearer <admin_access_token>
 Content-Type: application/json
 ```
 
@@ -2460,22 +2457,23 @@ Content-Type: application/json
 **Response Errors:**
 
 - `602` - Invalid config data
-- `300` - Authentication required
+- `401` - Unauthorized
+- `403` - Admin privileges required
 - `651` - Insufficient admin privileges
 - `603` - Config creation failed
 
 ---
 
-### 9.3 Get All Configs (Admin Only)
+### 19.3 Get All Configs (Admin Only)
 
-**Endpoint:** `GET /api/configs`  
-**Access:** Admin/Owner only  
-**Description:** Retrieve all configuration keys and values
+**Endpoint:** `GET /api/admin/configs`  
+**Access:** Admin only  
+**Description:** Retrieve all configuration keys and values (admin access required)
 
 **Request Headers:**
 
 ```
-Authorization: Bearer <access_token>
+Authorization: Bearer <admin_access_token>
 ```
 
 **Response Success (200):**
@@ -2511,16 +2509,16 @@ Authorization: Bearer <access_token>
 
 ---
 
-### 9.4 Delete Config (Admin Only)
+### 19.4 Delete Config (Admin Only)
 
-**Endpoint:** `DELETE /api/config/{key}`  
-**Access:** Admin/Owner only  
-**Description:** Delete configuration by key
+**Endpoint:** `DELETE /api/admin/config/{key}`  
+**Access:** Admin only  
+**Description:** Delete configuration by key (admin access required)
 
 **Request Headers:**
 
 ```
-Authorization: Bearer <access_token>
+Authorization: Bearer <admin_access_token>
 ```
 
 **Path Parameters:**
@@ -2538,8 +2536,8 @@ Authorization: Bearer <access_token>
 
 **Response Errors:**
 
-- `300` - Authentication required
-- `651` - Insufficient admin privileges
+- `401` - Unauthorized
+- `403` - Admin privileges required
 - `600` - Config not found
 - `604` - Config deletion failed
 

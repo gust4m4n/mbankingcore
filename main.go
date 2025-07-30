@@ -99,6 +99,12 @@ func main() {
 				// Audit trails (admin only)
 				adminProtected.GET("/audit-logs", auditHandler.GetAuditLogs)        // Get audit logs with filtering
 				adminProtected.GET("/login-audits", auditHandler.GetLoginAuditLogs) // Get login audit logs with filtering
+
+				// Config management (admin only)
+				adminProtected.POST("/config", handlers.SetConfig)           // Set config value (admin only)
+				adminProtected.GET("/configs", handlers.GetAllConfigs)       // Get all configs (admin only)
+				adminProtected.GET("/config/:key", handlers.GetConfig)       // Get config value by key (admin only)
+				adminProtected.DELETE("/config/:key", handlers.DeleteConfig) // Delete config by key (admin only)
 			}
 		} // Protected routes (require authentication)
 		protected := api.Group("/")
@@ -149,14 +155,6 @@ func main() {
 			protected.GET("/users", handlers.ListUsers)         // List all users (authenticated users)
 			protected.GET("/users/:id", handlers.GetUserByID)   // Get user by ID (authenticated users)
 			protected.DELETE("/users/:id", handlers.DeleteUser) // Delete user by ID (authenticated users)
-
-			// Config management (authenticated users)
-			protected.POST("/config", handlers.SetConfig)           // Set config value (authenticated users)
-			protected.GET("/configs", handlers.GetAllConfigs)       // Get all configs (authenticated users)
-			protected.DELETE("/config/:key", handlers.DeleteConfig) // Delete config by key (authenticated users)
-
-			// Config management - get only (all authenticated users can read configs)
-			protected.GET("/config/:key", handlers.GetConfig) // Get config value by key (authenticated users)
 
 			// Transaction management (authenticated users)
 			protected.POST("/transactions/topup", transactionHandler.Topup)                // Top up balance
