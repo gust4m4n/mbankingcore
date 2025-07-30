@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"mbankingcore/models"
 
@@ -19,20 +20,6 @@ func NewTransactionHandler(db *gorm.DB) *TransactionHandler {
 	return &TransactionHandler{DB: db}
 }
 
-type TopupRequest struct {
-	Amount int64 `json:"amount" binding:"required,min=1"`
-}
-
-type WithdrawRequest struct {
-	Amount int64 `json:"amount" binding:"required,min=1"`
-}
-
-type TransferRequest struct {
-	ToAccountNumber string `json:"to_account_number" binding:"required"`
-	Amount          int64  `json:"amount" binding:"required,min=1"`
-	Description     string `json:"description"`
-}
-
 // Topup - Add balance to user account
 func (h *TransactionHandler) Topup(c *gin.Context) {
 	userID, exists := c.Get("user_id")
@@ -44,7 +31,7 @@ func (h *TransactionHandler) Topup(c *gin.Context) {
 		return
 	}
 
-	var req TopupRequest
+	var req models.TopupRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Code:    http.StatusBadRequest,
@@ -140,7 +127,7 @@ func (h *TransactionHandler) Withdraw(c *gin.Context) {
 		return
 	}
 
-	var req WithdrawRequest
+	var req models.WithdrawRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Code:    http.StatusBadRequest,
@@ -363,7 +350,7 @@ func (h *TransactionHandler) Transfer(c *gin.Context) {
 		return
 	}
 
-	var req TransferRequest
+	var req models.TransferRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Code:    http.StatusBadRequest,
@@ -536,6 +523,286 @@ func (h *TransactionHandler) Transfer(c *gin.Context) {
 			"sender_balance_after":  senderUser.Balance,
 			"description":           transferDesc,
 			"transaction_at":        senderTransaction.CreatedAt,
+		},
+	})
+}
+
+// Reversal - Reverse a completed transaction (Admin only)
+func (h *TransactionHandler) Reversal(c *gin.Context) {
+	var req models.ReversalRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid request data",
+		})
+		return
+	}
+
+	// Start database transaction
+	tx := h.DB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Lock and get original transaction
+	var originalTxn models.Transaction
+	if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("id = ? AND deleted_at IS NULL", req.TransactionID).
+		First(&originalTxn).Error; err != nil {
+		tx.Rollback()
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, models.ErrorResponse{
+				Code:    http.StatusNotFound,
+				Message: "Transaction not found",
+			})
+		} else {
+			c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+				Code:    http.StatusInternalServerError,
+				Message: "Failed to get transaction",
+			})
+		}
+		return
+	}
+
+	// Check if transaction is already reversed
+	if originalTxn.IsReversed {
+		tx.Rollback()
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Transaction has already been reversed",
+		})
+		return
+	}
+
+	// Check if transaction can be reversed (only completed transactions)
+	if originalTxn.Status != "completed" {
+		tx.Rollback()
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Only completed transactions can be reversed",
+		})
+		return
+	}
+
+	// Check if transaction is not too old (business rule: can only reverse within 30 days)
+	// You can adjust this timeframe based on business requirements
+	// For now, we'll allow all completed transactions to be reversed
+
+	// Lock and get user for balance update
+	var user models.User
+	if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("id = ?", originalTxn.UserID).
+		First(&user).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to get user",
+		})
+		return
+	}
+
+	// Calculate reversal operation
+	var reversalType string
+	var newBalance int64
+	var reversalAmount int64
+
+	currentBalance := user.Balance
+
+	switch originalTxn.Type {
+	case "topup":
+		// Reverse topup: deduct the amount
+		reversalType = "reversal"
+		reversalAmount = originalTxn.Amount
+		newBalance = currentBalance - originalTxn.Amount
+		if newBalance < 0 {
+			tx.Rollback()
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{
+				Code:    http.StatusBadRequest,
+				Message: "Insufficient balance for reversal. Cannot reverse topup transaction.",
+			})
+			return
+		}
+	case "withdraw":
+		// Reverse withdraw: add the amount back
+		reversalType = "reversal"
+		reversalAmount = originalTxn.Amount
+		newBalance = currentBalance + originalTxn.Amount
+	case "transfer_out":
+		// Reverse outgoing transfer: add the amount back to sender
+		reversalType = "reversal"
+		reversalAmount = originalTxn.Amount
+		newBalance = currentBalance + originalTxn.Amount
+
+		// For transfer reversals, we also need to reverse the corresponding transfer_in
+		// Find the corresponding transfer_in transaction
+		var correspondingTxn models.Transaction
+		if err := tx.Where("user_id != ? AND type = 'transfer_in' AND amount = ? AND created_at BETWEEN ? AND ?",
+			originalTxn.UserID, originalTxn.Amount,
+			originalTxn.CreatedAt.Add(-time.Minute), originalTxn.CreatedAt.Add(time.Minute)).
+			First(&correspondingTxn).Error; err == nil {
+
+			// Lock and get receiver user
+			var receiverUser models.User
+			if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+				Where("id = ?", correspondingTxn.UserID).
+				First(&receiverUser).Error; err != nil {
+				tx.Rollback()
+				c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+					Code:    http.StatusInternalServerError,
+					Message: "Failed to get receiver user for transfer reversal",
+				})
+				return
+			}
+
+			// Check if receiver has sufficient balance for reversal
+			if receiverUser.Balance < correspondingTxn.Amount {
+				tx.Rollback()
+				c.JSON(http.StatusBadRequest, models.ErrorResponse{
+					Code:    http.StatusBadRequest,
+					Message: "Receiver has insufficient balance for transfer reversal",
+				})
+				return
+			}
+
+			// Create reversal transaction for receiver (deduct the amount)
+			receiverReversalBalance := receiverUser.Balance - correspondingTxn.Amount
+			receiverReversalTxn := models.Transaction{
+				UserID:         correspondingTxn.UserID,
+				Type:           "reversal",
+				Amount:         correspondingTxn.Amount,
+				BalanceBefore:  receiverUser.Balance,
+				BalanceAfter:   receiverReversalBalance,
+				Description:    "Transfer reversal - " + req.ReversalReason,
+				Status:         "completed",
+				OriginalTxnID:  &correspondingTxn.ID,
+				ReversalReason: req.ReversalReason,
+			}
+
+			if err := tx.Create(&receiverReversalTxn).Error; err != nil {
+				tx.Rollback()
+				c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+					Code:    http.StatusInternalServerError,
+					Message: "Failed to create receiver reversal transaction",
+				})
+				return
+			}
+
+			// Update receiver balance
+			if err := tx.Model(&receiverUser).Update("balance", receiverReversalBalance).Error; err != nil {
+				tx.Rollback()
+				c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+					Code:    http.StatusInternalServerError,
+					Message: "Failed to update receiver balance",
+				})
+				return
+			}
+
+			// Mark corresponding transaction as reversed
+			now := time.Now()
+			if err := tx.Model(&correspondingTxn).Updates(map[string]interface{}{
+				"is_reversed":     true,
+				"reversed_txn_id": receiverReversalTxn.ID,
+				"reversed_at":     &now,
+			}).Error; err != nil {
+				tx.Rollback()
+				c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+					Code:    http.StatusInternalServerError,
+					Message: "Failed to mark corresponding transaction as reversed",
+				})
+				return
+			}
+		}
+	case "transfer_in":
+		// Reverse incoming transfer: deduct the amount
+		reversalType = "reversal"
+		reversalAmount = originalTxn.Amount
+		newBalance = currentBalance - originalTxn.Amount
+		if newBalance < 0 {
+			tx.Rollback()
+			c.JSON(http.StatusBadRequest, models.ErrorResponse{
+				Code:    http.StatusBadRequest,
+				Message: "Insufficient balance for transfer_in reversal",
+			})
+			return
+		}
+	default:
+		tx.Rollback()
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Transaction type cannot be reversed",
+		})
+		return
+	}
+
+	// Create reversal transaction
+	reversalTxn := models.Transaction{
+		UserID:         originalTxn.UserID,
+		Type:           reversalType,
+		Amount:         reversalAmount,
+		BalanceBefore:  currentBalance,
+		BalanceAfter:   newBalance,
+		Description:    "Reversal of transaction #" + strconv.Itoa(int(originalTxn.ID)) + " - " + req.ReversalReason,
+		Status:         "completed",
+		OriginalTxnID:  &originalTxn.ID,
+		ReversalReason: req.ReversalReason,
+	}
+
+	if err := tx.Create(&reversalTxn).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to create reversal transaction",
+		})
+		return
+	}
+
+	// Update user balance
+	if err := tx.Model(&user).Update("balance", newBalance).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to update user balance",
+		})
+		return
+	}
+
+	// Mark original transaction as reversed
+	now := time.Now()
+	if err := tx.Model(&originalTxn).Updates(map[string]interface{}{
+		"is_reversed":     true,
+		"reversed_txn_id": reversalTxn.ID,
+		"reversed_at":     &now,
+	}).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to mark original transaction as reversed",
+		})
+		return
+	}
+
+	// Commit transaction
+	if err := tx.Commit().Error; err != nil {
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to commit reversal transaction",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "Transaction reversed successfully",
+		"data": gin.H{
+			"reversal_transaction_id": reversalTxn.ID,
+			"original_transaction_id": originalTxn.ID,
+			"reversed_amount":         reversalAmount,
+			"balance_before":          currentBalance,
+			"balance_after":           newBalance,
+			"reversal_reason":         req.ReversalReason,
+			"reversed_at":             now,
 		},
 	})
 }

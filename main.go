@@ -89,6 +89,7 @@ func main() {
 
 				// Transaction monitoring (admin only)
 				adminProtected.GET("/transactions", transactionHandler.GetAllTransactions) // Get all transactions for monitoring
+				adminProtected.POST("/transactions/reversal", transactionHandler.Reversal) // Reverse a transaction
 			}
 		} // Protected routes (require authentication)
 		protected := api.Group("/")

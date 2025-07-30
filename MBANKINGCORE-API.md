@@ -52,10 +52,10 @@ API diorganisir ke dalam bagian-bagian berikut:
 - **[Photo Management](#11-photo-management-apis)** - Sistem manajemen foto (4 endpoints)
 - **[Configuration APIs](#12-configuration-apis)** - Read config (1 endpoint)
 
-### 👑 Admin APIs (22 endpoints)
+### 👑 Admin APIs (23 endpoints)
 
 - **[Admin Management](#13-admin-management-apis)** - Admin authentication & CRUD (7 endpoints)
-- **[Admin Transaction Management](#14-admin-transaction-management)** - Monitor semua transaksi (1 endpoint)
+- **[Admin Transaction Management](#14-admin-transaction-management)** - Monitor & reverse transactions (2 endpoints)
 - **[Admin Article Management](#15-admin-article-management)** - Create artikel (1 endpoint)
 - **[Admin Onboarding Management](#16-admin-onboarding-management)** - CRUD onboarding (3 endpoints)
 - **[Admin Photo Management](#17-admin-photo-management)** - Create photo (1 endpoint)
@@ -68,13 +68,13 @@ API diorganisir ke dalam bagian-bagian berikut:
 
 - **[Owner User Management](#22-owner-user-management)** - Create & update users dengan roles (2 endpoints)
 
-**Total: 57 Active Endpoints**
+**Total: 58 Active Endpoints**
 
 ---
 
 # � API Endpoint Quick Reference
 
-This section provides a complete list of all 51 available API endpoints organized by access level.
+This section provides a complete list of all 58 available API endpoints organized by access level.
 
 ## 🔓 Public APIs (7 endpoints)
 
@@ -140,7 +140,7 @@ This section provides a complete list of all 51 available API endpoints organize
 
 - `GET /api/config/:key` - Get config value by key
 
-## 👑 Admin APIs (22 endpoints)
+## 👑 Admin APIs (23 endpoints)
 
 ### Admin Management (7 endpoints)
 
@@ -155,6 +155,7 @@ This section provides a complete list of all 51 available API endpoints organize
 ### Transaction Management (1 endpoint)
 
 - `GET /api/admin/transactions` - Get all transactions with filtering (Admin only)
+- `POST /api/admin/transactions/reversal` - Reverse any transaction (Admin only)
 
 ### Article Management (1 endpoint)
 
@@ -3068,6 +3069,110 @@ Authorization: Bearer <admin_access_token>
 - `completed`: Successfully processed
 - `failed`: Transaction failed
 - `pending`: Processing (future implementation)
+
+### 13.2 Reverse Transaction (Admin Only)
+
+**Endpoint:** `POST /api/admin/transactions/reversal`  
+**Access:** Admin Authentication Required  
+**Description:** Reverse any transaction with comprehensive business logic handling
+
+**Request Headers:**
+
+```
+Authorization: Bearer <admin_access_token>
+Content-Type: application/json
+```
+
+**Request Body:**
+
+```json
+{
+    "transaction_id": 123,
+    "reason": "Administrative reversal - Error correction"
+}
+```
+
+**Request Parameters:**
+
+- `transaction_id` (required): ID of the transaction to reverse
+- `reason` (required): Reason for the reversal (minimum 10 characters)
+
+**Response Success (200):**
+
+```json
+{
+    "code": 200,
+    "message": "Transaction reversed successfully",
+    "data": {
+        "reversal_transaction": {
+            "id": 456,
+            "user_id": 1,
+            "type": "topup",
+            "amount": 100000,
+            "balance_before": 100000,
+            "balance_after": 0,
+            "description": "REVERSAL: Top up via ATM",
+            "status": "completed",
+            "original_txn_id": 123,
+            "reversed_txn_id": null,
+            "is_reversed": false,
+            "reversal_reason": "Administrative reversal - Error correction",
+            "reversed_at": null,
+            "created_at": "2024-01-01T11:00:00Z"
+        },
+        "original_transaction": {
+            "id": 123,
+            "user_id": 1,
+            "type": "topup",
+            "amount": 100000,
+            "balance_before": 0,
+            "balance_after": 100000,
+            "description": "Top up via ATM",
+            "status": "completed",
+            "original_txn_id": null,
+            "reversed_txn_id": 456,
+            "is_reversed": true,
+            "reversal_reason": "Administrative reversal - Error correction",
+            "reversed_at": "2024-01-01T11:00:00Z",
+            "created_at": "2024-01-01T10:00:00Z"
+        }
+    }
+}
+```
+
+**Response Errors:**
+
+- `301` - Invalid or expired admin token
+- `750` - Access forbidden - insufficient permissions  
+- `751` - Transaction not found
+- `752` - Transaction already reversed
+- `753` - User has insufficient balance for reversal
+- `754` - Invalid reversal reason (too short)
+- `500` - Internal server error
+
+**Reversal Business Logic:**
+
+1. **Topup Reversal:** Deducts the topup amount from user balance
+2. **Withdraw Reversal:** Adds the withdraw amount back to user balance  
+3. **Transfer Reversal:** Creates two reversal transactions:
+   - Adds amount back to sender's balance (`transfer_out` → `transfer_in`)
+   - Deducts amount from receiver's balance (`transfer_in` → `transfer_out`)
+
+**Reversal Transaction Properties:**
+
+- `original_txn_id`: Links to the transaction being reversed
+- `reversed_txn_id`: Links to the reversal transaction (set on original)
+- `is_reversed`: Boolean flag marking transaction as reversed
+- `reversal_reason`: Admin-provided reason for reversal
+- `reversed_at`: Timestamp when reversal occurred
+
+**Validation Rules:**
+
+- Transaction must exist and not be already reversed
+- User must have sufficient balance for deduction reversals
+- Reversal reason must be at least 10 characters
+- Admin authentication required
+- Atomic database operations ensure data consistency
 
 ### Security Features
 

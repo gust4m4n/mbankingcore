@@ -15,15 +15,16 @@ Go RESTful API dengan Banking Authentication, JWT, Multi-Device Session Manageme
 - 🏦 **Banking Authentication** (2-step OTP process dengan login_token)
 - 📱 **Multi-Device Session Management** (Login dari multiple devices)
 - 💼 **Multi-Account Banking Support** (CRUD bank accounts)
-- � **Transaction Management** (Topup, withdraw, transfer antar user)
-- �🔑 **JWT Authentication** dengan refresh token
+- 💳 **Transaction Management** (Topup, withdraw, transfer, reversal)
+- 🔄 **Transaction Reversal System** (Admin-only dengan audit trail lengkap)
+- 🔑 **JWT Authentication** dengan refresh token
 - 🎯 **Selective Logout** (Per device atau semua device)
 - 👥 **User Management** dengan role-based access (User, Admin, Owner)
 - 🔧 **Admin Management System** (Admin authentication & CRUD)
 - 📝 **Content Management** (Articles, Photos, Onboarding)
 - ⚙️ **Configuration Management** (Dynamic app configuration)
 - 📋 **Terms & Conditions** dan **Privacy Policy** management
-- ⚡ **RESTful API** dengan response format konsisten (57 endpoints)
+- ⚡ **RESTful API** dengan response format konsisten (58 endpoints)
 - 🗄️ **PostgreSQL Database** dengan GORM ORM
 - 🔄 **Auto Database Migration**
 - 🌐 **CORS Support**
@@ -72,7 +73,7 @@ mbankingcore/
 │   ├── auth.go                  # JWT utilities & password hashing
 │   └── session.go               # Session management utilities
 ├── postman/
-│   ├── MBankingCore-API.postman_collection.json    # Postman collection (57 endpoints)
+│   ├── MBankingCore-API.postman_collection.json    # Postman collection (58 endpoints)
 │   └── MBankingCore-API.postman_environment.json   # Environment variables
 ├── .env                              # Environment variables
 ├── .env.example                      # Environment template
@@ -80,7 +81,7 @@ mbankingcore/
 ├── go.mod                           # Go modules
 ├── go.sum                           # Go modules checksum
 ├── main.go                          # Application entry point
-├── MBANKINGCORE-API.md              # Complete API documentation (57 endpoints)
+├── MBANKINGCORE-API.md              # Complete API documentation (58 endpoints)
 └── README.md                        # This documentation
 ```
 
@@ -252,12 +253,14 @@ MBankingCore dilengkapi dengan sistem manajemen admin yang komprehensif untuk me
 - 💵 **Topup Balance** - Add balance to user account
 - 💸 **Withdraw Balance** - Deduct balance from user account  
 - 🔄 **Transfer Balance** - Transfer balance between users using account numbers
+- ↩️ **Transaction Reversal** - Admin-only reversal with comprehensive business logic
 - 📊 **Transaction History** - Complete audit trail with pagination
 - 🔒 **Atomic Operations** - Database transactions with row-level locking
 - ⚡ **Real-time Balance Updates** - Immediate balance reflection
 - 📋 **Admin Monitoring** - Admin dashboard for all transactions
+- 🛡️ **Reversal Audit Trail** - Complete transaction relationship tracking
 
-### 📋 Transaction Endpoints (5 endpoints)
+### 📋 Transaction Endpoints (6 endpoints)
 
 | Endpoint | Method | Path | Access Level |
 |----------|--------|------|--------------|
@@ -266,6 +269,7 @@ MBankingCore dilengkapi dengan sistem manajemen admin yang komprehensif untuk me
 | Transfer Balance | `POST` | `/api/transactions/transfer` | User Authentication |
 | Transaction History | `GET` | `/api/transactions/history` | User Authentication |
 | Admin Transaction Monitor | `GET` | `/api/admin/transactions` | Admin Authentication |
+| Transaction Reversal | `POST` | `/api/admin/transactions/reversal` | Admin Authentication |
 
 ### 🔄 Transaction Types
 
@@ -273,6 +277,37 @@ MBankingCore dilengkapi dengan sistem manajemen admin yang komprehensif untuk me
 - **withdraw** - Balance deduction operation
 - **transfer_out** - Outgoing transfer (sender side)
 - **transfer_in** - Incoming transfer (receiver side)
+
+### ↩️ Transaction Reversal System
+
+**Admin-Only Feature** dengan business logic komprehensif:
+
+#### Reversal Business Logic
+
+1. **Topup Reversal**: Deducts the topup amount from user balance
+2. **Withdraw Reversal**: Adds the withdraw amount back to user balance  
+3. **Transfer Reversal**: Creates two reversal transactions:
+   - Adds amount back to sender's balance (`transfer_out` → `transfer_in`)
+   - Deducts amount from receiver's balance (`transfer_in` → `transfer_out`)
+
+#### Reversal Features
+
+- 🔐 **Admin-Only Access** - Requires admin authentication
+- 🔗 **Transaction Relationships** - Links original and reversal transactions
+- 📝 **Reversal Reason** - Mandatory reason for audit purposes
+- ⏰ **Timestamp Tracking** - Records when reversal occurred
+- 🚫 **Duplicate Prevention** - Prevents reversing already reversed transactions
+- 💰 **Balance Validation** - Ensures sufficient balance for deduction reversals
+- 🔒 **Atomic Operations** - Ensures data consistency during complex reversals
+
+#### Reversal Request Example
+
+```json
+{
+    "transaction_id": 123,
+    "reason": "Administrative reversal - Error correction"
+}
+```
 
 ### 🔒 Security Features
 
@@ -386,7 +421,7 @@ Import koleksi Postman untuk testing yang lebih komprehensif:
 - 🏦 **Bank account management** (CRUD operations)
 - � **Admin management** (Admin CRUD operations)
 - �📝 **Content management** (Articles, Photos, Onboarding)
-- 🧪 **57 ready-to-use endpoints** (Complete API coverage)
+- 🧪 **58 ready-to-use endpoints** (Complete API coverage)
 - 📊 **Test result validation**
 
 **Environment Variables yang Diperlukan:**
@@ -704,11 +739,36 @@ createdb mbcdb
 - Check token expiration time
 - Validate token format
 
+## 🆕 Recent Updates
+
+### Version 2.0 - Transaction Reversal System
+
+**🎉 New Feature: Transaction Reversal API**
+
+- ↩️ **Admin Transaction Reversal** - Comprehensive reversal system for all transaction types
+- 🔐 **Admin-Only Access** - Secure reversal operations with admin authentication
+- 🔗 **Complete Audit Trail** - Full transaction relationship tracking
+- 💰 **Smart Business Logic** - Handles topup, withdraw, and transfer reversals
+- 🛡️ **Data Integrity** - Atomic operations with balance validation
+- 📝 **Reversal Reasons** - Mandatory documentation for all reversals
+- ⏰ **Timestamp Tracking** - Complete reversal history
+
+**Technical Enhancements:**
+
+- Enhanced Transaction model with reversal tracking fields
+- New admin endpoint: `POST /api/admin/transactions/reversal`
+- Comprehensive reversal business logic for all transaction types
+- Updated Postman collection with reversal testing
+- Complete API documentation updates
+- Database migration for reversal functionality
+
+**Total Endpoints: 58** (Previous: 57)
+
 ## 📚 Additional Resources & Documentation
 
 ### 📖 Documentation Files
 
-- **[MBANKINGCORE-API.md](./MBANKINGCORE-API.md)** - Complete API documentation with examples and endpoint reference (57 endpoints)
+- **[MBANKINGCORE-API.md](./MBANKINGCORE-API.md)** - Complete API documentation with examples and endpoint reference (58 endpoints)
 
 ### 🔗 External Resources
 
