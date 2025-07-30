@@ -97,7 +97,7 @@ mbankingcore/
 ├── go.mod                           # Go modules
 ├── go.sum                           # Go modules checksum
 ├── main.go                          # Application entry point
-├── MBANKINGCORE-API.md              # Complete API documentation (58 endpoints)
+├── MBANKINGCORE-API.md              # Complete API documentation (60 endpoints)
 └── README.md                        # This documentation
 ```
 
@@ -499,13 +499,14 @@ Import koleksi Postman untuk testing yang lebih komprehensif:
 
 - ✅ **Banking Authentication Flow** (2-step OTP process)
 - ✅ **Admin Authentication Flow** (Admin login/logout)
+- ✅ **Audit Trails Testing** (Activity & Login audit logs)
 - ✅ **Automated token handling** & refresh
 - 📱 **Multi-device scenarios** (Android, iOS, Web, Desktop)
 - 🔄 **Session management** testing
 - 🏦 **Bank account management** (CRUD operations)
 - � **Admin management** (Admin CRUD operations)
 - �📝 **Content management** (Articles, Photos, Onboarding)
-- 🧪 **58 ready-to-use endpoints** (Complete API coverage)
+- 🧪 **60 ready-to-use endpoints** (Complete API coverage)
 - 📊 **Test result validation**
 
 **Environment Variables yang Diperlukan:**
@@ -684,6 +685,14 @@ curl -X POST http://localhost:8080/api/admin/login \
 # Get All Admins (use admin_token from above)
 curl -X GET http://localhost:8080/api/admin/admins \
   -H "Authorization: Bearer your_admin_token_here"
+
+# Get Audit Logs with filtering
+curl -X GET "http://localhost:8080/api/admin/audit-logs?action=create&resource=transaction&page=1&limit=20" \
+  -H "Authorization: Bearer your_admin_token_here"
+
+# Get Login Audit Logs
+curl -X GET "http://localhost:8080/api/admin/login-audits?success=false&page=1&limit=50" \
+  -H "Authorization: Bearer your_admin_token_here"
 ```
 
 ### Postman Collection Testing
@@ -825,9 +834,37 @@ createdb mbcdb
 
 ## 🆕 Recent Updates
 
+### Version 3.0 - Comprehensive Audit Trails System
+
+**🎉 New Feature: Complete Audit Trails Implementation**
+
+- 🔍 **Activity Audit Logs** - Comprehensive tracking of all user and admin actions
+- 🔐 **Login Audit Logs** - Security monitoring for authentication activities
+- � **Advanced Filtering** - Filter by user, action, resource, date range, IP address
+- � **Admin-Only Access** - Secure access control for audit data
+- ⚡ **Automatic Logging** - Real-time activity tracking via middleware
+- 📄 **Pagination Support** - Efficient handling of large audit datasets
+- � **Summary Statistics** - Login success rates and security analytics
+
+**New Audit Endpoints (2 new endpoints):**
+
+- `GET /api/admin/audit-logs` - Get system activity audit logs with advanced filtering
+- `GET /api/admin/login-audits` - Get login/logout audit logs for security monitoring
+
+**Technical Enhancements:**
+
+- New models: `AuditLog` and `LoginAudit` with comprehensive tracking
+- Enhanced middleware: Automatic audit logging for all user/admin activities
+- Database migrations: Added `audit_logs` and `login_audits` tables
+- Complete Postman collection updates with audit endpoint testing
+- Comprehensive API documentation with request/response examples
+- Security monitoring capabilities for compliance and threat detection
+
+**Total Endpoints: 60** (Previous: 58)
+
 ### Version 2.0 - Transaction Reversal System
 
-**🎉 New Feature: Transaction Reversal API**
+**🎉 Previous Feature: Transaction Reversal API**
 
 - ↩️ **Admin Transaction Reversal** - Comprehensive reversal system for all transaction types
 - 🔐 **Admin-Only Access** - Secure reversal operations with admin authentication
@@ -837,22 +874,11 @@ createdb mbcdb
 - 📝 **Reversal Reasons** - Mandatory documentation for all reversals
 - ⏰ **Timestamp Tracking** - Complete reversal history
 
-**Technical Enhancements:**
-
-- Enhanced Transaction model with reversal tracking fields
-- New admin endpoint: `POST /api/admin/transactions/reversal`
-- Comprehensive reversal business logic for all transaction types
-- Updated Postman collection with reversal testing
-- Complete API documentation updates
-- Database migration for reversal functionality
-
-**Total Endpoints: 58** (Previous: 57)
-
 ## 📚 Additional Resources & Documentation
 
 ### 📖 Documentation Files
 
-- **[MBANKINGCORE-API.md](./MBANKINGCORE-API.md)** - Complete API documentation with examples and endpoint reference (58 endpoints)
+- **[MBANKINGCORE-API.md](./MBANKINGCORE-API.md)** - Complete API documentation with examples and endpoint reference (60 endpoints)
 
 ### 🔗 External Resources
 

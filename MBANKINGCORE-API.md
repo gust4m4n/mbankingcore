@@ -52,7 +52,7 @@ API diorganisir ke dalam bagian-bagian berikut:
 - **[Photo Management](#11-photo-management-apis)** - Sistem manajemen foto (4 endpoints)
 - **[Configuration APIs](#12-configuration-apis)** - Read config (1 endpoint)
 
-### 👑 Admin APIs (23 endpoints)
+### 👑 Admin APIs (25 endpoints)
 
 - **[Admin Management](#13-admin-management-apis)** - Admin authentication & CRUD (7 endpoints)
 - **[Admin Transaction Management](#14-admin-transaction-management)** - Monitor & reverse transactions (2 endpoints)
@@ -61,20 +61,21 @@ API diorganisir ke dalam bagian-bagian berikut:
 - **[Admin Photo Management](#17-admin-photo-management)** - Create photo (1 endpoint)
 - **[Admin User Management](#18-admin-user-management)** - Manajemen user (4 endpoints)
 - **[Admin Configuration](#19-admin-configuration-apis)** - Full config management (3 endpoints)
-- **[Admin Terms & Conditions](#20-admin-terms-conditions)** - Set T&C (1 endpoint)
-- **[Admin Privacy Policy](#21-admin-privacy-policy)** - Set Privacy Policy (1 endpoint)
+- **[Admin Audit Trails](#20-admin-audit-trails)** - System activity & login monitoring (2 endpoints)
+- **[Admin Terms & Conditions](#21-admin-terms-conditions)** - Set T&C (1 endpoint)
+- **[Admin Privacy Policy](#22-admin-privacy-policy)** - Set Privacy Policy (1 endpoint)
 
 ### 👨‍💼 Owner-Only APIs (2 endpoints)
 
-- **[Owner User Management](#22-owner-user-management)** - Create & update users dengan roles (2 endpoints)
+- **[Owner User Management](#23-owner-user-management)** - Create & update users dengan roles (2 endpoints)
 
-**Total: 58 Active Endpoints**
+**Total: 60 Active Endpoints**
 
 ---
 
 # � API Endpoint Quick Reference
 
-This section provides a complete list of all 58 available API endpoints organized by access level.
+This section provides a complete list of all 60 available API endpoints organized by access level.
 
 ## 🔓 Public APIs (7 endpoints)
 
@@ -140,7 +141,7 @@ This section provides a complete list of all 58 available API endpoints organize
 
 - `GET /api/config/:key` - Get config value by key
 
-## 👑 Admin APIs (23 endpoints)
+## 👑 Admin APIs (25 endpoints)
 
 ### Admin Management (7 endpoints)
 
@@ -182,6 +183,11 @@ This section provides a complete list of all 58 available API endpoints organize
 - `POST /api/config` - Set config value (Admin/Owner only)
 - `GET /api/configs` - Get all configs (Admin/Owner only)
 - `DELETE /api/config/:key` - Delete config by key (Admin/Owner only)
+
+### Audit Trails (2 endpoints)
+
+- `GET /api/admin/audit-logs` - Get system activity audit logs with filtering (Admin only)
+- `GET /api/admin/login-audits` - Get login/logout audit logs with filtering (Admin only)
 
 ### Terms & Conditions (1 endpoint)
 
@@ -2954,11 +2960,13 @@ Authorization: Bearer <admin_access_token>
 ### Role-Based Access Control
 
 **Super Admin:**
+
 - Full access to all admin operations
 - Can create, read, update, delete other admins
 - Cannot delete themselves
 
 **Admin:**
+
 - Can view admin list and details
 - Cannot manage other admin accounts
 - Standard admin operations only
@@ -3060,12 +3068,14 @@ Authorization: Bearer <admin_access_token>
 - `500` - Internal server error
 
 **Transaction Types:**
+
 - `topup`: Balance addition
 - `withdraw`: Balance deduction  
 - `transfer_out`: Outgoing transfer (sender)
 - `transfer_in`: Incoming transfer (receiver)
 
 **Transaction Status:**
+
 - `completed`: Successfully processed
 - `failed`: Transaction failed
 - `pending`: Processing (future implementation)
@@ -3282,12 +3292,237 @@ The API uses a hierarchical error code system where each feature has its own uni
 - `658` - Admin account inactive
 - `659` - Admin account blocked
 
+#### Audit Trails (700-749) - Admin Endpoints
+
+- `700` - Failed to retrieve audit logs
+- `701` - Invalid audit log parameters
+- `702` - Failed to retrieve login audit logs
+- `703` - Invalid login audit parameters
+- `704` - Audit log not found
+- `705` - Failed to create audit log
+
 #### Permissions (750-799)
 
 - `750` - Access forbidden - insufficient permissions
 - `751` - Insufficient permissions to perform this action
 - `752` - Admin privileges required
 - `753` - Owner privileges required
+
+---
+
+## 14. Audit Trails API
+
+### 14.1 Get Audit Logs
+
+Retrieve system audit logs with advanced filtering capabilities.
+
+**Endpoint:** `GET /api/admin/audit-logs`
+
+**Headers:**
+
+```
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+```
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| user_id | integer | No | Filter by specific user ID |
+| action | string | No | Filter by action type |
+| resource | string | No | Filter by resource type |
+| start_date | string | No | Start date (YYYY-MM-DD format) |
+| end_date | string | No | End date (YYYY-MM-DD format) |
+| ip_address | string | No | Filter by IP address |
+| page | integer | No | Page number (default: 1) |
+| limit | integer | No | Items per page (default: 10, max: 100) |
+
+**Example Request:**
+
+```bash
+curl -X GET "https://api.mbankingcore.com/api/admin/audit-logs?action=create&resource=transaction&page=1&limit=20" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  -H "Content-Type: application/json"
+```
+
+**Success Response (200 OK):**
+
+```json
+{
+  "code": 200,
+  "message": "Audit logs retrieved successfully",
+  "data": {
+    "audit_logs": [
+      {
+        "id": 1,
+        "user_id": 123,
+        "action": "create",
+        "resource": "transaction",
+        "resource_id": "456",
+        "details": {
+          "amount": 1000000,
+          "recipient": "1234567890",
+          "type": "transfer"
+        },
+        "ip_address": "192.168.1.100",
+        "user_agent": "MBankingCore Mobile/1.0",
+        "created_at": "2025-01-20T10:30:00Z"
+      },
+      {
+        "id": 2,
+        "user_id": 789,
+        "action": "update",
+        "resource": "user_profile",
+        "resource_id": "789",
+        "details": {
+          "field_updated": "phone_number",
+          "old_value": "+6281234567890",
+          "new_value": "+6289876543210"
+        },
+        "ip_address": "192.168.1.101",
+        "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0)",
+        "created_at": "2025-01-20T11:15:00Z"
+      }
+    ],
+    "pagination": {
+      "current_page": 1,
+      "total_pages": 5,
+      "total_items": 98,
+      "items_per_page": 20
+    },
+    "filters_applied": {
+      "action": "create",
+      "resource": "transaction"
+    }
+  }
+}
+```
+
+**Error Responses:**
+
+- `401 Unauthorized` - Invalid or missing admin token
+- `403 Forbidden` - Insufficient admin privileges
+- `422 Unprocessable Entity` - Invalid query parameters
+- `500 Internal Server Error` - Server error
+
+### 14.2 Get Login Audit Logs
+
+Retrieve login attempt audit logs for security monitoring.
+
+**Endpoint:** `GET /api/admin/login-audits`
+
+**Headers:**
+
+```
+Authorization: Bearer <admin_token>
+Content-Type: application/json
+```
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| user_id | integer | No | Filter by specific user ID |
+| success | boolean | No | Filter by login success status |
+| start_date | string | No | Start date (YYYY-MM-DD format) |
+| end_date | string | No | End date (YYYY-MM-DD format) |
+| ip_address | string | No | Filter by IP address |
+| page | integer | No | Page number (default: 1) |
+| limit | integer | No | Items per page (default: 10, max: 100) |
+
+**Example Request:**
+
+```bash
+curl -X GET "https://api.mbankingcore.com/api/admin/login-audits?success=false&page=1&limit=50" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+  -H "Content-Type: application/json"
+```
+
+**Success Response (200 OK):**
+
+```json
+{
+  "code": 200,
+  "message": "Login audit logs retrieved successfully",
+  "data": {
+    "login_audits": [
+      {
+        "id": 1,
+        "user_id": 123,
+        "email": "user@example.com",
+        "success": false,
+        "failure_reason": "invalid_password",
+        "ip_address": "192.168.1.100",
+        "user_agent": "MBankingCore Mobile/1.0",
+        "attempted_at": "2025-01-20T10:30:00Z"
+      },
+      {
+        "id": 2,
+        "user_id": 456,
+        "email": "another@example.com",
+        "success": true,
+        "failure_reason": null,
+        "ip_address": "192.168.1.101",
+        "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0)",
+        "attempted_at": "2025-01-20T11:15:00Z"
+      }
+    ],
+    "pagination": {
+      "current_page": 1,
+      "total_pages": 3,
+      "total_items": 142,
+      "items_per_page": 50
+    },
+    "filters_applied": {
+      "success": false
+    },
+    "summary": {
+      "total_attempts": 142,
+      "successful_logins": 89,
+      "failed_attempts": 53,
+      "success_rate": "62.68%"
+    }
+  }
+}
+```
+
+**Error Responses:**
+
+- `401 Unauthorized` - Invalid or missing admin token
+- `403 Forbidden` - Insufficient admin privileges
+- `422 Unprocessable Entity` - Invalid query parameters
+- `500 Internal Server Error` - Server error
+
+### 14.3 Audit Trail Security Features
+
+#### Automatic Logging
+
+- All user actions are automatically logged via middleware
+- Login attempts (successful and failed) are tracked
+- Administrative actions are recorded with full context
+- API calls include request details and response status
+
+#### Data Integrity
+
+- Audit logs are immutable once created
+- Timestamps are in UTC format
+- IP addresses and user agents are captured
+- Detailed action context is stored in JSON format
+
+#### Compliance Features
+
+- Comprehensive audit trail for regulatory compliance
+- Advanced filtering for audit reviews
+- Pagination for large datasets
+- Summary statistics for security analysis
+
+#### Best Practices
+
+- Regular audit log reviews recommended
+- Monitor failed login attempts for security threats
+- Use date range filters for periodic compliance checks
+- Export audit data for external compliance systems
 
 ## Error Response Format
 
