@@ -44,6 +44,7 @@ func main() {
 	photoHandler := handlers.NewPhotoHandler(config.DB)
 	bankAccountHandler := handlers.NewBankAccountHandler(config.DB)
 	adminHandler := handlers.NewAdminHandler(config.DB)
+	transactionHandler := handlers.NewTransactionHandler(config.DB)
 
 	// API routes
 	api := router.Group("/api")
@@ -85,6 +86,9 @@ func main() {
 				adminProtected.POST("/admins", adminHandler.CreateAdmin)       // Create new admin
 				adminProtected.PUT("/admins/:id", adminHandler.UpdateAdmin)    // Update admin
 				adminProtected.DELETE("/admins/:id", adminHandler.DeleteAdmin) // Delete admin
+
+				// Transaction monitoring (admin only)
+				adminProtected.GET("/transactions", transactionHandler.GetAllTransactions) // Get all transactions for monitoring
 			}
 		} // Protected routes (require authentication)
 		protected := api.Group("/")
@@ -147,6 +151,12 @@ func main() {
 
 			// Config management - get only (all authenticated users can read configs)
 			protected.GET("/config/:key", handlers.GetConfig) // Get config value by key (authenticated users)
+
+			// Transaction management (authenticated users)
+			protected.POST("/transactions/topup", transactionHandler.Topup)                // Top up balance
+			protected.POST("/transactions/withdraw", transactionHandler.Withdraw)          // Withdraw balance
+			protected.POST("/transactions/transfer", transactionHandler.Transfer)          // Transfer balance to other user
+			protected.GET("/transactions/history", transactionHandler.GetUserTransactions) // Get user transaction history
 		}
 	}
 

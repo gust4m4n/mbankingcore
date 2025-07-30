@@ -22,6 +22,7 @@ func RunMigrations() error {
 		&models.Onboarding{},
 		&models.Photo{},
 		&models.Config{},
+		&models.Transaction{},
 	)
 	if err != nil {
 		log.Printf("Failed to auto-migrate models: %v", err)
