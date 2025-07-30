@@ -24,6 +24,8 @@ Dokumentasi lengkap struktur database untuk aplikasi MBankingCore dengan Postgre
 | `photos` | Photo management system | Dynamic | `id` (uint) |
 | `onboardings` | App onboarding content | Dynamic | `id` (uint) |
 | `configs` | Dynamic application configuration | Dynamic | `key` (string) |
+| `audit_logs` | Comprehensive system activity audit trail | Dynamic | `id` (uint) |
+| `login_audits` | Authentication and login activity tracking | Dynamic | `id` (uint) |
 
 ---
 
@@ -566,6 +568,153 @@ CREATE TABLE configs (
 
 ---
 
+### 10. audit_logs
+
+**Purpose:** Comprehensive audit trail for all system activities and changes
+
+```sql
+CREATE TABLE audit_logs (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER,
+    admin_id INTEGER,
+    entity_type VARCHAR(50) NOT NULL,
+    entity_id INTEGER NOT NULL,
+    action VARCHAR(20) NOT NULL,
+    old_values JSONB,
+    new_values JSONB,
+    ip_address INET,
+    user_agent VARCHAR(255),
+    api_endpoint VARCHAR(255),
+    request_method VARCHAR(10),
+    status_code INTEGER,
+    created_at TIMESTAMP NOT NULL,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (admin_id) REFERENCES admins(id) ON DELETE SET NULL
+);
+
+-- Indexes
+CREATE INDEX idx_audit_logs_user_id ON audit_logs(user_id);
+CREATE INDEX idx_audit_logs_admin_id ON audit_logs(admin_id);
+CREATE INDEX idx_audit_logs_entity_type ON audit_logs(entity_type);
+CREATE INDEX idx_audit_logs_entity_id ON audit_logs(entity_id);
+CREATE INDEX idx_audit_logs_action ON audit_logs(action);
+CREATE INDEX idx_audit_logs_created_at ON audit_logs(created_at DESC);
+CREATE INDEX idx_audit_logs_ip_address ON audit_logs(ip_address);
+CREATE INDEX idx_audit_logs_composite ON audit_logs(entity_type, action, created_at DESC);
+```
+
+**Fields:**
+
+| Field | Type | Constraints | Description |
+|-------|------|-------------|-------------|
+| `id` | SERIAL | PRIMARY KEY | Auto-increment audit log ID |
+| `user_id` | INTEGER | NULLABLE, FK | User who performed the action |
+| `admin_id` | INTEGER | NULLABLE, FK | Admin who performed the action |
+| `entity_type` | VARCHAR(50) | NOT NULL | Type of entity (user, transaction, etc.) |
+| `entity_id` | INTEGER | NOT NULL | ID of the affected entity |
+| `action` | VARCHAR(20) | NOT NULL | Action performed (CREATE, READ, UPDATE, DELETE) |
+| `old_values` | JSONB | NULLABLE | Data before change (JSON format) |
+| `new_values` | JSONB | NULLABLE | Data after change (JSON format) |
+| `ip_address` | INET | NULLABLE | Client IP address |
+| `user_agent` | VARCHAR(255) | NULLABLE | Client user agent |
+| `api_endpoint` | VARCHAR(255) | NULLABLE | API endpoint called |
+| `request_method` | VARCHAR(10) | NULLABLE | HTTP method (GET, POST, PUT, DELETE) |
+| `status_code` | INTEGER | NULLABLE | HTTP response status code |
+| `created_at` | TIMESTAMP | NOT NULL | When the action occurred |
+
+**Entity Types:**
+
+- `user` - User account operations
+- `transaction` - Transaction operations
+- `bank_account` - Bank account operations
+- `admin` - Admin operations
+- `article` - Article operations
+- `photo` - Photo operations
+- `config` - Configuration changes
+- `auth` - Authentication operations
+- `session` - Session management
+
+**Action Types:**
+
+- `CREATE` - New record creation
+- `READ` - Data retrieval/viewing
+- `UPDATE` - Record modification
+- `DELETE` - Record deletion
+- `LOGIN` - Authentication success
+- `LOGOUT` - Session termination
+
+---
+
+### 11. login_audits
+
+**Purpose:** Specialized audit trail for authentication activities
+
+```sql
+CREATE TABLE login_audits (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER,
+    admin_id INTEGER,
+    login_type VARCHAR(20) NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    ip_address INET,
+    user_agent VARCHAR(255),
+    device_info JSONB,
+    failure_reason VARCHAR(255),
+    created_at TIMESTAMP NOT NULL,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (admin_id) REFERENCES admins(id) ON DELETE SET NULL
+);
+
+-- Indexes
+CREATE INDEX idx_login_audits_user_id ON login_audits(user_id);
+CREATE INDEX idx_login_audits_admin_id ON login_audits(admin_id);
+CREATE INDEX idx_login_audits_login_type ON login_audits(login_type);
+CREATE INDEX idx_login_audits_status ON login_audits(status);
+CREATE INDEX idx_login_audits_created_at ON login_audits(created_at DESC);
+CREATE INDEX idx_login_audits_ip_address ON login_audits(ip_address);
+CREATE INDEX idx_login_audits_composite ON login_audits(login_type, status, created_at DESC);
+```
+
+**Fields:**
+
+| Field | Type | Constraints | Description |
+|-------|------|-------------|-------------|
+| `id` | SERIAL | PRIMARY KEY | Auto-increment login audit ID |
+| `user_id` | INTEGER | NULLABLE, FK | User account involved |
+| `admin_id` | INTEGER | NULLABLE, FK | Admin account involved |
+| `login_type` | VARCHAR(20) | NOT NULL | Type of login attempt |
+| `status` | VARCHAR(20) | NOT NULL | Result of login attempt |
+| `ip_address` | INET | NULLABLE | Client IP address |
+| `user_agent` | VARCHAR(255) | NULLABLE | Client user agent |
+| `device_info` | JSONB | NULLABLE | Device information (JSON format) |
+| `failure_reason` | VARCHAR(255) | NULLABLE | Reason for failed attempt |
+| `created_at` | TIMESTAMP | NOT NULL | When the attempt occurred |
+
+**Login Types:**
+
+- `user_login` - User authentication attempt
+- `admin_login` - Admin authentication attempt
+- `user_logout` - User session termination
+- `admin_logout` - Admin session termination
+
+**Status Values:**
+
+- `success` - Authentication successful
+- `failed` - Authentication failed
+- `blocked` - Account blocked/suspended
+
+**Key Features:**
+
+- **Complete Authentication Audit** - All login/logout attempts tracked
+- **Security Monitoring** - Failed attempts and IP tracking
+- **Device Information** - Device fingerprinting for security
+- **Forensic Analysis** - Complete audit trail for security incidents
+- **Automatic Logging** - Middleware-based logging for all auth events
+
+---
+
 ## 🔗 Database Relationships
 
 ### Entity Relationship Diagram (ERD)
@@ -579,8 +728,8 @@ CREATE TABLE configs (
 │ • phone     │       │ • account_number│       │ • session_token │
 │ • mother_name│      │ • account_name  │       │ • refresh_token │
 │ • pin_atm   │       │ • bank_name     │       │ • device_type   │
-│ • role      │       │ • bank_code     │       │ • device_id     │
-│ • avatar    │       │ • account_type  │       │ • provider      │
+│ • balance   │       │ • bank_code     │       │ • device_id     │
+│ • status    │       │ • account_type  │       │ • provider      │
 └─────────────┘       │ • is_active     │       │ • expires_at    │
        │               │ • is_primary    │       └─────────────────┘
        │               └─────────────────┘              ▲
@@ -588,22 +737,53 @@ CREATE TABLE configs (
        │ 1:N                                           │ 1:N
        ▼                                                │
 ┌─────────────┐       ┌─────────────────┐              │
-│   articles  │       │   onboardings   │              │
+│transactions │       │     admins      │              │
 │             │       │                 │              │
 │ • id (PK)   │       │ • id (PK)       │              │
-│ • title     │       │ • image         │              │
-│ • image     │       │ • title         │              │
-│ • content   │       │ • description   │              │
-│ • is_active │       │ • is_active     │              │
-│ • user_id(FK)│      └─────────────────┘              │
-└─────────────┘                                        │
-                                                       │
+│ • user_id(FK)│      │ • name          │              │
+│ • type      │       │ • email         │              │
+│ • amount    │       │ • password      │              │
+│ • balance_before│   │ • role          │              │
+│ • balance_after │   │ • status        │              │
+│ • description│      └─────────────────┘              │
+└─────────────┘                 │                     │
+                               │ 1:N                  │
+                               ▼                       │
 ┌─────────────┐       ┌─────────────────┐              │
-│   photos    │       │     configs     │              │
+│   articles  │       │   audit_logs    │              │
 │             │       │                 │              │
-│ • id (PK)   │       │ • key (PK)      │              │
-│ • image     │       │ • value         │              │
-└─────────────┘       └─────────────────┘              │
+│ • id (PK)   │       │ • id (PK)       │              │
+│ • title     │       │ • user_id (FK)  │◄─────────────┘
+│ • image     │       │ • admin_id (FK) │◄─────────────┐
+│ • content   │       │ • entity_type   │              │
+│ • is_active │       │ • entity_id     │              │
+│ • user_id(FK)│      │ • action        │              │
+└─────────────┘       │ • old_values    │              │
+                      │ • new_values    │              │
+┌─────────────┐       │ • ip_address    │              │
+│   photos    │       │ • user_agent    │              │
+│             │       │ • api_endpoint  │              │
+│ • id (PK)   │       │ • request_method│              │
+│ • image     │       │ • status_code   │              │
+│ • user_id(FK)│      └─────────────────┘              │
+└─────────────┘                 │                     │
+                               │                       │
+┌─────────────┐       ┌─────────────────┐              │
+│ onboardings │       │  login_audits   │              │
+│             │       │                 │              │
+│ • id (PK)   │       │ • id (PK)       │              │
+│ • image     │       │ • user_id (FK)  │◄─────────────┘
+│ • title     │       │ • admin_id (FK) │◄─────────────┐
+│ • description│      │ • login_type    │              │
+│ • is_active │       │ • status        │              │
+└─────────────┘       │ • ip_address    │              │
+                      │ • user_agent    │              │
+┌─────────────┐       │ • device_info   │              │
+│   configs   │       │ • failure_reason│              │
+│             │       └─────────────────┘              │
+│ • key (PK)  │                                        │
+│ • value     │                                        │
+└─────────────┘                                        │
                                                        │
 └──────────────────────────────────────────────────────┘
 ```
@@ -620,15 +800,45 @@ CREATE TABLE configs (
    - Foreign key: `device_sessions.user_id → users.id`
    - Cascade delete: Delete user → Delete all sessions
 
-3. **users ↔ articles** (One-to-Many)
+3. **users ↔ transactions** (One-to-Many)
+   - One user can have multiple transactions
+   - Foreign key: `transactions.user_id → users.id`
+   - Cascade delete: Delete user → Delete all transactions
+
+4. **users ↔ articles** (One-to-Many)
    - One user can author multiple articles
    - Foreign key: `articles.user_id → users.id`
    - Cascade delete: Delete user → Delete all articles
 
-4. **Independent Tables**
-   - `photos` - No foreign key relationships
-   - `onboardings` - No foreign key relationships  
-   - `configs` - No foreign key relationships
+5. **users ↔ photos** (One-to-Many)
+   - One user can upload multiple photos
+   - Foreign key: `photos.user_id → users.id`
+   - Cascade delete: Delete user → Delete all photos
+
+6. **users ↔ audit_logs** (One-to-Many)
+   - One user can have multiple audit log entries
+   - Foreign key: `audit_logs.user_id → users.id`
+   - Set NULL on delete: Delete user → Set user_id to NULL
+
+7. **admins ↔ audit_logs** (One-to-Many)
+   - One admin can have multiple audit log entries
+   - Foreign key: `audit_logs.admin_id → admins.id`
+   - Set NULL on delete: Delete admin → Set admin_id to NULL
+
+8. **users ↔ login_audits** (One-to-Many)
+   - One user can have multiple login audit entries
+   - Foreign key: `login_audits.user_id → users.id`
+   - Set NULL on delete: Delete user → Set user_id to NULL
+
+9. **admins ↔ login_audits** (One-to-Many)
+   - One admin can have multiple login audit entries
+   - Foreign key: `login_audits.admin_id → admins.id`
+   - Set NULL on delete: Delete admin → Set admin_id to NULL
+
+10. **Independent Tables**
+    - `otp_sessions` - Temporary data, no permanent relationships
+    - `onboardings` - No foreign key relationships  
+    - `configs` - No foreign key relationships
 
 ---
 
@@ -666,12 +876,17 @@ DB_SSLMODE=disable
 // Auto-migration configuration
 db.AutoMigrate(
     &User{},
+    &Admin{},
     &BankAccount{},
     &DeviceSession{},
+    &OTPSession{},
+    &Transaction{},
     &Article{},
     &Photo{},
     &Onboarding{},
     &Config{},
+    &AuditLog{},
+    &LoginAudit{},
 )
 ```
 
@@ -877,8 +1092,123 @@ psql -h localhost -U username -d mbcdb < backup_20250730.sql
 
 ---
 
+## 🔍 Audit Trails & Compliance
+
+### Comprehensive Audit System
+
+The MBankingCore database includes a sophisticated audit trail system designed for compliance, security monitoring, and forensic analysis.
+
+#### 1. Activity Audit Logs (`audit_logs`)
+
+**Automatic Logging:**
+- All CRUD operations across all entities
+- API endpoint calls and HTTP methods
+- Request/response status codes
+- IP addresses and user agents
+- Complete before/after data snapshots (JSON)
+
+**Filtering Capabilities:**
+- Entity type (user, transaction, admin, etc.)
+- Action type (CREATE, READ, UPDATE, DELETE)
+- User or Admin ID
+- Date range filtering
+- IP address tracking
+- Combined filters with pagination
+
+**Use Cases:**
+- Compliance reporting and audits
+- Security incident investigation
+- Change tracking and rollback support
+- Performance monitoring and analytics
+- Regulatory compliance (PCI DSS, SOX, etc.)
+
+#### 2. Authentication Audit (`login_audits`)
+
+**Login/Logout Tracking:**
+- All authentication attempts (successful/failed)
+- Device information and fingerprinting
+- IP address and geolocation data
+- Failure reasons for security analysis
+- Session duration tracking
+
+**Security Features:**
+- Brute force attack detection
+- Suspicious IP monitoring
+- Device authentication patterns
+- Failed login attempt analysis
+- Administrative access monitoring
+
+#### 3. Compliance Features
+
+**Data Retention:**
+```sql
+-- Audit log retention (example: 7 years)
+DELETE FROM audit_logs WHERE created_at < NOW() - INTERVAL '7 years';
+DELETE FROM login_audits WHERE created_at < NOW() - INTERVAL '7 years';
+```
+
+**Performance Optimization:**
+```sql
+-- Partitioning for large audit tables (PostgreSQL 10+)
+CREATE TABLE audit_logs_2025 PARTITION OF audit_logs
+FOR VALUES FROM ('2025-01-01') TO ('2026-01-01');
+
+-- Archive old audit data
+CREATE TABLE audit_logs_archive AS
+SELECT * FROM audit_logs WHERE created_at < '2024-01-01';
+```
+
+**GDPR Compliance:**
+- User data anonymization support
+- Right to be forgotten implementation
+- Data export capabilities
+- Consent tracking through audit logs
+
+#### 4. Monitoring & Alerting
+
+**Critical Events:**
+- Failed admin login attempts
+- Unusual transaction patterns
+- Bulk data modifications
+- System configuration changes
+- Security policy violations
+
+**Automated Alerts:**
+```sql
+-- Example: Monitor failed login attempts
+SELECT ip_address, COUNT(*) as failed_attempts
+FROM login_audits 
+WHERE status = 'failed' 
+  AND created_at > NOW() - INTERVAL '1 hour'
+GROUP BY ip_address
+HAVING COUNT(*) >= 5;
+```
+
+### Best Practices
+
+1. **Regular Audit Reviews**
+   - Weekly security audit log analysis
+   - Monthly compliance report generation
+   - Quarterly data retention cleanup
+   - Annual audit trail verification
+
+2. **Access Control**
+   - Admin-only access to audit endpoints
+   - Role-based audit data filtering
+   - Secure audit data transmission
+   - Encrypted audit data storage
+
+3. **Performance Considerations**
+   - Asynchronous audit logging
+   - Batch processing for bulk operations
+   - Indexed columns for fast queries
+   - Partitioned tables for scalability
+
+---
+
 **Last Updated:** July 30, 2025  
 **Database Version:** PostgreSQL 12+  
 **ORM Version:** GORM v1.25+  
-**Tables:** 7 core tables  
-**Total Relationships:** 3 foreign key relationships
+**Tables:** 12 core tables (including audit trails)  
+**Total Relationships:** 9 foreign key relationships  
+**Audit Features:** Comprehensive activity & authentication tracking

@@ -1,6 +1,18 @@
 # MBankingCore - Mobile Banking Core API
 
-Go RESTful API dengan Banking Authentication, JWT, Multi-Device Session Management menggunakan Gin Framework, GORM, dan PostgreSQL.
+Go RESTful API denga├── models/
+│   ├── admin.go                 # Admin model & structures
+│   ├── article.go               # Article model & structures
+│   ├── audit.go                 # Audit trails models (NEW)
+│   ├── bank_account.go          # Bank account model
+│   ├── config.go                # Configuration model
+│   ├── constants.go             # Response codes & messages
+│   ├── device_session.go        # Device session model
+│   ├── onboarding.go            # Onboarding model
+│   ├── photo.go                 # Photo model
+│   ├── responses.go             # Response helper functions
+│   ├── transaction.go           # Transaction model & structures (NEW)
+│   └── user.go                  # User model & request structuresthentication, JWT, Multi-Device Session Management menggunakan Gin Framework, GORM, dan PostgreSQL.
 
 > � **Mobile Banking Core API** dengan 2-step OTP Authentication
 >
@@ -24,7 +36,9 @@ Go RESTful API dengan Banking Authentication, JWT, Multi-Device Session Manageme
 - 📝 **Content Management** (Articles, Photos, Onboarding)
 - ⚙️ **Configuration Management** (Dynamic app configuration)
 - 📋 **Terms & Conditions** dan **Privacy Policy** management
-- ⚡ **RESTful API** dengan response format konsisten (58 endpoints)
+- 🔍 **Comprehensive Audit Trails** (Activity & Login monitoring)
+- 💰 **Transaction Management** dengan reversal system
+- ⚡ **RESTful API** dengan response format konsisten (60 endpoints)
 - 🗄️ **PostgreSQL Database** dengan GORM ORM
 - 🔄 **Auto Database Migration**
 - 🌐 **CORS Support**
@@ -44,6 +58,7 @@ mbankingcore/
 ├── handlers/
 │   ├── admin.go                 # Admin management handlers (NEW)
 │   ├── article.go               # Article CRUD handlers
+│   ├── audit.go                 # Audit trails handlers (NEW)
 │   ├── auth.go                  # Banking authentication handlers
 │   ├── bank_account.go          # Bank account management
 │   ├── config.go                # Configuration handlers
@@ -55,6 +70,7 @@ mbankingcore/
 │   └── user.go                  # User management handlers
 ├── middleware/
 │   ├── admin_auth.go            # Admin authentication middleware (NEW)
+│   ├── audit.go                 # Audit logging middleware (NEW)
 │   └── auth.go                  # JWT authentication middleware
 ├── models/
 │   ├── admin.go                 # Admin model & structures (NEW)
@@ -73,7 +89,7 @@ mbankingcore/
 │   ├── auth.go                  # JWT utilities & password hashing
 │   └── session.go               # Session management utilities
 ├── postman/
-│   ├── MBankingCore-API.postman_collection.json    # Postman collection (58 endpoints)
+│   ├── MBankingCore-API.postman_collection.json    # Postman collection (60 endpoints)
 │   └── MBankingCore-API.postman_environment.json   # Environment variables
 ├── .env                              # Environment variables
 ├── .env.example                      # Environment template
@@ -308,6 +324,74 @@ MBankingCore dilengkapi dengan sistem manajemen admin yang komprehensif untuk me
     "reason": "Administrative reversal - Error correction"
 }
 ```
+
+## 🔍 Audit Trails System
+
+### Audit Features
+
+- **Comprehensive Activity Logging** - Records all user and admin actions
+- **Login/Logout Monitoring** - Tracks authentication activities  
+- **Real-time Tracking** - Automatic logging via middleware
+- **Advanced Filtering** - Filter by user, admin, entity type, date range, IP
+- **Pagination Support** - Efficient handling of large audit datasets
+- **Admin-Only Access** - Secure access control for audit data
+
+### 📋 Audit Endpoints (2 endpoints)
+
+- `GET /api/admin/audit-logs` - Get activity audit logs with filtering (Admin only)
+- `GET /api/admin/login-audits` - Get login/logout audit logs (Admin only)
+
+### 🔐 Audit Data Types
+
+#### 1. Activity Audit Logs
+
+Tracks all system activities including:
+
+- **User Actions**: Profile updates, transactions, content creation
+- **Admin Actions**: User management, transaction reversals, system configuration
+- **Entity Operations**: CREATE, READ, UPDATE, DELETE operations
+- **API Calls**: Request details, response codes, execution time
+
+#### 2. Login Audit Logs  
+
+Monitors authentication activities:
+
+- **Login Attempts**: Successful and failed login attempts
+- **Logout Activities**: User and admin logout tracking
+- **Device Information**: IP addresses, user agents, device details
+- **Security Events**: Failed attempts, blocked access, unusual activity
+
+### 🔍 Filtering Capabilities
+
+```bash
+# Filter by entity type
+GET /api/admin/audit-logs?entity_type=transaction
+
+# Filter by user ID  
+GET /api/admin/audit-logs?user_id=123
+
+# Filter by admin ID
+GET /api/admin/audit-logs?admin_id=456
+
+# Filter by date range
+GET /api/admin/audit-logs?start_date=2024-01-01&end_date=2024-01-31
+
+# Filter by IP address
+GET /api/admin/audit-logs?ip_address=192.168.1.100
+
+# Combine multiple filters with pagination
+GET /api/admin/audit-logs?entity_type=user&start_date=2024-01-01&page=1&limit=50
+```
+
+### ⚡ Automatic Logging
+
+The audit system automatically logs:
+
+- **All API Requests** - Method, endpoint, parameters, response codes
+- **User Activities** - Profile changes, transactions, content management  
+- **Admin Activities** - User management, system configuration, transaction oversight
+- **Authentication Events** - Login/logout attempts with device information
+- **Security Events** - Failed attempts, blocked access, suspicious activities
 
 ### 🔒 Security Features
 

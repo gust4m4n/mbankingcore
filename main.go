@@ -45,14 +45,19 @@ func main() {
 	bankAccountHandler := handlers.NewBankAccountHandler(config.DB)
 	adminHandler := handlers.NewAdminHandler(config.DB)
 	transactionHandler := handlers.NewTransactionHandler(config.DB)
+	auditHandler := handlers.NewAuditHandler()
 
 	// API routes
 	api := router.Group("/api")
+
+	// Add audit logging middleware
+	api.Use(middleware.AuditLogMiddleware())
+
 	{
 		// Authentication routes (public)
-		api.POST("/login", authHandler.BankingLogin)              // Banking Login Step 1 - Send OTP
-		api.POST("/login/verify", authHandler.BankingLoginVerify) // Banking Login Step 2 - Verify OTP
-		api.POST("/refresh", authHandler.RefreshToken)            // Refresh token
+		api.POST("/login", middleware.AuditLoginMiddleware(), authHandler.BankingLogin)              // Banking Login Step 1 - Send OTP
+		api.POST("/login/verify", middleware.AuditLoginMiddleware(), authHandler.BankingLoginVerify) // Banking Login Step 2 - Verify OTP
+		api.POST("/refresh", authHandler.RefreshToken)                                               // Refresh token
 
 		// Public onboarding routes (remain public)
 		api.GET("/onboardings", handlers.GetOnboardings)    // Get all onboardings (public)
@@ -73,8 +78,8 @@ func main() {
 		// Admin authentication routes (public)
 		admin := api.Group("/admin")
 		{
-			admin.POST("/login", adminHandler.AdminLogin)   // Admin login
-			admin.POST("/logout", adminHandler.AdminLogout) // Admin logout
+			admin.POST("/login", middleware.AuditLoginMiddleware(), adminHandler.AdminLogin)   // Admin login
+			admin.POST("/logout", middleware.AuditLoginMiddleware(), adminHandler.AdminLogout) // Admin logout
 
 			// Admin protected routes
 			adminProtected := admin.Group("/")
@@ -90,6 +95,10 @@ func main() {
 				// Transaction monitoring (admin only)
 				adminProtected.GET("/transactions", transactionHandler.GetAllTransactions) // Get all transactions for monitoring
 				adminProtected.POST("/transactions/reversal", transactionHandler.Reversal) // Reverse a transaction
+
+				// Audit trails (admin only)
+				adminProtected.GET("/audit-logs", auditHandler.GetAuditLogs)        // Get audit logs with filtering
+				adminProtected.GET("/login-audits", auditHandler.GetLoginAuditLogs) // Get login audit logs with filtering
 			}
 		} // Protected routes (require authentication)
 		protected := api.Group("/")
@@ -101,9 +110,9 @@ func main() {
 			protected.PUT("/change-pin", authHandler.ChangePIN)  // Change PIN ATM
 
 			// Session management
-			protected.GET("/sessions", authHandler.GetActiveSessions)         // Get active sessions
-			protected.POST("/logout", authHandler.Logout)                     // Logout
-			protected.POST("/logout-others", authHandler.LogoutOtherSessions) // Logout other sessions
+			protected.GET("/sessions", authHandler.GetActiveSessions)                                            // Get active sessions
+			protected.POST("/logout", middleware.AuditLoginMiddleware(), authHandler.Logout)                     // Logout
+			protected.POST("/logout-others", middleware.AuditLoginMiddleware(), authHandler.LogoutOtherSessions) // Logout other sessions
 
 			// Article management (all operations require authentication)
 			protected.GET("/articles", articleHandler.GetArticles)          // Get all articles (protected)
