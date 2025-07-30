@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "mbankingcore-api-collection",
     "name": "MBankingCore API Collection",
-    "description": "API testing collection for MBankingCore with comprehensive endpoint coverage.\n\n## Features:\n- 🏦 Banking Authentication (3-step process with refresh)\n- 📱 Device session management\n- 🔄 Automated token refresh\n- ✅ Comprehensive API coverage\n- 💰 Multi-account banking support\n- 📝 Article management (CRUD)\n- 🎯 Onboarding content management\n- 📸 Photo gallery management\n- ⚙️ Config management system\n- 📋 Terms & Conditions management\n- 🔐 Privacy Policy management\n- 👥 User management (CRUD)\n- 🔧 Admin management system\n- 🧪 Testing scenarios\n\n## API Coverage (66+ endpoints):\n- **Public APIs** (8 endpoints)\n  - Health Check (1)\n  - Terms & Conditions (1)\n  - Privacy Policy (1)\n  - Onboarding (2)\n  - Banking Authentication (3)\n- **Authenticated Content Management APIs** (2 endpoints)\n  - Terms & Conditions Management (1)\n  - Privacy Policy Management (1)\n- **Protected User APIs** (35 endpoints)\n  - User Profile Management (3)\n  - Session Management (3)\n  - Bank Account Management (5)\n  - Article Management (6)\n  - Photo Management (5)\n  - Onboarding Management (3)\n  - Configuration Management (4)\n  - User Management (5)\n- **Admin Management APIs** (7 endpoints)\n  - Admin Authentication (2)\n  - Admin CRUD Operations (5)\n\n## Testing Order:\n1. **Public APIs** - No authentication required\n2. **Banking Authentication** - 3-step process (login → verify → refresh)\n3. **Protected APIs** - User profile, bank accounts, content management\n4. **Admin APIs** - Admin login, admin management\n5. **Content Management** - Terms, Privacy Policy, Onboarding\n6. **User Management** - User CRUD operations\n\n## Usage:\n1. Import environment file: `MBankingCore-API.postman_environment.json`\n2. **Important**: Update `banking_account_number` to a unique value before testing\n3. Run collection with automated token handling\n4. Test all API endpoints systematically\n\n## Banking Authentication Flow:\n1. Banking Login → Submit credentials and get login_token + OTP\n2. Banking Verify → Submit login_token + OTP and get session tokens\n3. Refresh Token → Get new access/refresh tokens using refresh token\n4. Access protected endpoints → Auto token refresh\n5. Test CRUD operations on all resources\n6. Logout selectively → Per device or all devices\n\n## Admin Authentication Flow:\n1. Admin Login → Submit admin credentials and get admin access_token\n2. Access admin endpoints → Create, read, update, delete admin accounts\n3. Admin Logout → Invalidate admin session\n\n## Content Management Flow:\n1. Terms & Conditions → Set/update terms content (authenticated)\n2. Privacy Policy → Set/update privacy policy content (authenticated)\n3. Onboarding → Create, update, delete onboarding steps (authenticated)\n4. Articles → Full CRUD operations for articles (authenticated)\n5. Photos → Full CRUD operations for photo gallery (authenticated)\n\n## Configuration Management Flow:\n1. Set Config → Create or update configuration values\n2. Get All Configs → Retrieve all system configurations\n3. Get Config by Key → Retrieve specific configuration\n4. Delete Config → Remove configuration by key\n\n## User Management Flow:\n1. List Users → Get all users in the system\n2. Get User by ID → Retrieve specific user details\n3. Create User → Add new user to the system\n4. Update User → Modify existing user information\n5. Delete User → Remove user from the system\n\n## Important Notes:\n⚠️ **Account Numbers Must Be Unique**: Each account number must be unique across the system. If testing with existing data, ensure you use a unique account number in the environment variables to avoid database constraint violations.\n\n🔑 **Environment Variables**: The collection uses pre-configured variables for testing. Update these values as needed:\n- `banking_account_number`: Use unique 16-digit number\n- `banking_phone`: Use unique phone number\n- `banking_name`: Full name (8+ characters)\n- `banking_mother_name`: Mother's name (8+ characters)\n- `banking_pin_atm`: 6-digit PIN\n- `admin_email`: Admin email (default: admin@mbankingcore.com)\n- `admin_password`: Admin password (default: admin123)\n- `config_key`: Configuration key for testing (default: app_version)\n- `test_user_id`: User ID for testing user operations\n- `created_article_id`: Auto-saved from article creation\n- `created_photo_id`: Auto-saved from photo creation\n- `created_onboarding_id`: Auto-saved from onboarding creation\n- `created_user_id`: Auto-saved from user creation",
+    "description": "API testing collection for MBankingCore with comprehensive endpoint coverage.\n\n## Features:\n- 🏦 Banking Authentication (3-step process with refresh)\n- 📱 Device session management\n- 🔄 Automated token refresh\n- ✅ Comprehensive API coverage\n- 💰 Multi-account banking support\n- � Transaction management (topup, withdraw, transfer)\n- �📝 Article management (CRUD)\n- 🎯 Onboarding content management\n- 📸 Photo gallery management\n- ⚙️ Config management system\n- 📋 Terms & Conditions management\n- 🔐 Privacy Policy management\n- 👥 User management (CRUD)\n- 🔧 Admin management system\n- 🧪 Testing scenarios\n\n## API Coverage (71+ endpoints):\n- **Public APIs** (8 endpoints)\n  - Health Check (1)\n  - Terms & Conditions (1)\n  - Privacy Policy (1)\n  - Onboarding (2)\n  - Banking Authentication (3)\n- **Authenticated Content Management APIs** (2 endpoints)\n  - Terms & Conditions Management (1)\n  - Privacy Policy Management (1)\n- **Protected User APIs** (40 endpoints)\n  - User Profile Management (3)\n  - Session Management (3)\n  - Bank Account Management (5)\n  - Transaction Management (4)\n  - Article Management (6)\n  - Photo Management (5)\n  - Onboarding Management (3)\n  - Configuration Management (4)\n  - User Management (5)\n  - Transaction History (2)\n- **Admin Management APIs** (8 endpoints)\n  - Admin Authentication (2)\n  - Admin CRUD Operations (5)\n  - Admin Transaction Monitoring (1)\n\n## Testing Order:\n1. **Public APIs** - No authentication required\n2. **Banking Authentication** - 3-step process (login → verify → refresh)\n3. **Protected APIs** - User profile, bank accounts, content management\n4. **Transaction APIs** - Topup, withdraw, transfer, history\n5. **Admin APIs** - Admin login, admin management, transaction monitoring\n6. **Content Management** - Terms, Privacy Policy, Onboarding\n7. **User Management** - User CRUD operations\n\n## Usage:\n1. Import environment file: `MBankingCore-API.postman_environment.json`\n2. **Important**: Update `banking_account_number` to a unique value before testing\n3. Run collection with automated token handling\n4. Test all API endpoints systematically\n\n## Banking Authentication Flow:\n1. Banking Login → Submit credentials and get login_token + OTP\n2. Banking Verify → Submit login_token + OTP and get session tokens\n3. Refresh Token → Get new access/refresh tokens using refresh token\n4. Access protected endpoints → Auto token refresh\n5. Test CRUD operations on all resources\n6. Logout selectively → Per device or all devices\n\n## Transaction Management Flow:\n1. Topup Balance → Add balance to user account\n2. Withdraw Balance → Deduct balance from user account  \n3. Transfer Balance → Transfer balance between users using account number\n4. Transaction History → View user's transaction records\n5. Admin Transaction Monitoring → Admin view of all transactions\n\n## Admin Authentication Flow:\n1. Admin Login → Submit admin credentials and get admin access_token\n2. Access admin endpoints → Create, read, update, delete admin accounts\n3. Monitor Transactions → View all user transactions with filtering\n4. Admin Logout → Invalidate admin session\n\n## Content Management Flow:\n1. Terms & Conditions → Set/update terms content (authenticated)\n2. Privacy Policy → Set/update privacy policy content (authenticated)\n3. Onboarding → Create, update, delete onboarding steps (authenticated)\n4. Articles → Full CRUD operations for articles (authenticated)\n5. Photos → Full CRUD operations for photo gallery (authenticated)\n\n## Configuration Management Flow:\n1. Set Config → Create or update configuration values\n2. Get All Configs → Retrieve all system configurations\n3. Get Config by Key → Retrieve specific configuration\n4. Delete Config → Remove configuration by key\n\n## User Management Flow:\n1. List Users → Get all users in the system\n2. Get User by ID → Retrieve specific user details\n3. Create User → Add new user to the system\n4. Update User → Modify existing user information\n5. Delete User → Remove user from the system\n\n## Important Notes:\n⚠️ **Account Numbers Must Be Unique**: Each account number must be unique across the system. If testing with existing data, ensure you use a unique account number in the environment variables to avoid database constraint violations.\n\n🔑 **Environment Variables**: The collection uses pre-configured variables for testing. Update these values as needed:\n- `banking_account_number`: Use unique 16-digit number\n- `banking_phone`: Use unique phone number\n- `banking_name`: Full name (8+ characters)\n- `banking_mother_name`: Mother's name (8+ characters)\n- `banking_pin_atm`: 6-digit PIN\n- `admin_email`: Admin email (default: admin@mbankingcore.com)\n- `admin_password`: Admin password (default: admin123)\n- `config_key`: Configuration key for testing (default: app_version)\n- `test_user_id`: User ID for testing user operations\n- `created_article_id`: Auto-saved from article creation\n- `created_photo_id`: Auto-saved from photo creation\n- `created_onboarding_id`: Auto-saved from onboarding creation\n- `created_user_id`: Auto-saved from user creation\n- `topup_amount`: Amount for topup testing (default: 100000)\n- `withdraw_amount`: Amount for withdraw testing (default: 25000)\n- `transfer_amount`: Amount for transfer testing (default: 75000)\n- `transfer_to_account_number`: Target account for transfer testing\n- `transaction_page`: Page number for transaction history (default: 1)\n- `transaction_limit`: Items per page for transaction history (default: 10)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_uid": "12345-mbankingcore"
   },
@@ -2513,7 +2513,357 @@
       ]
     },
     {
-      "name": "�🔄 Token Refresh",
+      "name": "💰 Transaction Management",
+      "item": [
+        {
+          "name": "Topup Balance",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "});",
+                  "",
+                  "pm.test('Topup data is correct', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data).to.have.property('transaction_id');",
+                  "    pm.expect(responseJson.data).to.have.property('amount');",
+                  "    pm.expect(responseJson.data).to.have.property('balance_before');",
+                  "    pm.expect(responseJson.data).to.have.property('balance_after');",
+                  "    pm.expect(responseJson.data.amount).to.be.above(0);",
+                  "});",
+                  "",
+                  "// Save transaction ID for future tests",
+                  "pm.test('Save transaction ID', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.data && responseJson.data.transaction_id) {",
+                  "        pm.environment.set('last_transaction_id', responseJson.data.transaction_id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": {{topup_amount}},\n  \"description\": \"{{topup_description}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/transactions/topup",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions", "topup"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Withdraw Balance",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "});",
+                  "",
+                  "pm.test('Withdraw data is correct', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data).to.have.property('transaction_id');",
+                  "    pm.expect(responseJson.data).to.have.property('amount');",
+                  "    pm.expect(responseJson.data).to.have.property('balance_before');",
+                  "    pm.expect(responseJson.data).to.have.property('balance_after');",
+                  "    pm.expect(responseJson.data.amount).to.be.above(0);",
+                  "    pm.expect(responseJson.data.balance_after).to.be.at.least(0);",
+                  "});",
+                  "",
+                  "// Save transaction ID for future tests",
+                  "pm.test('Save transaction ID', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.data && responseJson.data.transaction_id) {",
+                  "        pm.environment.set('last_transaction_id', responseJson.data.transaction_id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": {{withdraw_amount}},\n  \"description\": \"{{withdraw_description}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/transactions/withdraw",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions", "withdraw"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Transfer Balance",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "});",
+                  "",
+                  "pm.test('Transfer data is correct', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data).to.have.property('transaction_id');",
+                  "    pm.expect(responseJson.data).to.have.property('to_account_number');",
+                  "    pm.expect(responseJson.data).to.have.property('to_account_name');",
+                  "    pm.expect(responseJson.data).to.have.property('amount');",
+                  "    pm.expect(responseJson.data).to.have.property('sender_balance_before');",
+                  "    pm.expect(responseJson.data).to.have.property('sender_balance_after');",
+                  "    pm.expect(responseJson.data.amount).to.be.above(0);",
+                  "    pm.expect(responseJson.data.sender_balance_after).to.be.at.least(0);",
+                  "});",
+                  "",
+                  "// Save transaction ID for future tests",
+                  "pm.test('Save transaction ID', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.data && responseJson.data.transaction_id) {",
+                  "        pm.environment.set('last_transaction_id', responseJson.data.transaction_id);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"to_account_number\": \"{{transfer_to_account_number}}\",\n  \"amount\": {{transfer_amount}},\n  \"description\": \"{{transfer_description}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/transactions/transfer",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions", "transfer"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Transaction History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "});",
+                  "",
+                  "pm.test('Transaction history data is correct', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data).to.have.property('transactions');",
+                  "    pm.expect(responseJson.data).to.have.property('pagination');",
+                  "    pm.expect(responseJson.data.transactions).to.be.an('array');",
+                  "    pm.expect(responseJson.data.pagination).to.have.property('page');",
+                  "    pm.expect(responseJson.data.pagination).to.have.property('limit');",
+                  "    pm.expect(responseJson.data.pagination).to.have.property('total');",
+                  "});",
+                  "",
+                  "pm.test('Transaction records have required fields', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.data.transactions.length > 0) {",
+                  "        const transaction = responseJson.data.transactions[0];",
+                  "        pm.expect(transaction).to.have.property('id');",
+                  "        pm.expect(transaction).to.have.property('type');",
+                  "        pm.expect(transaction).to.have.property('amount');",
+                  "        pm.expect(transaction).to.have.property('balance_before');",
+                  "        pm.expect(transaction).to.have.property('balance_after');",
+                  "        pm.expect(transaction).to.have.property('status');",
+                  "        pm.expect(transaction).to.have.property('created_at');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/transactions/history?page={{transaction_page}}&limit={{transaction_limit}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions", "history"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{transaction_page}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "{{transaction_limit}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Transactions (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('code');",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "});",
+                  "",
+                  "pm.test('Admin transaction data is correct', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.data).to.have.property('transactions');",
+                  "    pm.expect(responseJson.data).to.have.property('pagination');",
+                  "    pm.expect(responseJson.data.transactions).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Admin transaction records have required fields', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.data.transactions.length > 0) {",
+                  "        const transaction = responseJson.data.transactions[0];",
+                  "        pm.expect(transaction).to.have.property('id');",
+                  "        pm.expect(transaction).to.have.property('user_id');",
+                  "        pm.expect(transaction).to.have.property('user_name');",
+                  "        pm.expect(transaction).to.have.property('type');",
+                  "        pm.expect(transaction).to.have.property('amount');",
+                  "        pm.expect(transaction).to.have.property('status');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/transactions?page={{admin_transaction_page}}&limit={{admin_transaction_limit}}&user_id={{filter_user_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "transactions"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{admin_transaction_page}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "{{admin_transaction_limit}}"
+                },
+                {
+                  "key": "user_id",
+                  "value": "{{filter_user_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔄 Token Refresh",
       "item": [
         {
           "name": "Refresh Access Token",

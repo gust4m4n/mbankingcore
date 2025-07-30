@@ -42,31 +42,33 @@ API diorganisir ke dalam bagian-bagian berikut:
 
 - **[Banking Authentication](#5-banking-authentication-apis)** - 2-step banking authentication dengan OTP
 
-### 🛡️ Protected APIs (18 endpoints)
+### 🛡️ Protected APIs (23 endpoints)
 
 - **[User Profile Management](#6-user-profile-apis)** - Manajemen profil user (3 endpoints)
 - **[Session Management](#7-session-management-apis)** - Manajemen sesi device (3 endpoints)
 - **[Bank Account Management](#8-bank-account-management-apis)** - Multi-account banking CRUD (5 endpoints)
-- **[Article Management](#9-article-management-apis)** - Operasi CRUD artikel (5 endpoints)
-- **[Photo Management](#10-photo-management-apis)** - Sistem manajemen foto (4 endpoints)
-- **[Configuration APIs](#11-configuration-apis)** - Read config (1 endpoint)
+- **[Transaction Management](#9-transaction-management-apis)** - Topup, withdraw, transfer, history (4 endpoints)
+- **[Article Management](#10-article-management-apis)** - Operasi CRUD artikel (5 endpoints)
+- **[Photo Management](#11-photo-management-apis)** - Sistem manajemen foto (4 endpoints)
+- **[Configuration APIs](#12-configuration-apis)** - Read config (1 endpoint)
 
-### 👑 Admin APIs (21 endpoints)
+### 👑 Admin APIs (22 endpoints)
 
-- **[Admin Management](#12-admin-management-apis)** - Admin authentication & CRUD (7 endpoints)
-- **[Admin Article Management](#13-admin-article-management)** - Create artikel (1 endpoint)
-- **[Admin Onboarding Management](#14-admin-onboarding-management)** - CRUD onboarding (3 endpoints)
-- **[Admin Photo Management](#15-admin-photo-management)** - Create photo (1 endpoint)
-- **[Admin User Management](#16-admin-user-management)** - Manajemen user (4 endpoints)
-- **[Admin Configuration](#17-admin-configuration-apis)** - Full config management (3 endpoints)
-- **[Admin Terms & Conditions](#18-admin-terms-conditions)** - Set T&C (1 endpoint)
-- **[Admin Privacy Policy](#19-admin-privacy-policy)** - Set Privacy Policy (1 endpoint)
+- **[Admin Management](#13-admin-management-apis)** - Admin authentication & CRUD (7 endpoints)
+- **[Admin Transaction Management](#14-admin-transaction-management)** - Monitor semua transaksi (1 endpoint)
+- **[Admin Article Management](#15-admin-article-management)** - Create artikel (1 endpoint)
+- **[Admin Onboarding Management](#16-admin-onboarding-management)** - CRUD onboarding (3 endpoints)
+- **[Admin Photo Management](#17-admin-photo-management)** - Create photo (1 endpoint)
+- **[Admin User Management](#18-admin-user-management)** - Manajemen user (4 endpoints)
+- **[Admin Configuration](#19-admin-configuration-apis)** - Full config management (3 endpoints)
+- **[Admin Terms & Conditions](#20-admin-terms-conditions)** - Set T&C (1 endpoint)
+- **[Admin Privacy Policy](#21-admin-privacy-policy)** - Set Privacy Policy (1 endpoint)
 
 ### 👨‍💼 Owner-Only APIs (2 endpoints)
 
-- **[Owner User Management](#20-owner-user-management)** - Create & update users dengan roles (2 endpoints)
+- **[Owner User Management](#22-owner-user-management)** - Create & update users dengan roles (2 endpoints)
 
-**Total: 51 Active Endpoints**
+**Total: 57 Active Endpoints**
 
 ---
 
@@ -90,7 +92,7 @@ This section provides a complete list of all 51 available API endpoints organize
 - `POST /api/login/verify` - Banking login step 2 (verify OTP)
 - `POST /api/refresh` - Refresh access token
 
-## 🛡️ Protected APIs (18 endpoints)
+## 🛡️ Protected APIs (23 endpoints)
 
 ### User Profile Management (3 endpoints)
 
@@ -112,6 +114,13 @@ This section provides a complete list of all 51 available API endpoints organize
 - `DELETE /api/bank-accounts/:id` - Delete bank account
 - `PUT /api/bank-accounts/:id/primary` - Set primary account
 
+### Transaction Management (4 endpoints)
+
+- `POST /api/transactions/topup` - Topup balance
+- `POST /api/transactions/withdraw` - Withdraw balance  
+- `POST /api/transactions/transfer` - Transfer balance to another user
+- `GET /api/transactions/history` - Get transaction history
+
 ### Article Management (5 endpoints)
 
 - `GET /api/articles` - Get all articles (with pagination)
@@ -131,7 +140,7 @@ This section provides a complete list of all 51 available API endpoints organize
 
 - `GET /api/config/:key` - Get config value by key
 
-## 👑 Admin APIs (21 endpoints)
+## 👑 Admin APIs (22 endpoints)
 
 ### Admin Management (7 endpoints)
 
@@ -142,6 +151,10 @@ This section provides a complete list of all 51 available API endpoints organize
 - `POST /api/admin/admins` - Create admin (Super Admin only)
 - `PUT /api/admin/admins/:id` - Update admin (Super Admin only)
 - `DELETE /api/admin/admins/:id` - Delete admin (Super Admin only)
+
+### Transaction Management (1 endpoint)
+
+- `GET /api/admin/transactions` - Get all transactions with filtering (Admin only)
 
 ### Article Management (1 endpoint)
 
@@ -1694,9 +1707,245 @@ Content-Type: application/json
 
 ---
 
-## 9. Article Management APIs
+## 9. Transaction Management APIs
 
-### 7.1 Get All Articles
+### 9.1 Topup Balance
+
+**Endpoint:** `POST /api/transactions/topup`  
+**Description:** Add balance to user account  
+**Authentication:** Bearer token required
+
+**Request Headers:**
+
+```
+Authorization: Bearer <access_token>
+Content-Type: application/json
+```
+
+**Request Body:**
+
+```json
+{
+    "amount": 100000,
+    "description": "Top up via ATM"
+}
+```
+
+**Request Fields:**
+
+- `amount` (required): Amount to topup (minimum: 1)
+- `description` (optional): Description of the transaction
+
+**Response Success (200):**
+
+```json
+{
+    "code": 200,
+    "message": "Topup successful",
+    "data": {
+        "transaction_id": 1,
+        "amount": 100000,
+        "balance_before": 0,
+        "balance_after": 100000,
+        "description": "Top up via ATM",
+        "transaction_at": "2024-01-01T10:00:00Z"
+    }
+}
+```
+
+**Response Errors:**
+
+- `400` - Invalid amount (must be positive)
+- `401` - Unauthorized access
+- `500` - Internal server error
+
+---
+
+### 9.2 Withdraw Balance
+
+**Endpoint:** `POST /api/transactions/withdraw`  
+**Description:** Withdraw balance from user account  
+**Authentication:** Bearer token required
+
+**Request Headers:**
+
+```
+Authorization: Bearer <access_token>
+Content-Type: application/json
+```
+
+**Request Body:**
+
+```json
+{
+    "amount": 25000,
+    "description": "Withdraw untuk belanja"
+}
+```
+
+**Request Fields:**
+
+- `amount` (required): Amount to withdraw (minimum: 1)
+- `description` (optional): Description of the transaction
+
+**Response Success (200):**
+
+```json
+{
+    "code": 200,
+    "message": "Withdraw successful",
+    "data": {
+        "transaction_id": 2,
+        "amount": 25000,
+        "balance_before": 100000,
+        "balance_after": 75000,
+        "description": "Withdraw untuk belanja",
+        "transaction_at": "2024-01-01T10:05:00Z"
+    }
+}
+```
+
+**Response Errors:**
+
+- `400` - Invalid amount or insufficient balance
+- `401` - Unauthorized access
+- `500` - Internal server error
+
+---
+
+### 9.3 Transfer Balance
+
+**Endpoint:** `POST /api/transactions/transfer`  
+**Description:** Transfer balance to another user using account number  
+**Authentication:** Bearer token required
+
+**Request Headers:**
+
+```
+Authorization: Bearer <access_token>
+Content-Type: application/json
+```
+
+**Request Body:**
+
+```json
+{
+    "to_account_number": "1234567890",
+    "amount": 75000,
+    "description": "Transfer untuk bayar kos"
+}
+```
+
+**Request Fields:**
+
+- `to_account_number` (required): Recipient's account number
+- `amount` (required): Amount to transfer (minimum: 1)
+- `description` (optional): Description of the transaction
+
+**Response Success (200):**
+
+```json
+{
+    "code": 200,
+    "message": "Transfer successful",
+    "data": {
+        "transaction_id": 3,
+        "to_account_number": "1234567890",
+        "to_account_name": "Jane Doe",
+        "amount": 75000,
+        "sender_balance_before": 100000,
+        "sender_balance_after": 25000,
+        "description": "Transfer untuk bayar kos",
+        "transaction_at": "2024-01-01T10:10:00Z"
+    }
+}
+```
+
+**Response Errors:**
+
+- `400` - Invalid amount, insufficient balance, or cannot transfer to own account
+- `401` - Unauthorized access
+- `404` - Recipient account number not found or inactive
+- `500` - Internal server error
+
+---
+
+### 9.4 Get Transaction History
+
+**Endpoint:** `GET /api/transactions/history`  
+**Description:** Get user's transaction history with pagination  
+**Authentication:** Bearer token required
+
+**Request Headers:**
+
+```
+Authorization: Bearer <access_token>
+```
+
+**Query Parameters:**
+
+- `page` (optional): Page number (default: 1)
+- `limit` (optional): Items per page (default: 10, max: 100)
+
+**Response Success (200):**
+
+```json
+{
+    "code": 200,
+    "message": "User transactions retrieved successfully",
+    "data": {
+        "transactions": [
+            {
+                "id": 3,
+                "type": "transfer_out",
+                "amount": 75000,
+                "balance_before": 100000,
+                "balance_after": 25000,
+                "description": "Transfer untuk bayar kos",
+                "status": "completed",
+                "created_at": "2024-01-01T10:10:00Z"
+            },
+            {
+                "id": 2,
+                "type": "withdraw",
+                "amount": 25000,
+                "balance_before": 100000,
+                "balance_after": 75000,
+                "description": "Withdraw untuk belanja",
+                "status": "completed",
+                "created_at": "2024-01-01T10:05:00Z"
+            },
+            {
+                "id": 1,
+                "type": "topup",
+                "amount": 100000,
+                "balance_before": 0,
+                "balance_after": 100000,
+                "description": "Top up via ATM",
+                "status": "completed",
+                "created_at": "2024-01-01T10:00:00Z"
+            }
+        ],
+        "pagination": {
+            "page": 1,
+            "limit": 10,
+            "total": 3,
+            "total_pages": 1
+        }
+    }
+}
+```
+
+**Response Errors:**
+
+- `401` - Unauthorized access
+- `500` - Internal server error
+
+---
+
+## 10. Article Management APIs
+
+### 10.1 Get All Articles
 
 **Endpoint:** `GET /api/articles`  
 **Access:** Authenticated users  
@@ -2712,6 +2961,113 @@ Authorization: Bearer <admin_access_token>
 - Can view admin list and details
 - Cannot manage other admin accounts
 - Standard admin operations only
+
+---
+
+## 13. Admin Transaction Management
+
+### 13.1 Get All Transactions (Admin Only)
+
+**Endpoint:** `GET /api/admin/transactions`  
+**Access:** Admin Authentication Required  
+**Description:** Retrieve all user transactions with filtering and pagination (admin monitoring)
+
+**Request Headers:**
+
+```
+Authorization: Bearer <admin_access_token>
+```
+
+**Query Parameters:**
+
+- `page` (optional): Page number (default: 1)
+- `limit` (optional): Items per page (default: 10, max: 100)
+- `user_id` (optional): Filter transactions by specific user ID
+
+**Response Success (200):**
+
+```json
+{
+    "code": 200,
+    "message": "All transactions retrieved successfully",
+    "data": {
+        "transactions": [
+            {
+                "id": 3,
+                "user_id": 1,
+                "user_name": "John Doe",
+                "type": "transfer_out",
+                "amount": 75000,
+                "balance_before": 100000,
+                "balance_after": 25000,
+                "description": "Transfer untuk bayar kos",
+                "status": "completed",
+                "created_at": "2024-01-01T10:10:00Z"
+            },
+            {
+                "id": 4,
+                "user_id": 2,
+                "user_name": "Jane Doe",
+                "type": "transfer_in",
+                "amount": 75000,
+                "balance_before": 50000,
+                "balance_after": 125000,
+                "description": "Transfer untuk bayar kos",
+                "status": "completed",
+                "created_at": "2024-01-01T10:10:00Z"
+            },
+            {
+                "id": 2,
+                "user_id": 1,
+                "user_name": "John Doe",
+                "type": "withdraw",
+                "amount": 25000,
+                "balance_before": 100000,
+                "balance_after": 75000,
+                "description": "Withdraw untuk belanja",
+                "status": "completed",
+                "created_at": "2024-01-01T10:05:00Z"
+            },
+            {
+                "id": 1,
+                "user_id": 1,
+                "user_name": "John Doe",
+                "type": "topup",
+                "amount": 100000,
+                "balance_before": 0,
+                "balance_after": 100000,
+                "description": "Top up via ATM",
+                "status": "completed",
+                "created_at": "2024-01-01T10:00:00Z"
+            }
+        ],
+        "pagination": {
+            "page": 1,
+            "limit": 10,
+            "total": 4,
+            "total_pages": 1
+        }
+    }
+}
+```
+
+**Response Errors:**
+
+- `301` - Invalid or expired admin token
+- `750` - Access forbidden - insufficient permissions
+- `400` - Invalid query parameters
+- `500` - Internal server error
+
+**Transaction Types:**
+- `topup`: Balance addition
+- `withdraw`: Balance deduction  
+- `transfer_out`: Outgoing transfer (sender)
+- `transfer_in`: Incoming transfer (receiver)
+
+**Transaction Status:**
+- `completed`: Successfully processed
+- `failed`: Transaction failed
+- `pending`: Processing (future implementation)
 
 ### Security Features
 

@@ -15,14 +15,15 @@ Go RESTful API dengan Banking Authentication, JWT, Multi-Device Session Manageme
 - 🏦 **Banking Authentication** (2-step OTP process dengan login_token)
 - 📱 **Multi-Device Session Management** (Login dari multiple devices)
 - 💼 **Multi-Account Banking Support** (CRUD bank accounts)
-- 🔑 **JWT Authentication** dengan refresh token
+- � **Transaction Management** (Topup, withdraw, transfer antar user)
+- �🔑 **JWT Authentication** dengan refresh token
 - 🎯 **Selective Logout** (Per device atau semua device)
 - 👥 **User Management** dengan role-based access (User, Admin, Owner)
-- � **Admin Management System** (Admin authentication & CRUD)
-- �📝 **Content Management** (Articles, Photos, Onboarding)
+- 🔧 **Admin Management System** (Admin authentication & CRUD)
+- 📝 **Content Management** (Articles, Photos, Onboarding)
 - ⚙️ **Configuration Management** (Dynamic app configuration)
 - 📋 **Terms & Conditions** dan **Privacy Policy** management
-- ⚡ **RESTful API** dengan response format konsisten (51 endpoints)
+- ⚡ **RESTful API** dengan response format konsisten (57 endpoints)
 - 🗄️ **PostgreSQL Database** dengan GORM ORM
 - 🔄 **Auto Database Migration**
 - 🌐 **CORS Support**
@@ -49,6 +50,7 @@ mbankingcore/
 │   ├── photo.go                 # Photo management handlers
 │   ├── privacy_policy.go        # Privacy policy handlers
 │   ├── terms_conditions.go      # Terms & conditions handlers
+│   ├── transaction.go           # Transaction management handlers (NEW)
 │   └── user.go                  # User management handlers
 ├── middleware/
 │   ├── admin_auth.go            # Admin authentication middleware (NEW)
@@ -63,13 +65,14 @@ mbankingcore/
 │   ├── onboarding.go            # Onboarding model
 │   ├── photo.go                 # Photo model
 │   ├── responses.go             # Response helper functions
+│   ├── transaction.go           # Transaction model & structures (NEW)
 │   └── user.go                  # User model & request structures
 ├── utils/
 │   ├── admin_auth.go            # Admin JWT utilities (NEW)
 │   ├── auth.go                  # JWT utilities & password hashing
 │   └── session.go               # Session management utilities
 ├── postman/
-│   ├── MBankingCore-API.postman_collection.json    # Postman collection (51 endpoints)
+│   ├── MBankingCore-API.postman_collection.json    # Postman collection (57 endpoints)
 │   └── MBankingCore-API.postman_environment.json   # Environment variables
 ├── .env                              # Environment variables
 ├── .env.example                      # Environment template
@@ -77,7 +80,7 @@ mbankingcore/
 ├── go.mod                           # Go modules
 ├── go.sum                           # Go modules checksum
 ├── main.go                          # Application entry point
-├── MBANKINGCORE-API.md              # Complete API documentation (51 endpoints)
+├── MBANKINGCORE-API.md              # Complete API documentation (57 endpoints)
 └── README.md                        # This documentation
 ```
 
@@ -242,6 +245,44 @@ MBankingCore dilengkapi dengan sistem manajemen admin yang komprehensif untuk me
 
 ⚠️ **Production Warning**: Change default credentials immediately in production!
 
+## 💰 Transaction Management
+
+### Transaction Features
+
+- 💵 **Topup Balance** - Add balance to user account
+- 💸 **Withdraw Balance** - Deduct balance from user account  
+- 🔄 **Transfer Balance** - Transfer balance between users using account numbers
+- 📊 **Transaction History** - Complete audit trail with pagination
+- 🔒 **Atomic Operations** - Database transactions with row-level locking
+- ⚡ **Real-time Balance Updates** - Immediate balance reflection
+- 📋 **Admin Monitoring** - Admin dashboard for all transactions
+
+### 📋 Transaction Endpoints (5 endpoints)
+
+| Endpoint | Method | Path | Access Level |
+|----------|--------|------|--------------|
+| Topup Balance | `POST` | `/api/transactions/topup` | User Authentication |
+| Withdraw Balance | `POST` | `/api/transactions/withdraw` | User Authentication |
+| Transfer Balance | `POST` | `/api/transactions/transfer` | User Authentication |
+| Transaction History | `GET` | `/api/transactions/history` | User Authentication |
+| Admin Transaction Monitor | `GET` | `/api/admin/transactions` | Admin Authentication |
+
+### 🔄 Transaction Types
+
+- **topup** - Balance addition operation
+- **withdraw** - Balance deduction operation
+- **transfer_out** - Outgoing transfer (sender side)
+- **transfer_in** - Incoming transfer (receiver side)
+
+### 🔒 Security Features
+
+- **Atomic Database Transactions** - Ensures data consistency
+- **Row-level Locking** - Prevents concurrent balance conflicts  
+- **Balance Validation** - Prevents negative balances and invalid amounts
+- **Account Number Verification** - Validates recipient accounts for transfers
+- **Self-transfer Prevention** - Blocks transfers to same account
+- **Complete Audit Trail** - Balance before/after tracking
+
 ## 🧪 Testing Banking Authentication
 
 ### Quick Test dengan cURL
@@ -345,7 +386,7 @@ Import koleksi Postman untuk testing yang lebih komprehensif:
 - 🏦 **Bank account management** (CRUD operations)
 - � **Admin management** (Admin CRUD operations)
 - �📝 **Content management** (Articles, Photos, Onboarding)
-- 🧪 **51 ready-to-use endpoints** (Complete API coverage)
+- 🧪 **57 ready-to-use endpoints** (Complete API coverage)
 - 📊 **Test result validation**
 
 **Environment Variables yang Diperlukan:**
@@ -667,7 +708,7 @@ createdb mbcdb
 
 ### 📖 Documentation Files
 
-- **[MBANKINGCORE-API.md](./MBANKINGCORE-API.md)** - Complete API documentation with examples and endpoint reference (51 endpoints)
+- **[MBANKINGCORE-API.md](./MBANKINGCORE-API.md)** - Complete API documentation with examples and endpoint reference (57 endpoints)
 
 ### 🔗 External Resources
 

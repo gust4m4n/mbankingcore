@@ -19,6 +19,7 @@ Dokumentasi lengkap struktur database untuk aplikasi MBankingCore dengan Postgre
 | `bank_accounts` | Multi-account banking support | Dynamic | `id` (uint) |
 | `device_sessions` | Multi-device session management | Dynamic | `id` (uint) |
 | `otp_sessions` | Temporary OTP session data for banking login | Dynamic | `id` (uint) |
+| `transactions` | Transaction history (topup, withdraw, transfer) | Dynamic | `id` (uint) |
 | `articles` | Content management articles | Dynamic | `id` (uint) |
 | `photos` | Photo management system | Dynamic | `id` (uint) |
 | `onboardings` | App onboarding content | Dynamic | `id` (uint) |
@@ -336,7 +337,84 @@ CREATE INDEX idx_otp_sessions_is_used ON otp_sessions(is_used);
 
 ---
 
-### 6. articles
+### 6. transactions
+
+**Purpose:** Complete transaction history for all balance operations
+
+```sql
+CREATE TABLE transactions (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    type VARCHAR(50) NOT NULL,  -- 'topup', 'withdraw', 'transfer_out', 'transfer_in'
+    amount BIGINT NOT NULL,  -- Transaction amount (integer)
+    balance_before BIGINT NOT NULL,  -- Balance before transaction
+    balance_after BIGINT NOT NULL,  -- Balance after transaction
+    status VARCHAR(50) DEFAULT 'completed',  -- 'completed', 'failed', 'pending'
+    description TEXT,  -- Transaction description
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Indexes
+CREATE INDEX idx_transactions_user_id ON transactions(user_id);
+CREATE INDEX idx_transactions_type ON transactions(type);
+CREATE INDEX idx_transactions_created_at ON transactions(created_at DESC);
+CREATE INDEX idx_transactions_user_type ON transactions(user_id, type);
+```
+
+**Field Details:**
+
+| Field | Type | Constraints | Description |
+|-------|------|-------------|-------------|
+| `id` | SERIAL | PRIMARY KEY | Unique transaction identifier |
+| `user_id` | INTEGER | NOT NULL, FK | Reference to users table |
+| `type` | VARCHAR(50) | NOT NULL | Transaction type |
+| `amount` | BIGINT | NOT NULL | Transaction amount (positive integer) |
+| `balance_before` | BIGINT | NOT NULL | User balance before transaction |
+| `balance_after` | BIGINT | NOT NULL | User balance after transaction |
+| `status` | VARCHAR(50) | DEFAULT 'completed' | Transaction status |
+| `description` | TEXT | NULLABLE | Optional transaction description |
+| `created_at` | TIMESTAMP | NOT NULL | Transaction timestamp |
+| `updated_at` | TIMESTAMP | NOT NULL | Last update time |
+
+**Relationships:**
+
+- **Foreign Key** → `users(id)` - Each transaction belongs to a user
+- **Cascade Delete** - Transactions deleted when user is deleted
+
+**Transaction Types:**
+
+- `topup` - Balance addition operation
+- `withdraw` - Balance deduction operation
+- `transfer_out` - Outgoing transfer (sender side)
+- `transfer_in` - Incoming transfer (receiver side)
+
+**Transaction Status:**
+
+- `completed` - Successfully processed transaction
+- `failed` - Failed transaction (future implementation)
+- `pending` - Processing transaction (future implementation)
+
+**Key Features:**
+
+- Complete audit trail for all balance changes
+- Atomic transaction processing with balance tracking
+- Support for multiple transaction types
+- Optimized indexes for common query patterns
+- Foreign key constraints ensure data integrity
+
+**Business Rules:**
+
+- All amounts stored as positive integers (smallest currency unit)
+- Balance before/after provides complete audit trail
+- Transfer operations create dual records (sender + receiver)
+- Immutable records - transactions cannot be modified after creation
+
+---
+
+### 7. articles
 
 **Purpose:** Content management system for articles
 
