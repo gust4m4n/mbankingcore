@@ -26,21 +26,6 @@ type User struct {
 	UpdatedAt      time.Time       `json:"updated_at"`
 }
 
-type CreateUserRequest struct {
-	Name       string `json:"name" binding:"required"`
-	Phone      string `json:"phone" binding:"required"`
-	MotherName string `json:"mother_name" binding:"required"`
-	PinAtm     string `json:"pin_atm" binding:"required"`
-}
-
-type UpdateUserRequest struct {
-	Name       string `json:"name,omitempty"`
-	Phone      string `json:"phone,omitempty"`
-	MotherName string `json:"mother_name,omitempty"`
-	Balance    *int64 `json:"balance,omitempty"`
-	Status     *int   `json:"status,omitempty"`
-}
-
 // Action-based Request Structure
 type UserActionRequest struct {
 	Action string `json:"action" binding:"required"`

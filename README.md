@@ -38,7 +38,7 @@ Go RESTful API denga├── models/
 - 📋 **Terms & Conditions** dan **Privacy Policy** management
 - 🔍 **Comprehensive Audit Trails** (Activity & Login monitoring)
 - 💰 **Transaction Management** dengan reversal system
-- ⚡ **RESTful API** dengan response format konsisten (60 endpoints)
+- ⚡ **RESTful API** dengan response format konsisten (59 endpoints)
 - 🗄️ **PostgreSQL Database** dengan GORM ORM
 - 🔄 **Auto Database Migration**
 - 🌐 **CORS Support**
@@ -89,7 +89,7 @@ mbankingcore/
 │   ├── auth.go                  # JWT utilities & password hashing
 │   └── session.go               # Session management utilities
 ├── postman/
-│   ├── MBankingCore-API.postman_collection.json    # Postman collection (60 endpoints)
+│   ├── MBankingCore-API.postman_collection.json    # Postman collection (59 endpoints)
 │   └── MBankingCore-API.postman_environment.json   # Environment variables
 ├── .env                              # Environment variables
 ├── .env.example                      # Environment template
@@ -97,7 +97,7 @@ mbankingcore/
 ├── go.mod                           # Go modules
 ├── go.sum                           # Go modules checksum
 ├── main.go                          # Application entry point
-├── MBANKINGCORE-API.md              # Complete API documentation (60 endpoints)
+├── MBANKINGCORE-API.md              # Complete API documentation (59 endpoints)
 └── README.md                        # This documentation
 ```
 
@@ -506,7 +506,7 @@ Import koleksi Postman untuk testing yang lebih komprehensif:
 - 🏦 **Bank account management** (CRUD operations)
 - � **Admin management** (Admin CRUD operations)
 - �📝 **Content management** (Articles, Photos, Onboarding)
-- 🧪 **60 ready-to-use endpoints** (Complete API coverage)
+- 🧪 **59 ready-to-use endpoints** (Complete API coverage)
 - 📊 **Test result validation**
 
 **Environment Variables yang Diperlukan:**
@@ -860,7 +860,7 @@ createdb mbcdb
 - Comprehensive API documentation with request/response examples
 - Security monitoring capabilities for compliance and threat detection
 
-**Total Endpoints: 60** (Previous: 58)
+**Total Endpoints: 59** (Previous: 60)
 
 ### Version 2.0 - Transaction Reversal System
 
@@ -878,7 +878,7 @@ createdb mbcdb
 
 ### 📖 Documentation Files
 
-- **[MBANKINGCORE-API.md](./MBANKINGCORE-API.md)** - Complete API documentation with examples and endpoint reference (60 endpoints)
+- **[MBANKINGCORE-API.md](./MBANKINGCORE-API.md)** - Complete API documentation with examples and endpoint reference (59 endpoints)
 
 ### 🔗 External Resources
 

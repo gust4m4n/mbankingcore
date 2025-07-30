@@ -59,23 +59,19 @@ API diorganisir ke dalam bagian-bagian berikut:
 - **[Admin Article Management](#15-admin-article-management)** - Create artikel (1 endpoint)
 - **[Admin Onboarding Management](#16-admin-onboarding-management)** - CRUD onboarding (3 endpoints)
 - **[Admin Photo Management](#17-admin-photo-management)** - Create photo (1 endpoint)
-- **[Admin User Management](#18-admin-user-management)** - Manajemen user (4 endpoints)
+- **[Admin User Management](#18-admin-user-management)** - Manajemen user (3 endpoints)
 - **[Admin Configuration](#19-admin-configuration-apis)** - Full config management (3 endpoints)
 - **[Admin Audit Trails](#20-admin-audit-trails)** - System activity & login monitoring (2 endpoints)
 - **[Admin Terms & Conditions](#21-admin-terms-conditions)** - Set T&C (1 endpoint)
 - **[Admin Privacy Policy](#22-admin-privacy-policy)** - Set Privacy Policy (1 endpoint)
 
-### 👨‍💼 Owner-Only APIs (2 endpoints)
-
-- **[Owner User Management](#23-owner-user-management)** - Create & update users dengan roles (2 endpoints)
-
-**Total: 60 Active Endpoints**
+**Total: 58 Active Endpoints**
 
 ---
 
 # � API Endpoint Quick Reference
 
-This section provides a complete list of all 60 available API endpoints organized by access level.
+This section provides a complete list of all 58 available API endpoints organized by access level.
 
 ## 🔓 Public APIs (7 endpoints)
 
@@ -172,7 +168,7 @@ This section provides a complete list of all 60 available API endpoints organize
 
 - `POST /api/photos` - Create photo (Admin/Owner only)
 
-### User Management (4 endpoints)
+### User Management (3 endpoints)
 
 - `GET /api/users` - List all users (Admin/Owner only)
 - `GET /api/users/:id` - Get user by ID (Admin/Owner only)
@@ -197,19 +193,11 @@ This section provides a complete list of all 60 available API endpoints organize
 
 *Note: This is actually listed in Public APIs section*
 
-## 👨‍💼 Owner-Only APIs (2 endpoints)
-
-### User Management with Roles (2 endpoints)
-
-- `POST /api/users` - Create user with any role (Owner only)
-- `PUT /api/users/:id` - Update user including role changes (Owner only)
-
 ## 🔑 Authentication Levels
 
 1. **Public** - No authentication required
 2. **Protected** - Requires Bearer token (any authenticated user)
 3. **Admin** - Requires Bearer token + Admin or Owner role
-4. **Owner** - Requires Bearer token + Owner role only
 
 ## 📱 Testing Setup
 
@@ -1582,72 +1570,7 @@ Authorization: Bearer <access_token>
 
 ---
 
-### 6.5 Create User (Owner Only)
-
-**Endpoint:** `POST /api/users`  
-**Access:** Owner only  
-**Description:** Create new user with any role (owner can set any role)
-
-**Request Headers:**
-
-```
-Authorization: Bearer <access_token>
-Content-Type: application/json
-```
-
-**Request Body:**
-
-```json
-{
-    "name": "New User",
-    "email": "newuser@example.com",
-    "password": "hashed_password_from_client",
-    "phone": "+1234567890",
-    "role": "admin",
-    "email_verified": true
-}
-```
-
-**Request Fields:**
-
-- `name` (required): User's full name
-- `email` (required): User's email address
-- `password` (required): SHA256 hashed password from client
-- `phone` (optional): User's phone number
-- `role` (required): User role ("user", "admin", "owner")
-- `email_verified` (optional): Email verification status (default: false)
-
-**Response Success (201):**
-
-```json
-{
-    "code": 201,
-    "message": "User created successfully",
-    "data": {
-        "id": 1,
-        "name": "New User",
-        "email": "newuser@example.com",
-        "phone": "+1234567890",
-        "role": "admin",
-        "email_verified": true,
-        "avatar": null,
-        "created_at": "2023-01-01T00:00:00Z",
-        "updated_at": "2023-01-01T00:00:00Z"
-    }
-}
-```
-
-**Response Errors:**
-
-- `250` - Invalid request data
-- `300` - Authentication required
-- `753` - Owner privileges required
-- `401` - User already exists
-- `402` - User creation failed
-
----
-
-### 6.6 Update User (Owner Only)
+### 6.5 Update User (Owner Only)
 
 **Endpoint:** `PUT /api/users/{id}`  
 **Access:** Owner only  

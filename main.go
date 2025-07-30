@@ -155,10 +155,6 @@ func main() {
 			protected.GET("/configs", handlers.GetAllConfigs)       // Get all configs (authenticated users)
 			protected.DELETE("/config/:key", handlers.DeleteConfig) // Delete config by key (authenticated users)
 
-			// User management - CRUD operations (authenticated users)
-			protected.POST("/users", handlers.CreateUser)    // Create user (authenticated users)
-			protected.PUT("/users/:id", handlers.UpdateUser) // Update user by ID (authenticated users)
-
 			// Config management - get only (all authenticated users can read configs)
 			protected.GET("/config/:key", handlers.GetConfig) // Get config value by key (authenticated users)
 
