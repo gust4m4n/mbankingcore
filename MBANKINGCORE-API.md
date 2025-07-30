@@ -274,7 +274,7 @@ This section provides a complete list of all 51 available API endpoints organize
     "code": 200,
     "message": "Terms and conditions retrieved successfully",
     "data": {
-        "content": "# Terms and Conditions\n\n## 1. Introduction\nWelcome to MBX Backend API...",
+        "content": "# Terms and Conditions\n\n## 1. Introduction\nWelcome to MBankingCore API...",
         "updated_at": "2024-01-20T10:30:00Z"
     }
 }

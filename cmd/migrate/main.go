@@ -22,6 +22,6 @@ func main() {
 
 	log.Println("Migration completed successfully!")
 	log.Println("")
-	log.Println("Your database is now ready for the MBX Backend application.")
+	log.Println("Your database is now ready for the MBankingCore application.")
 	log.Println("You can now start the main application with: go run main.go")
 }
