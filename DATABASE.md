@@ -15,8 +15,10 @@ Dokumentasi lengkap struktur database untuk aplikasi MBankingCore dengan Postgre
 | Table | Description | Records | Primary Key |
 |-------|-------------|---------|-------------|
 | `users` | User accounts with banking authentication | Dynamic | `id` (uint) |
+| `admins` | Admin accounts with administrative privileges | Dynamic | `id` (uint) |
 | `bank_accounts` | Multi-account banking support | Dynamic | `id` (uint) |
 | `device_sessions` | Multi-device session management | Dynamic | `id` (uint) |
+| `otp_sessions` | Temporary OTP session data for banking login | Dynamic | `id` (uint) |
 | `articles` | Content management articles | Dynamic | `id` (uint) |
 | `photos` | Photo management system | Dynamic | `id` (uint) |
 | `onboardings` | App onboarding content | Dynamic | `id` (uint) |
@@ -39,7 +41,6 @@ CREATE TABLE users (
     pin_atm VARCHAR(255) NOT NULL,  -- bcrypt hashed
     balance BIGINT DEFAULT 0,  -- User account balance (integer)
     status INTEGER DEFAULT 1,  -- User status: 0=inactive, 1=active, 2=terblokir
-    role VARCHAR(20) DEFAULT 'user',
     avatar VARCHAR(500),
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL
@@ -47,9 +48,8 @@ CREATE TABLE users (
 
 -- Indexes
 CREATE UNIQUE INDEX idx_users_phone ON users(phone);
-CREATE INDEX idx_users_role ON users(role);
-CREATE INDEX idx_users_balance ON users(balance);
 CREATE INDEX idx_users_status ON users(status);
+CREATE INDEX idx_users_balance ON users(balance);
 ```
 
 **Fields:**
@@ -63,16 +63,9 @@ CREATE INDEX idx_users_status ON users(status);
 | `pin_atm` | VARCHAR(255) | NOT NULL | Hashed PIN ATM (6 digits, bcrypt) |
 | `balance` | BIGINT | DEFAULT 0 | User account balance (integer amount) |
 | `status` | INTEGER | DEFAULT 1 | User status: 0=inactive, 1=active, 2=terblokir |
-| `role` | VARCHAR(20) | DEFAULT 'user' | User role: 'user', 'admin', 'owner' |
 | `avatar` | VARCHAR(500) | NULLABLE | Avatar image URL |
 | `created_at` | TIMESTAMP | NOT NULL | Record creation time |
 | `updated_at` | TIMESTAMP | NOT NULL | Last update time |
-
-**Role Values:**
-
-- `user` - Standard banking user (default)
-- `admin` - Administrative user
-- `owner` - System owner (full access)
 
 **Status Values:**
 
@@ -88,7 +81,64 @@ CREATE INDEX idx_users_status ON users(status);
 
 ---
 
-### 2. bank_accounts
+### 2. admins
+
+**Purpose:** Administrative accounts with elevated privileges for system management
+
+```sql
+CREATE TABLE admins (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,  -- bcrypt hashed
+    role VARCHAR(20) DEFAULT 'admin',  -- admin, super
+    status INTEGER DEFAULT 1,  -- 0=inactive, 1=active, 2=blocked
+    avatar VARCHAR(500),
+    last_login TIMESTAMP,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL
+);
+
+-- Indexes
+CREATE UNIQUE INDEX idx_admins_email ON admins(email);
+CREATE INDEX idx_admins_role ON admins(role);
+CREATE INDEX idx_admins_status ON admins(status);
+```
+
+**Fields:**
+
+| Field | Type | Constraints | Description |
+|-------|------|-------------|-------------|
+| `id` | SERIAL | PRIMARY KEY | Auto-increment admin ID |
+| `name` | VARCHAR(255) | NOT NULL | Full name of administrator |
+| `email` | VARCHAR(255) | UNIQUE, NOT NULL | Email address (unique identifier) |
+| `password` | VARCHAR(255) | NOT NULL | Hashed password (bcrypt) |
+| `role` | VARCHAR(20) | DEFAULT 'admin' | Admin role: 'admin', 'super' |
+| `status` | INTEGER | DEFAULT 1 | Admin status: 0=inactive, 1=active, 2=blocked |
+| `avatar` | VARCHAR(500) | NULLABLE | Avatar image URL |
+| `last_login` | TIMESTAMP | NULLABLE | Last login timestamp |
+| `created_at` | TIMESTAMP | NOT NULL | Record creation time |
+| `updated_at` | TIMESTAMP | NOT NULL | Last update time |
+
+**Role Values:**
+
+- `admin` - Standard administrator (default)
+- `super` - Super administrator (full system access)
+
+**Status Values:**
+
+- `0` - Inactive admin (cannot login)
+- `1` - Active admin (default, normal operation)
+- `2` - Blocked admin (cannot perform any actions)
+
+**Relationships:**
+
+- **Independent table** - No direct foreign key relationships
+- **Functional relationships** with all other tables through admin operations
+
+---
+
+### 3. bank_accounts
 
 **Purpose:** Multi-account banking support for users
 
@@ -144,7 +194,7 @@ CREATE UNIQUE INDEX idx_user_account ON bank_accounts(user_id, account_number);
 
 ---
 
-### 3. device_sessions
+### 4. device_sessions
 
 **Purpose:** Multi-device session management with JWT tokens
 
@@ -222,7 +272,71 @@ CREATE UNIQUE INDEX idx_refresh_token ON device_sessions(refresh_token);
 
 ---
 
-### 4. articles
+### 5. otp_sessions
+
+**Purpose:** Temporary storage for OTP session data during banking login process
+
+```sql
+CREATE TABLE otp_sessions (
+    id SERIAL PRIMARY KEY,
+    login_token VARCHAR(255) UNIQUE NOT NULL,
+    phone VARCHAR(255) NOT NULL,
+    otp_code VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    account_number VARCHAR(255) NOT NULL,
+    mother_name VARCHAR(255) NOT NULL,
+    pin_atm VARCHAR(255) NOT NULL,
+    device_type VARCHAR(255) NOT NULL,
+    device_id VARCHAR(255) NOT NULL,
+    device_name VARCHAR(255) NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    is_used BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL
+);
+
+-- Indexes
+CREATE UNIQUE INDEX idx_otp_sessions_login_token ON otp_sessions(login_token);
+CREATE INDEX idx_otp_sessions_phone ON otp_sessions(phone);
+CREATE INDEX idx_otp_sessions_expires_at ON otp_sessions(expires_at);
+CREATE INDEX idx_otp_sessions_is_used ON otp_sessions(is_used);
+```
+
+**Fields:**
+
+| Field | Type | Constraints | Description |
+|-------|------|-------------|-------------|
+| `id` | SERIAL | PRIMARY KEY | Auto-increment session ID |
+| `login_token` | VARCHAR(255) | UNIQUE, NOT NULL | Unique login token for verification |
+| `phone` | VARCHAR(255) | NOT NULL | Phone number for login |
+| `otp_code` | VARCHAR(255) | NOT NULL | OTP code (hidden from JSON) |
+| `name` | VARCHAR(255) | NOT NULL | User name |
+| `account_number` | VARCHAR(255) | NOT NULL | Account number |
+| `mother_name` | VARCHAR(255) | NOT NULL | Mother's name |
+| `pin_atm` | VARCHAR(255) | NOT NULL | PIN ATM (hidden from JSON) |
+| `device_type` | VARCHAR(255) | NOT NULL | Device type |
+| `device_id` | VARCHAR(255) | NOT NULL | Device identifier |
+| `device_name` | VARCHAR(255) | NOT NULL | Device name |
+| `expires_at` | TIMESTAMP | NOT NULL | Session expiration time |
+| `is_used` | BOOLEAN | DEFAULT FALSE | Whether session has been used |
+| `created_at` | TIMESTAMP | NOT NULL | Record creation time |
+| `updated_at` | TIMESTAMP | NOT NULL | Last update time |
+
+**Relationships:**
+
+- **Independent table** - Temporary storage, no permanent relationships
+- **Functional relationship** with `users` during login verification process
+
+**Key Features:**
+
+- Temporary storage for 2-step banking authentication
+- Automatic expiration and cleanup
+- Security through unique login tokens
+- Device tracking for multi-device support
+
+---
+
+### 6. articles
 
 **Purpose:** Content management system for articles
 
@@ -267,7 +381,7 @@ CREATE INDEX idx_articles_created_at ON articles(created_at);
 
 ---
 
-### 5. photos
+### 7. photos
 
 **Purpose:** Photo management system
 
@@ -299,7 +413,7 @@ CREATE INDEX idx_photos_created_at ON photos(created_at);
 
 ---
 
-### 6. onboardings
+### 8. onboardings
 
 **Purpose:** App onboarding content management
 
@@ -338,7 +452,7 @@ CREATE INDEX idx_onboardings_created_at ON onboardings(created_at);
 
 ---
 
-### 7. configs
+### 9. configs
 
 **Purpose:** Dynamic application configuration
 

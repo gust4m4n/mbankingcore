@@ -160,14 +160,13 @@ This section provides a complete list of all 51 available API endpoints organize
 ### User Management (4 endpoints)
 
 - `GET /api/users` - List all users (Admin/Owner only)
-- `GET /api/admin/users` - List admin and owner users (Admin/Owner only)
 - `GET /api/users/:id` - Get user by ID (Admin/Owner only)
 - `DELETE /api/users/:id` - Delete user by ID (Admin/Owner only)
 
 ### Configuration Management (3 endpoints)
 
 - `POST /api/config` - Set config value (Admin/Owner only)
-- `GET /api/admin/configs` - Get all configs (Admin/Owner only)
+- `GET /api/configs` - Get all configs (Admin/Owner only)
 - `DELETE /api/config/:key` - Delete config by key (Admin/Owner only)
 
 ### Terms & Conditions (1 endpoint)
@@ -1485,69 +1484,7 @@ Authorization: Bearer <access_token>
 
 ---
 
-### 6.2 List Admin Users (Admin Only)
-
-**Endpoint:** `GET /api/admin/users`  
-**Access:** Admin/Owner only  
-**Description:** Retrieve all admin and owner users with pagination
-
-**Request Headers:**
-
-```
-Authorization: Bearer <access_token>
-```
-
-**Query Parameters:**
-
-- `page` (optional): Page number (default: 1)
-- `per_page` (optional): Items per page (default: 10, max: 100)
-
-**Response Success (200):**
-
-```json
-{
-    "code": 200,
-    "message": "Users retrieved successfully",
-    "data": {
-        "users": [
-            {
-                "id": 1,
-                "name": "Admin User",
-                "email": "admin@example.com",
-                "phone": "+1234567890",
-                "role": "admin",
-                "email_verified": true,
-                "created_at": "2023-01-01T00:00:00Z",
-                "updated_at": "2023-01-01T00:00:00Z"
-            },
-            {
-                "id": 2,
-                "name": "Owner User", 
-                "email": "owner@example.com",
-                "phone": "+1234567891",
-                "role": "owner",
-                "email_verified": true,
-                "created_at": "2023-01-01T00:00:00Z",
-                "updated_at": "2023-01-01T00:00:00Z"
-            }
-        ],
-        "page": 1,
-        "per_page": 10,
-        "total": 2,
-        "pages": 1
-    }
-}
-```
-
-**Response Errors:**
-
-- `300` - Authentication required
-- `752` - Admin privileges required
-- `405` - Failed to retrieve users
-
----
-
-### 6.3 Get User by ID (Admin Only)
+### 6.2 Get User by ID (Admin Only)
 
 **Endpoint:** `GET /api/users/{id}`  
 **Access:** Admin/Owner only  
@@ -1591,7 +1528,7 @@ Authorization: Bearer <access_token>
 
 ---
 
-### 6.4 Delete User (Admin Only)
+### 6.3 Delete User (Admin Only)
 
 **Endpoint:** `DELETE /api/users/{id}`  
 **Access:** Admin/Owner only  
@@ -2352,7 +2289,7 @@ Content-Type: application/json
 
 ### 9.3 Get All Configs (Admin Only)
 
-**Endpoint:** `GET /api/admin/configs`  
+**Endpoint:** `GET /api/configs`  
 **Access:** Admin/Owner only  
 **Description:** Retrieve all configuration keys and values
 
