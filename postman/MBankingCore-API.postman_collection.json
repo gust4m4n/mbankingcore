@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "mbankingcore-api-collection",
     "name": "MBankingCore API Collection",
-    "description": "API testing collection for MBankingCore with comprehensive endpoint coverage.\n\n## Features:\n- 🏦 Banking Authentication (2-step OTP process)\n- 📱 Device session management\n- 🔄 Automated token refresh\n- ✅ Comprehensive API coverage\n- 💰 Multi-account banking support\n- 📝 Article management (CRUD)\n- 🎯 Onboarding content management\n- 📸 Photo gallery management\n- ⚙️ Config management system\n- 📋 Terms & Conditions management\n- 🔐 Privacy Policy management\n- 👥 User management (Admin)\n- 🔧 Admin management system\n- 🧪 Testing scenarios\n\n## API Coverage (51+ endpoints):\n- **Public APIs** (7 endpoints)\n  - Health Check (1)\n  - Terms & Conditions (2)\n  - Privacy Policy (2)\n  - Onboarding (2)\n- **Banking Authentication APIs** (3 endpoints)\n- **Protected User APIs** (18 endpoints)\n  - User Profile (3)\n  - Session Management (3)\n  - Bank Account Management (5)\n  - Article Management (5)\n  - Photo Management (4)\n  - Configuration (1)\n- **Admin Management APIs** (7 endpoints)\n  - Admin Authentication (2)\n  - Admin CRUD Operations (5)\n- **Owner Management APIs** (16 endpoints)\n  - User Management (4)\n  - Content Management (12)\n\n## Testing Order:\n1. **Public APIs** - No authentication required\n2. **Banking Authentication** - 2-step login process\n3. **Protected APIs** - User profile, bank accounts, content\n4. **Admin APIs** - Admin login, admin management\n5. **Owner APIs** - User management, content management\n\n## Usage:\n1. Import environment file: `MBankingCore-API.postman_environment.json`\n2. **Important**: Update `banking_account_number` to a unique value before testing\n3. Run collection with automated token handling\n4. Test all API endpoints systematically\n\n## Banking Authentication Flow:\n1. Banking Login → Submit credentials and get login_token + OTP\n2. Banking Verify → Submit login_token + OTP and get session tokens\n3. Access protected endpoints → Auto token refresh\n4. Test CRUD operations on bank accounts and other resources\n5. Logout selectively → Per device or all devices\n\n## Admin Authentication Flow:\n1. Admin Login → Submit admin credentials and get admin access_token\n2. Access admin endpoints → Create, read, update, delete admin accounts\n3. Admin Logout → Invalidate admin session\n\n## Important Notes:\n⚠️ **Account Numbers Must Be Unique**: Each account number must be unique across the system. If testing with existing data, ensure you use a unique account number in the environment variables to avoid database constraint violations.\n\n🔑 **Environment Variables**: The collection uses pre-configured variables for testing. Update these values as needed:\n- `banking_account_number`: Use unique 16-digit number\n- `banking_phone`: Use unique phone number\n- `banking_name`: Full name (8+ characters)\n- `banking_mother_name`: Mother's name (8+ characters)\n- `banking_pin_atm`: 6-digit PIN\n- `admin_email`: Admin email (default: admin@mbankingcore.com)\n- `admin_password`: Admin password (default: admin123)",
+    "description": "API testing collection for MBankingCore with comprehensive endpoint coverage.\n\n## Features:\n- 🏦 Banking Authentication (2-step OTP process)\n- 📱 Device session management\n- 🔄 Automated token refresh\n- ✅ Comprehensive API coverage\n- 💰 Multi-account banking support\n- 📝 Article management (CRUD)\n- 🎯 Onboarding content management\n- 📸 Photo gallery management\n- ⚙️ Config management system\n- 📋 Terms & Conditions management\n- 🔐 Privacy Policy management\n- 👥 User management (Admin)\n- 🔧 Admin management system\n- 🧪 Testing scenarios\n\n## API Coverage (54+ endpoints):\n- **Public APIs** (7 endpoints)\n  - Health Check (1)\n  - Terms & Conditions (2)\n  - Privacy Policy (2)\n  - Onboarding (2)\n- **Banking Authentication APIs** (3 endpoints)\n- **Protected User APIs** (21 endpoints)\n  - User Profile (3)\n  - Session Management (3)\n  - Bank Account Management (5)\n  - Article Management (5)\n  - Photo Management (4)\n  - Configuration Management (4)\n- **Admin Management APIs** (7 endpoints)\n  - Admin Authentication (2)\n  - Admin CRUD Operations (5)\n- **Owner Management APIs** (16 endpoints)\n  - User Management (4)\n  - Content Management (12)\n\n## Testing Order:\n1. **Public APIs** - No authentication required\n2. **Banking Authentication** - 2-step login process\n3. **Protected APIs** - User profile, bank accounts, content\n4. **Admin APIs** - Admin login, admin management\n5. **Owner APIs** - User management, content management\n\n## Usage:\n1. Import environment file: `MBankingCore-API.postman_environment.json`\n2. **Important**: Update `banking_account_number` to a unique value before testing\n3. Run collection with automated token handling\n4. Test all API endpoints systematically\n\n## Banking Authentication Flow:\n1. Banking Login → Submit credentials and get login_token + OTP\n2. Banking Verify → Submit login_token + OTP and get session tokens\n3. Access protected endpoints → Auto token refresh\n4. Test CRUD operations on bank accounts and other resources\n5. Logout selectively → Per device or all devices\n\n## Admin Authentication Flow:\n1. Admin Login → Submit admin credentials and get admin access_token\n2. Access admin endpoints → Create, read, update, delete admin accounts\n3. Admin Logout → Invalidate admin session\n\n## Configuration Management Flow:\n1. Set Config → Create or update configuration values\n2. Get All Configs → Retrieve all system configurations\n3. Get Config by Key → Retrieve specific configuration\n4. Delete Config → Remove configuration by key\n\n## Important Notes:\n⚠️ **Account Numbers Must Be Unique**: Each account number must be unique across the system. If testing with existing data, ensure you use a unique account number in the environment variables to avoid database constraint violations.\n\n🔑 **Environment Variables**: The collection uses pre-configured variables for testing. Update these values as needed:\n- `banking_account_number`: Use unique 16-digit number\n- `banking_phone`: Use unique phone number\n- `banking_name`: Full name (8+ characters)\n- `banking_mother_name`: Mother's name (8+ characters)\n- `banking_pin_atm`: 6-digit PIN\n- `admin_email`: Admin email (default: admin@mbankingcore.com)\n- `admin_password`: Admin password (default: admin123)\n- `config_key`: Configuration key for testing (default: app_version)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_uid": "12345-mbankingcore"
   },
@@ -1306,10 +1306,64 @@
       ]
     },
     {
-      "name": "⚙️ Configuration",
+      "name": "⚙️ Configuration Management",
+      "description": "CRUD operations for managing application configurations",
       "item": [
         {
-          "name": "Get Config by Key",
+          "name": "Set Config",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 or 201', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "pm.test('Response has config data', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "    pm.expect(responseJson.data).to.have.property('key');",
+                  "    pm.expect(responseJson.data).to.have.property('value');",
+                  "    pm.expect(responseJson.data.key).to.eql('app_version');",
+                  "    pm.expect(responseJson.data.value).to.eql('2.1.0');",
+                  "});",
+                  "",
+                  "// Save config key for other tests",
+                  "pm.environment.set('config_key', 'app_version');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"key\": \"app_version\",\n  \"value\": \"2.1.0\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/config",
+              "host": ["{{base_url}}"],
+              "path": ["api", "config"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Configs",
           "event": [
             {
               "listen": "test",
@@ -1319,11 +1373,21 @@
                   "    pm.response.to.have.status(200);",
                   "});",
                   "",
-                  "pm.test('Response has config data', function () {",
+                  "pm.test('Response has configs array', function () {",
                   "    const responseJson = pm.response.json();",
                   "    pm.expect(responseJson).to.have.property('data');",
-                  "    pm.expect(responseJson.data).to.have.property('key');",
-                  "    pm.expect(responseJson.data).to.have.property('value');",
+                  "    pm.expect(responseJson.data).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Configs have correct structure', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.data.length > 0) {",
+                  "        const config = responseJson.data[0];",
+                  "        pm.expect(config).to.have.property('key');",
+                  "        pm.expect(config).to.have.property('value');",
+                  "        pm.expect(config).to.have.property('created_at');",
+                  "        pm.expect(config).to.have.property('updated_at');",
+                  "    }",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -1340,9 +1404,88 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/config/app_version",
+              "raw": "{{base_url}}/api/configs",
               "host": ["{{base_url}}"],
-              "path": ["api", "config", "app_version"]
+              "path": ["api", "configs"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Config by Key",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has config data', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('data');",
+                  "    pm.expect(responseJson.data).to.have.property('key');",
+                  "    pm.expect(responseJson.data).to.have.property('value');",
+                  "    pm.expect(responseJson.data).to.have.property('created_at');",
+                  "    pm.expect(responseJson.data).to.have.property('updated_at');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/config/{{config_key}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "config", "{{config_key}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Config by Key",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response confirms deletion', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('message');",
+                  "    pm.expect(responseJson.message).to.include('deleted successfully');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/config/test_config_to_delete",
+              "host": ["{{base_url}}"],
+              "path": ["api", "config", "test_config_to_delete"]
             }
           },
           "response": []
