@@ -1,31 +1,72 @@
 # MBankingCore Database Documentation
 
-Dokumentasi lengkap struktur database untuk aplikasi MBankingCore dengan PostgreSQL sebagai database utama.
+Dokumentasi lengkap struktur database untuk aplikasi MBankingCore dengan PostgreSQL sebagai database utama dan comprehensive demo data integration.
+
+**Last Updated:** July 31, 2025  
+**Database Version:** PostgreSQL 12+  
+**ORM:** GORM (Go ORM)  
+**Database Name:** `mbcdb`  
+**Total Tables:** 12  
+**Demo Data:** ✅ Integrated (18 admins + 67 users + 92 transactions)
 
 ## 📋 Database Overview
 
 **Database Engine:** PostgreSQL 12+  
-**ORM:** GORM (Go ORM)  
-**Auto Migration:** Enabled  
-**Connection Pool:** Configured  
-**SSL Mode:** Configurable (disable/require)
+**ORM:** GORM (Go ORM) with Auto Migration  
+**Auto Migration:** ✅ Enabled with comprehensive seeding  
+**Connection Pool:** ✅ Configured for production  
+**SSL Mode:** Configurable (disable/require)  
+**HTTPS Support:** ✅ TLS 1.2+ encryption ready  
+**Demo Data Integration:** ✅ Indonesian banking scenarios
+
+## 🎯 Key Features
+
+- ✅ **Auto Migration System** - Automatic table creation and updates
+- ✅ **Comprehensive Seeding** - 18 admins, 67 users, 92 realistic transactions
+- ✅ **Multi-Device Support** - JWT session management across platforms
+- ✅ **Multi-Account Banking** - Primary account management system
+- ✅ **Transaction Processing** - Real-time balance tracking
+- ✅ **Audit System** - Complete activity and login monitoring
+- ✅ **Role-based Access** - Super Admin, Admin, User roles
+- ✅ **Indonesian Localization** - Realistic names and banking data
 
 ### Database Schema Summary
 
-| Table | Description | Records | Primary Key |
-|-------|-------------|---------|-------------|
-| `users` | User accounts with banking authentication | Dynamic | `id` (uint) |
-| `admins` | Admin accounts with administrative privileges | Dynamic | `id` (uint) |
+| Table | Description | Demo Records | Primary Key |
+|-------|-------------|--------------|-------------|
+| `users` | User accounts with banking authentication | 67 users | `id` (uint) |
+| `admins` | Admin accounts with administrative privileges | 18 admins | `id` (uint) |
 | `bank_accounts` | Multi-account banking support | Dynamic | `id` (uint) |
 | `device_sessions` | Multi-device session management | Dynamic | `id` (uint) |
 | `otp_sessions` | Temporary OTP session data for banking login | Dynamic | `id` (uint) |
-| `transactions` | Transaction history (topup, withdraw, transfer) | Dynamic | `id` (uint) |
+| `transactions` | Transaction history (topup, withdraw, transfer) | 92 transactions | `id` (uint) |
 | `articles` | Content management articles | Dynamic | `id` (uint) |
 | `photos` | Photo management system | Dynamic | `id` (uint) |
-| `onboardings` | App onboarding content | Dynamic | `id` (uint) |
-| `configs` | Dynamic application configuration | Dynamic | `key` (string) |
+| `onboardings` | App onboarding content | Seeded | `id` (uint) |
+| `configs` | Dynamic application configuration | Seeded | `key` (string) |
 | `audit_logs` | Comprehensive system activity audit trail | Dynamic | `id` (uint) |
 | `login_audits` | Authentication and login activity tracking | Dynamic | `id` (uint) |
+
+## 🏦 Demo Data Overview
+
+### Admin Users (18 total)
+- **Super Admin:** `super@mbankingcore.com` (password: `Super123?`)
+- **Main Admin:** `admin@mbankingcore.com` (password: `Admin123?`)
+- **16 Additional Admins:** Various roles and realistic Indonesian names
+
+### Regular Users (67 total)
+- **Phone Numbers:** `081234567001` to `081234567067`
+- **PIN:** `123456` (standard for all demo users)
+- **Account Numbers:** `1234567890123456` to `1234567890123522`
+- **Names:** Indonesian names (Andi Wijaya, Budi Santoso, Sari Indah, etc.)
+- **Balances:** Random realistic amounts (Rp 50,000 to Rp 5,000,000)
+
+### Transactions (92 total)
+- **30 Top-up Transactions:** Various amounts via ATM, bank transfer
+- **31 Transfer Transactions:** Inter-user transfers with Indonesian descriptions
+- **27 Withdraw Transactions:** ATM withdrawals and cash-outs
+- **4 Failed Transactions:** For error handling and testing scenarios
+- **Balance Tracking:** All transactions maintain accurate balance history
 
 ---
 
@@ -1172,6 +1213,176 @@ SELECT * FROM audit_logs WHERE created_at < '2024-01-01';
 - Bulk data modifications
 - System configuration changes
 - Security policy violations
+
+---
+
+## 🌱 Database Seeding System
+
+### Automated Seeding Process
+
+The MBankingCore application includes a comprehensive seeding system that automatically populates the database with realistic demo data for development and testing purposes.
+
+#### Seeding Execution Order
+
+1. **Admin Users** - Creates 18 admin accounts with various roles
+2. **Configuration Values** - Sets up application configuration
+3. **Onboarding Content** - Initializes app onboarding flow
+4. **Regular Users** - Creates 67 user accounts with Indonesian names
+5. **Transactions** - Generates 92 realistic banking transactions
+
+#### Seeding Functions
+
+```go
+// config/migrations.go
+func SeedData(db *gorm.DB) error {
+    // 1. Admin Users Seeding
+    if err := seedInitialAdmins(db); err != nil {
+        return err
+    }
+    
+    // 2. Configuration Seeding
+    if err := seedInitialConfig(db); err != nil {
+        return err
+    }
+    
+    // 3. Onboarding Content Seeding
+    if err := seedInitialOnboarding(db); err != nil {
+        return err
+    }
+    
+    // 4. Users Seeding
+    if err := seedInitialUsers(db); err != nil {
+        return err
+    }
+    
+    // 5. Transactions Seeding
+    if err := seedInitialTransactions(db); err != nil {
+        return err
+    }
+    
+    return nil
+}
+```
+
+### Admin Users Seeding (18 accounts)
+
+#### Super Admin Accounts (2)
+- `super@mbankingcore.com` / `Super123?` - Primary super admin
+- `admin@mbankingcore.com` / `Admin123?` - Secondary admin
+
+#### Additional Admin Accounts (16)
+- Realistic Indonesian names and email addresses
+- Secure bcrypt password hashing
+- Mixed roles (admin, super)
+- Active status by default
+
+```sql
+-- Example seeded admin accounts
+INSERT INTO admins (name, email, password, role, status) VALUES
+('Super Administrator', 'super@mbankingcore.com', '$2a$10$...', 'super', 1),
+('Main Administrator', 'admin@mbankingcore.com', '$2a$10$...', 'admin', 1),
+('Budi Santoso', 'budi.santoso@mbankingcore.com', '$2a$10$...', 'admin', 1),
+-- ... 15 more admin accounts
+```
+
+### User Accounts Seeding (67 accounts)
+
+#### User Data Characteristics
+- **Phone Numbers:** Sequential format `081234567001` to `081234567067`
+- **Names:** Authentic Indonesian names (male and female)
+- **Mother Names:** Traditional Indonesian female names
+- **PIN:** Standard `123456` for all accounts (bcrypt hashed)
+- **Account Numbers:** Sequential `1234567890123456` to `1234567890123522`
+- **Balances:** Random amounts between Rp 50,000 and Rp 5,000,000
+
+#### Sample User Data
+```sql
+-- Example seeded user accounts
+INSERT INTO users (name, phone, mother_name, pin_atm, balance, status) VALUES
+('Andi Wijaya', '081234567001', 'Siti Nurhaliza', '$2a$10$...', 1500000, 1),
+('Budi Santoso', '081234567002', 'Dewi Sartika', '$2a$10$...', 2750000, 1),
+('Citra Dewi', '081234567003', 'Kartini Sari', '$2a$10$...', 890000, 1),
+-- ... 64 more user accounts
+```
+
+### Transaction Seeding (92 transactions)
+
+#### Transaction Distribution
+- **30 Top-up Transactions** (32.6%)
+  - Amounts: Rp 50,000 to Rp 2,000,000
+  - Descriptions: "Top up via ATM BCA", "Setor tunai di Indomaret", etc.
+
+- **31 Transfer Transactions** (33.7%)
+  - Inter-user transfers between seeded accounts
+  - Descriptions: "Transfer untuk bayar kos", "Kirim uang ke adik", etc.
+
+- **27 Withdraw Transactions** (29.3%)
+  - ATM withdrawals and cash-outs
+  - Descriptions: "Tarik tunai ATM", "Belanja bulanan", etc.
+
+- **4 Failed Transactions** (4.3%)
+  - Insufficient balance scenarios
+  - Invalid account transfers
+  - For error handling testing
+
+#### Transaction Features
+- **Dynamic User Mapping** - Transactions linked to random seeded users
+- **Balance Tracking** - Accurate balance_before and balance_after calculation
+- **Realistic Timestamps** - Distributed across recent months
+- **Indonesian Localization** - All descriptions in Bahasa Indonesia
+
+```sql
+-- Example seeded transactions
+INSERT INTO transactions (user_id, type, amount, balance_before, balance_after, description, status) VALUES
+(5, 'topup', 500000, 1000000, 1500000, 'Top up saldo via ATM BCA', 'completed'),
+(12, 'transfer_out', 150000, 800000, 650000, 'Transfer untuk bayar kos bulanan', 'completed'),
+(23, 'withdraw', 100000, 1200000, 1100000, 'Tarik tunai untuk belanja', 'completed'),
+-- ... 89 more transactions
+```
+
+### Configuration Seeding
+
+#### Default Configuration Values
+```sql
+INSERT INTO configs (key, value, description) VALUES
+('app_name', 'MBankingCore', 'Application name'),
+('app_version', '1.0.0', 'Current application version'),
+('maintenance_mode', 'false', 'Maintenance mode status'),
+('max_login_attempts', '5', 'Maximum login attempts before lockout'),
+('session_timeout', '3600', 'Session timeout in seconds'),
+('otp_expiry', '300', 'OTP expiry time in seconds');
+```
+
+#### Onboarding Content Seeding
+```sql
+INSERT INTO onboardings (title, description, image_url, step_order) VALUES
+('Selamat Datang', 'Selamat datang di MBankingCore...', '/images/welcome.jpg', 1),
+('Keamanan Terjamin', 'Transaksi Anda dilindungi...', '/images/security.jpg', 2),
+('Mudah Digunakan', 'Interface yang sederhana...', '/images/easy.jpg', 3);
+```
+
+### Seeding Status Verification
+
+The seeding system includes built-in verification to prevent duplicate seeding:
+
+```go
+// Check if data already exists before seeding
+var count int64
+db.Model(&models.Admin{}).Count(&count)
+if count > 0 {
+    log.Println("✅ Admin users already exist")
+    return nil
+}
+```
+
+### Development vs Production
+
+- **Development:** Full seeding with demo data enabled
+- **Production:** Only essential configuration and admin accounts
+- **Testing:** Complete seeding for comprehensive API testing
+- **Demo Environment:** Full seeding with Indonesian banking scenarios
+
+This comprehensive seeding system ensures that the MBankingCore application is immediately ready for testing and development with realistic Indonesian banking data.
 
 **Automated Alerts:**
 ```sql

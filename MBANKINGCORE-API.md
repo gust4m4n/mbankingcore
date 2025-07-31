@@ -1,6 +1,23 @@
 # MBankingCore API Documentation
 
-Dokumentasi lengkap untuk RESTful API MBankingCore dengan JWT Authentication, Multi-Device Session Management, dan Multi-Account Banking.
+Dokumentasi lengkap untuk RESTful API MBankingCore dengan JWT Authentication, Multi-Device Session Management, Multi-Account Banking, dan Comprehensive Demo Data.
+
+**Last Updated:** July 31, 2025  
+**API Version:** 1.0  
+**Base URL:** `http://localhost:8080`  
+**Total Endpoints:** 73+  
+
+## 🎯 Key Features
+
+- ✅ **JWT Authentication** dengan refresh token mechanism
+- ✅ **Multi-Device Session Management** untuk Android, iOS, Web, Desktop
+- ✅ **Multi-Account Banking** dengan primary account management
+- ✅ **Real-time Transaction Processing** dengan balance tracking
+- ✅ **Comprehensive Audit System** untuk security monitoring
+- ✅ **Role-based Access Control** (Super Admin, Admin, User)
+- ✅ **HTTPS Support** dengan TLS 1.2+ encryption
+- ✅ **Demo Data Integration** dengan 67 users + 18 admins + 92 transactions
+- ✅ **Indonesian Localization** untuk realistic testing scenarios
 
 ## 📖 Response Format
 
@@ -51,7 +68,7 @@ API diorganisir ke dalam bagian-bagian berikut:
 - **[Article Management](#10-article-management-apis)** - Operasi CRUD artikel (5 endpoints)
 - **[Photo Management](#11-photo-management-apis)** - Sistem manajemen foto (4 endpoints)
 
-### 👑 Admin APIs (25 endpoints)
+### 👑 Admin APIs (44+ endpoints)
 
 - **[Admin Management](#13-admin-management-apis)** - Admin authentication & CRUD (7 endpoints)
 - **[Admin Transaction Management](#14-admin-transaction-management)** - Monitor & reverse transactions (2 endpoints)
@@ -64,15 +81,25 @@ API diorganisir ke dalam bagian-bagian berikut:
 - **[Admin Terms & Conditions](#21-admin-terms-conditions)** - Set T&C (1 endpoint)
 - **[Admin Privacy Policy](#22-admin-privacy-policy)** - Set Privacy Policy (1 endpoint)
 
-**Total: 58 Active Endpoints**
+**Total: 73+ Active Endpoints** ✨
+
+## 🎯 Demo Data Ready
+
+Aplikasi sudah dilengkapi dengan data demo yang komprehensif:
+
+- **18 Admin Users** - Termasuk super admin (`super@mbankingcore.com` / `Super123?`)
+- **67 Regular Users** - Dengan nama Indonesia dan data realistis
+- **92 Banking Transactions** - Top-up, transfer, withdraw dengan balance tracking yang akurat
+- **Realistic Account Numbers** - Format 16-digit sesuai standar perbankan Indonesia
+- **Indonesian Localization** - Nama, nomor telepon, dan deskripsi transaksi dalam bahasa Indonesia
 
 ---
 
-# � API Endpoint Quick Reference
+## 🚀 API Endpoint Quick Reference
 
-This section provides a complete list of all 58 available API endpoints organized by access level.
+Complete list of all 73+ available API endpoints organized by access level and functionality.
 
-## 🔓 Public APIs (7 endpoints)
+### 🔓 Public APIs (7 endpoints)
 
 - `GET /health` - Health check
 - `GET /api/terms-conditions` - Get terms & conditions
@@ -82,27 +109,27 @@ This section provides a complete list of all 58 available API endpoints organize
 - `GET /api/onboardings` - Get all onboardings
 - `GET /api/onboardings/:id` - Get onboarding by ID
 
-## 🔐 Banking Authentication APIs (3 endpoints)
+### 🔐 Banking Authentication APIs (3 endpoints)
 
 - `POST /api/login` - Banking login step 1 (send OTP)
 - `POST /api/login/verify` - Banking login step 2 (verify OTP)
 - `POST /api/refresh` - Refresh access token
 
-## 🛡️ Protected APIs (19 endpoints)
+### 🛡️ Protected APIs (19 endpoints)
 
-### User Profile Management (3 endpoints)
+#### User Profile Management (3 endpoints)
 
 - `GET /api/profile` - Get user profile
 - `PUT /api/profile` - Update user profile
 - `PUT /api/change-pin` - Change PIN ATM
 
-### Session Management (3 endpoints)
+#### Session Management (3 endpoints)
 
 - `GET /api/sessions` - Get active sessions
 - `POST /api/logout` - Logout (current or all devices)
 - `POST /api/logout-others` - Logout other sessions
 
-### Bank Account Management (5 endpoints)
+#### Bank Account Management (5 endpoints)
 
 - `GET /api/bank-accounts` - Get user's bank accounts
 - `POST /api/bank-accounts` - Create new bank account
@@ -110,14 +137,14 @@ This section provides a complete list of all 58 available API endpoints organize
 - `DELETE /api/bank-accounts/:id` - Delete bank account
 - `PUT /api/bank-accounts/:id/primary` - Set primary account
 
-### Transaction Management (4 endpoints)
+#### Transaction Management (4 endpoints)
 
 - `POST /api/transactions/topup` - Topup balance
 - `POST /api/transactions/withdraw` - Withdraw balance  
 - `POST /api/transactions/transfer` - Transfer balance to another user
 - `GET /api/transactions/history` - Get transaction history
 
-### Article Management (5 endpoints)
+#### Article Management (5 endpoints)
 
 - `GET /api/articles` - Get all articles (with pagination)
 - `GET /api/articles/:id` - Get article by ID
@@ -125,16 +152,16 @@ This section provides a complete list of all 58 available API endpoints organize
 - `DELETE /api/articles/:id` - Delete article (own only)
 - `GET /api/my-articles` - Get my articles
 
-### Photo Management (4 endpoints)
+#### Photo Management (4 endpoints)
 
 - `GET /api/photos` - Get all photos (with pagination)
 - `GET /api/photos/:id` - Get photo by ID
 - `PUT /api/photos/:id` - Update photo (own only)
 - `DELETE /api/photos/:id` - Delete photo (own only)
 
-## 👑 Admin APIs (29 endpoints)
+### 👑 Admin APIs (44+ endpoints)
 
-### Admin Management (7 endpoints)
+#### Admin Management (7 endpoints)
 
 - `POST /api/admin/login` - Admin login
 - `POST /api/admin/logout` - Admin logout
@@ -144,50 +171,36 @@ This section provides a complete list of all 58 available API endpoints organize
 - `PUT /api/admin/admins/:id` - Update admin (Super Admin only)
 - `DELETE /api/admin/admins/:id` - Delete admin (Super Admin only)
 
-### Transaction Management (1 endpoint)
+#### Admin Transaction Management (2 endpoints)
 
 - `GET /api/admin/transactions` - Get all transactions with filtering (Admin only)
 - `POST /api/admin/transactions/reversal` - Reverse any transaction (Admin only)
 
-### Article Management (1 endpoint)
+#### Admin Content Management (5 endpoints)
 
 - `POST /api/articles` - Create article (Admin/Owner only)
-
-### Onboarding Management (3 endpoints)
-
 - `POST /api/onboardings` - Create onboarding (Admin/Owner only)
 - `PUT /api/onboardings/:id` - Update onboarding (Admin/Owner only)
 - `DELETE /api/onboardings/:id` - Delete onboarding (Admin/Owner only)
-
-### Photo Management (1 endpoint)
-
 - `POST /api/photos` - Create photo (Admin/Owner only)
 
-### User Management (3 endpoints)
+#### Admin User Management (3 endpoints)
 
 - `GET /api/users` - List all users (Admin/Owner only)
 - `GET /api/users/:id` - Get user by ID (Admin/Owner only)
 - `DELETE /api/users/:id` - Delete user by ID (Admin/Owner only)
 
-### Configuration Management (4 endpoints)
+#### Admin Configuration Management (4 endpoints)
 
 - `POST /api/admin/config` - Set config value (Admin only)
 - `GET /api/admin/configs` - Get all configs (Admin only)
 - `GET /api/admin/config/:key` - Get config value by key (Admin only)
 - `DELETE /api/admin/config/:key` - Delete config by key (Admin only)
 
-### Audit Trails (2 endpoints)
+#### Admin Audit & Monitoring (2 endpoints)
 
 - `GET /api/admin/audit-logs` - Get system activity audit logs with filtering (Admin only)
 - `GET /api/admin/login-audits` - Get login/logout audit logs with filtering (Admin only)
-
-### Terms & Conditions (1 endpoint)
-
-*Note: This is actually listed in Public APIs section*
-
-### Privacy Policy (1 endpoint)
-
-*Note: This is actually listed in Public APIs section*
 
 ## 🔑 Authentication Levels
 
@@ -199,14 +212,26 @@ This section provides a complete list of all 58 available API endpoints organize
 
 ### Environment Variables Required
 
-- `base_url` - API base URL (e.g., <http://localhost:8080>)
+- `base_url` - API base URL (default: `http://localhost:8080`)
 - `banking_account_number` - Unique 16-digit account number
-- `banking_phone` - Phone number for registration
-- `banking_name` - Full name (8+ characters)
+- `banking_phone` - Phone number for registration (format: 081xxxxxxxxx)
+- `banking_name` - Full name (8+ characters, Indonesian names recommended)
 - `banking_mother_name` - Mother's name (8+ characters)
 - `banking_pin_atm` - 6-digit PIN
 - `banking_otp_code` - OTP code (for testing, use any 6-digit number)
 - `device_id_banking` - Unique device identifier
+
+### Demo Admin Credentials
+
+- **Super Admin:** `super@mbankingcore.com` / `Super123?`
+- **Admin:** `admin@mbankingcore.com` / `Admin123?`
+
+### Demo User Examples
+
+- **Phone:** `081234567001` - `081234567067` (67 available users)
+- **PIN:** `123456` (standard for all demo users)
+- **Account Numbers:** `1234567890123456` - `1234567890123522` (sequential format)
+- **Names:** Indonesian names (Andi Wijaya, Budi Santoso, etc.)
 
 ### Auto-Generated Variables
 
@@ -218,24 +243,35 @@ This section provides a complete list of all 58 available API endpoints organize
 
 ## 🎯 Testing Flow
 
-1. **Start with Public APIs** to verify basic connectivity
-2. **Banking Authentication** to get tokens
+1. **Start with Public APIs** to verify basic connectivity (`GET /health`)
+2. **Banking Authentication** to get tokens using demo user credentials
 3. **Test Protected APIs** with user token
-4. **Admin APIs** (if user has admin role)
-5. **Owner APIs** (if user has owner role)
+4. **Admin APIs** using super admin credentials (`super@mbankingcore.com`)
+5. **Transaction Testing** with existing demo data (92 transactions available)
 
 ## 📄 Postman Collections Available
 
-1. **MBankingCore-API.postman_collection.json** - Basic collection with core endpoints
-2. **MBankingCore-API.postman_environment.json** - Environment variables
+1. **MBankingCore-API.postman_collection.json** - Complete collection with 73+ endpoints
+2. **MBankingCore-API.postman_environment.json** - Pre-configured environment with demo data
 
 ## 🚀 Quick Start
 
 1. Import both Postman collection and environment files
-2. Update environment variables with unique test data
-3. Run "Banking Login (Step 1)" to get login_token
-4. Run "Banking Login Verification (Step 2)" to get access tokens
+2. Update environment variables or use pre-configured demo data
+3. Run "Banking Login (Step 1)" with demo phone number (`081234567001`)
+4. Run "Banking Login Verification (Step 2)" with PIN `123456`
 5. Test any protected endpoint with automatic token handling
+6. Use super admin credentials for admin endpoint testing
+
+## 🏦 Demo Transaction Data
+
+The system includes 92 realistic transactions:
+
+- **30 Top-up transactions** - Various amounts from Rp 50,000 to Rp 2,000,000
+- **31 Transfer transactions** - Inter-user transfers with Indonesian descriptions
+- **27 Withdraw transactions** - ATM withdrawals and cash-outs
+- **4 Failed transactions** - For error handling testing
+- **Balance tracking** - All transactions maintain accurate balance history
 
 ---
 
