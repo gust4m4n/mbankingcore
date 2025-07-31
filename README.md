@@ -38,9 +38,10 @@ Go RESTful API denga├── models/
 - 📋 **Terms & Conditions** dan **Privacy Policy** management
 - 🔍 **Comprehensive Audit Trails** (Activity & Login monitoring)
 - 💰 **Transaction Management** dengan reversal system
-- ⚡ **RESTful API** dengan response format konsisten (59 endpoints)
+- ⚡ **RESTful API** dengan response format konsisten (74+ endpoints)
 - 🗄️ **PostgreSQL Database** dengan GORM ORM
-- 🔄 **Auto Database Migration**
+- 🔄 **Auto Database Migration** dengan massive dummy data seeding
+- 📊 **Enterprise-Scale Demo Data** (6,067+ users, 50+ admins, 35,375+ transactions)
 - 🌐 **CORS Support**
 - ⚙️ **Environment Configuration**
 - 📊 **Health Check Endpoint**
@@ -89,7 +90,7 @@ mbankingcore/
 │   ├── auth.go                  # JWT utilities & password hashing
 │   └── session.go               # Session management utilities
 ├── postman/
-│   ├── MBankingCore-API.postman_collection.json    # Postman collection (59 endpoints)
+│   ├── MBankingCore-API.postman_collection.json    # Postman collection (74+ endpoints)
 │   └── MBankingCore-API.postman_environment.json   # Environment variables
 ├── .env                              # Environment variables
 ├── .env.example                      # Environment template
@@ -97,7 +98,7 @@ mbankingcore/
 ├── go.mod                           # Go modules
 ├── go.sum                           # Go modules checksum
 ├── main.go                          # Application entry point
-├── MBANKINGCORE-API.md              # Complete API documentation (59 endpoints)
+├── MBANKINGCORE-API.md              # Complete API documentation (74+ endpoints)
 └── README.md                        # This documentation
 ```
 
@@ -240,12 +241,13 @@ MBankingCore dilengkapi dengan sistem manajemen admin yang komprehensif untuk me
 - Cannot manage other admin accounts
 - Can access admin-protected content endpoints
 
-### 📋 Admin Management Endpoints (7 endpoints)
+### 📋 Admin Management Endpoints (9 endpoints)
 
 | Endpoint | Method | Path | Access Level |
 |----------|--------|------|--------------|
 | Admin Login | `POST` | `/api/admin/login` | Public (Credentials Required) |
 | Admin Logout | `POST` | `/api/admin/logout` | Admin Authentication |
+| Get Dashboard | `GET` | `/api/admin/dashboard` | Admin Authentication |
 | Get All Admins | `GET` | `/api/admin/admins` | Admin Authentication |
 | Get Admin by ID | `GET` | `/api/admin/admins/:id` | Admin Authentication |
 | Create Admin | `POST` | `/api/admin/admins` | Super Admin Only |
@@ -256,8 +258,8 @@ MBankingCore dilengkapi dengan sistem manajemen admin yang komprehensif untuk me
 
 **Super Admin Account:**
 - Email: `admin@mbankingcore.com`
-- Password: `admin123`
-- Role: `super`
+- Password: `Admin123?`
+- Role: `admin`
 - Status: `active`
 
 ⚠️ **Production Warning**: Change default credentials immediately in production!
@@ -506,7 +508,7 @@ Import koleksi Postman untuk testing yang lebih komprehensif:
 - 🏦 **Bank account management** (CRUD operations)
 - � **Admin management** (Admin CRUD operations)
 - �📝 **Content management** (Articles, Photos, Onboarding)
-- 🧪 **59 ready-to-use endpoints** (Complete API coverage)
+- 🧪 **74+ ready-to-use endpoints** (Complete API coverage)
 - 📊 **Test result validation**
 
 **Environment Variables yang Diperlukan:**
@@ -860,7 +862,7 @@ createdb mbcdb
 - Comprehensive API documentation with request/response examples
 - Security monitoring capabilities for compliance and threat detection
 
-**Total Endpoints: 59** (Previous: 60)
+**Total Endpoints: 74+** (Previous: 59)
 
 ### Version 2.0 - Transaction Reversal System
 
@@ -878,7 +880,7 @@ createdb mbcdb
 
 ### 📖 Documentation Files
 
-- **[MBANKINGCORE-API.md](./MBANKINGCORE-API.md)** - Complete API documentation with examples and endpoint reference (59 endpoints)
+- **[MBANKINGCORE-API.md](./MBANKINGCORE-API.md)** - Complete API documentation with examples and endpoint reference (74+ endpoints)
 
 ### 🔗 External Resources
 

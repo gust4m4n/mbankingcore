@@ -350,3 +350,33 @@ func DeleteFailedResponse() ErrorResponse {
 func RetrieveFailedResponse() ErrorResponse {
 	return UserRetrieveFailedResponse() // Deprecated: Use specific error responses
 }
+
+// ===========================================
+// DASHBOARD RESPONSE STRUCTURES
+// ===========================================
+
+// DashboardStats represents dashboard statistics
+type DashboardStats struct {
+	TotalUsers           int64              `json:"total_users"`
+	TotalAdmins          int64              `json:"total_admins"`
+	TotalTransactions    TransactionPeriods `json:"total_transactions"`
+	TopupTransactions    TransactionPeriods `json:"topup_transactions"`
+	WithdrawTransactions TransactionPeriods `json:"withdraw_transactions"`
+	TransferTransactions TransactionPeriods `json:"transfer_transactions"`
+}
+
+// TransactionPeriods represents transaction counts for different time periods
+type TransactionPeriods struct {
+	Today     int64 `json:"today"`
+	ThisMonth int64 `json:"this_month"`
+	ThisYear  int64 `json:"this_year"`
+}
+
+// Dashboard Success Responses
+func DashboardSuccessResponse(data interface{}) APIResponse {
+	return NewSuccessResponse(CODE_SUCCESS, "Dashboard data retrieved successfully", data)
+}
+
+func DashboardRetrieveFailedResponse() ErrorResponse {
+	return NewErrorResponse(CODE_DATABASE_FAILED, "Failed to retrieve dashboard data")
+}

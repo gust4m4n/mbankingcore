@@ -365,3 +365,92 @@ func (h *AdminHandler) GetAdminByID(c *gin.Context) {
 		Data:    admin.ToResponse(),
 	})
 }
+
+// GetDashboard retrieves dashboard statistics
+func (h *AdminHandler) GetDashboard(c *gin.Context) {
+	var dashboard models.DashboardStats
+
+	// Get total users count
+	if err := h.DB.Model(&models.User{}).Count(&dashboard.TotalUsers).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, models.DashboardRetrieveFailedResponse())
+		return
+	}
+
+	// Get total admins count
+	if err := h.DB.Model(&models.Admin{}).Count(&dashboard.TotalAdmins).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, models.DashboardRetrieveFailedResponse())
+		return
+	}
+
+	// Get current time and calculate time ranges
+	now := time.Now()
+	startOfToday := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	startOfYear := time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
+
+	// Get total transactions for all periods
+	// Today's transactions
+	h.DB.Model(&models.Transaction{}).
+		Where("created_at >= ? AND created_at < ?", startOfToday, startOfToday.AddDate(0, 0, 1)).
+		Count(&dashboard.TotalTransactions.Today)
+
+	// This month's transactions
+	h.DB.Model(&models.Transaction{}).
+		Where("created_at >= ? AND created_at < ?", startOfMonth, startOfMonth.AddDate(0, 1, 0)).
+		Count(&dashboard.TotalTransactions.ThisMonth)
+
+	// This year's transactions
+	h.DB.Model(&models.Transaction{}).
+		Where("created_at >= ? AND created_at < ?", startOfYear, startOfYear.AddDate(1, 0, 0)).
+		Count(&dashboard.TotalTransactions.ThisYear)
+
+	// Get topup transactions for all periods
+	// Today's topup transactions
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ? AND created_at < ?", "topup", startOfToday, startOfToday.AddDate(0, 0, 1)).
+		Count(&dashboard.TopupTransactions.Today)
+
+	// This month's topup transactions
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ? AND created_at < ?", "topup", startOfMonth, startOfMonth.AddDate(0, 1, 0)).
+		Count(&dashboard.TopupTransactions.ThisMonth)
+
+	// This year's topup transactions
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ? AND created_at < ?", "topup", startOfYear, startOfYear.AddDate(1, 0, 0)).
+		Count(&dashboard.TopupTransactions.ThisYear)
+
+	// Get withdraw transactions for all periods
+	// Today's withdraw transactions
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ? AND created_at < ?", "withdraw", startOfToday, startOfToday.AddDate(0, 0, 1)).
+		Count(&dashboard.WithdrawTransactions.Today)
+
+	// This month's withdraw transactions
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ? AND created_at < ?", "withdraw", startOfMonth, startOfMonth.AddDate(0, 1, 0)).
+		Count(&dashboard.WithdrawTransactions.ThisMonth)
+
+	// This year's withdraw transactions
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ? AND created_at < ?", "withdraw", startOfYear, startOfYear.AddDate(1, 0, 0)).
+		Count(&dashboard.WithdrawTransactions.ThisYear)
+
+	// Get transfer transactions for all periods (both transfer_out and transfer_in)
+	// Today's transfer transactions
+	h.DB.Model(&models.Transaction{}).
+		Where("(type = ? OR type = ?) AND created_at >= ? AND created_at < ?", "transfer_out", "transfer_in", startOfToday, startOfToday.AddDate(0, 0, 1)).
+		Count(&dashboard.TransferTransactions.Today)
+
+	// This month's transfer transactions
+	h.DB.Model(&models.Transaction{}).
+		Where("(type = ? OR type = ?) AND created_at >= ? AND created_at < ?", "transfer_out", "transfer_in", startOfMonth, startOfMonth.AddDate(0, 1, 0)).
+		Count(&dashboard.TransferTransactions.ThisMonth)
+
+	// This year's transfer transactions
+	h.DB.Model(&models.Transaction{}).
+		Where("(type = ? OR type = ?) AND created_at >= ? AND created_at < ?", "transfer_out", "transfer_in", startOfYear, startOfYear.AddDate(1, 0, 0)).
+		Count(&dashboard.TransferTransactions.ThisYear)
+
+	c.JSON(http.StatusOK, models.DashboardSuccessResponse(dashboard))
+}

@@ -1,12 +1,8 @@
 package config
 
 import (
-	"fmt"
 	"log"
-	"math/rand"
 	"mbankingcore/models"
-	"strings"
-	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -72,26 +68,6 @@ func seedInitialData() error {
 
 	// Seed initial transactions for testing
 	if err := seedInitialTransactions(); err != nil {
-		return err
-	}
-
-	// Seed 1000 dummy transactions for yearly data
-	if err := seedDummyTransactionsYearly(); err != nil {
-		return err
-	}
-
-	// Seed 1000 dummy users for yearly data
-	if err := seedDummyUsersYearly(); err != nil {
-		return err
-	}
-
-	// Seed 32 dummy admins for yearly data
-	if err := seedDummyAdminsYearly(); err != nil {
-		return err
-	}
-
-	// Seed 10000 dummy transactions for yearly data
-	if err := seedDummyTransactionsYearlyLarge(); err != nil {
 		return err
 	}
 
@@ -515,574 +491,6 @@ func seedInitialTransactions() error {
 	return nil
 }
 
-// seedDummyTransactionsYearly creates 1000 dummy transactions over 1 year period
-func seedDummyTransactionsYearly() error {
-	log.Println("Seeding 1000 dummy transactions for yearly data...")
-
-	// Initialize random seed for reproducible results
-	rand.Seed(time.Now().UnixNano())
-
-	// Check if we already have enough transactions (threshold: 1000+)
-	var count int64
-	DB.Model(&models.Transaction{}).Count(&count)
-
-	if count >= 1000 {
-		log.Printf("✅ Already have %d transactions, skipping yearly dummy data", count)
-		return nil
-	}
-
-	// Clear existing transactions to regenerate with yearly data
-	if count > 0 {
-		log.Println("Clearing existing transactions to regenerate with yearly data...")
-		if err := DB.Where("1 = 1").Delete(&models.Transaction{}).Error; err != nil {
-			log.Printf("Failed to clear existing transactions: %v", err)
-			return err
-		}
-		log.Println("✅ Existing transactions cleared")
-	}
-
-	// Get all users to assign transactions
-	var users []models.User
-	if err := DB.Find(&users).Error; err != nil {
-		log.Printf("Failed to get users for yearly transaction seeding: %v", err)
-		return err
-	}
-
-	if len(users) == 0 {
-		log.Println("No users found for yearly transaction seeding")
-		return nil
-	}
-
-	// Create a map of user IDs for easier access
-	userIDs := make([]uint, len(users))
-	for i, user := range users {
-		userIDs[i] = user.ID
-	}
-
-	// Base time: 1 year ago from now
-	now := time.Now()
-	baseTime := now.AddDate(-1, 0, 0)
-
-	// Transaction types and their relative frequencies
-	transactionTypes := []string{"topup", "withdraw", "transfer_out", "transfer_in"}
-	typeWeights := []int{25, 25, 30, 20} // Percentages
-
-	// Indonesian banking descriptions for realism
-	descriptions := map[string][]string{
-		"topup": {
-			"Top up via ATM BCA", "Top up via m-banking", "Top up gaji bulanan",
-			"Top up via internet banking", "Top up via ATM Mandiri", "Top up bonus kerja",
-			"Top up dari rekening utama", "Top up untuk traveling", "Top up via mobile banking",
-			"Top up untuk belanja online", "Setor tunai via teller", "Transfer masuk dari rekening lain",
-		},
-		"withdraw": {
-			"Tarik tunai untuk belanja", "Tarik tunai untuk keperluan harian", "Tarik tunai untuk ongkos",
-			"Tarik tunai untuk shopping", "Tarik tunai untuk jajan", "Tarik tunai untuk keperluan",
-			"Penarikan tunai di ATM", "Tarik tunai untuk bensin", "Penarikan untuk bayar warung",
-			"Tarik tunai darurat", "Penarikan untuk belanja bulanan", "Tarik tunai weekend",
-		},
-		"transfer_out": {
-			"Transfer ke keluarga", "Bayar tagihan listrik", "Transfer ke Maya - Split bill restoran",
-			"Bayar asuransi bulanan", "Transfer ke orang tua", "Bayar sewa kos bulanan",
-			"Transfer ke Dina - Bayar patungan gift", "Transfer untuk pembayaran", "Bayar tagihan internet",
-			"Transfer ke teman - Bayar hutang", "Bayar SPP kuliah", "Transfer donasi",
-			"Bayar cicilan motor", "Transfer ke adik - Uang saku", "Bayar tagihan kartu kredit",
-		},
-		"transfer_in": {
-			"Transfer dari Demo User - Bayar makan siang", "Transfer dari Test User - Bayar hutang",
-			"Transfer dari Sari - Split bill restoran", "Transfer dari Rizki - Bayar patungan gift",
-			"Terima gaji bulanan", "Transfer dari orang tua", "Terima bonus penjualan",
-			"Transfer dari klien", "Terima refund belanja", "Transfer dari teman",
-			"Terima cashback", "Transfer komisi", "Terima hadiah ulang tahun",
-		},
-	}
-
-	var transactions []models.Transaction
-	successfulCount := 0
-
-	// Generate 1000 transactions
-	for i := 0; i < 1000; i++ {
-		// Random user
-		userID := userIDs[i%len(userIDs)]
-
-		// Random time within the year
-		dayOffset := rand.Intn(365)
-		hourOffset := rand.Intn(24)
-		minuteOffset := rand.Intn(60)
-		transactionTime := baseTime.AddDate(0, 0, dayOffset).
-			Add(time.Duration(hourOffset) * time.Hour).
-			Add(time.Duration(minuteOffset) * time.Minute)
-
-		// Determine transaction type based on weights
-		randomNum := rand.Intn(100)
-		var transactionType string
-		cumulative := 0
-		for j, weight := range typeWeights {
-			cumulative += weight
-			if randomNum < cumulative {
-				transactionType = transactionTypes[j]
-				break
-			}
-		}
-
-		// Random amount based on transaction type
-		var amount int64
-		switch transactionType {
-		case "topup":
-			amount = int64(rand.Intn(2000000) + 100000) // 100k - 2.1M
-		case "withdraw":
-			amount = int64(rand.Intn(1000000) + 50000) // 50k - 1.05M
-		case "transfer_out", "transfer_in":
-			amount = int64(rand.Intn(1500000) + 25000) // 25k - 1.525M
-		}
-
-		// Random balance before (simulate realistic balances)
-		balanceBefore := int64(rand.Intn(5000000) + 100000) // 100k - 5.1M
-
-		// Calculate balance after based on transaction type
-		var balanceAfter int64
-		switch transactionType {
-		case "topup", "transfer_in":
-			balanceAfter = balanceBefore + amount
-		case "withdraw", "transfer_out":
-			balanceAfter = balanceBefore - amount
-			// Ensure balance doesn't go negative for successful transactions
-			if balanceAfter < 0 {
-				balanceAfter = balanceBefore // Keep original balance for failed transaction
-			}
-		}
-
-		// Determine transaction status (95% success rate)
-		status := "completed"
-		if rand.Intn(100) < 5 { // 5% failure rate
-			status = "failed"
-			balanceAfter = balanceBefore // Keep original balance for failed transactions
-		}
-
-		// Random description
-		descOptions := descriptions[transactionType]
-		description := descOptions[rand.Intn(len(descOptions))]
-		if status == "failed" {
-			switch transactionType {
-			case "withdraw", "transfer_out":
-				description += " - Saldo tidak mencukupi"
-			default:
-				description += " - Transaksi gagal"
-			}
-		}
-
-		transaction := models.Transaction{
-			UserID:        userID,
-			Type:          transactionType,
-			Amount:        amount,
-			BalanceBefore: balanceBefore,
-			BalanceAfter:  balanceAfter,
-			Status:        status,
-			Description:   description,
-			CreatedAt:     transactionTime,
-			UpdatedAt:     transactionTime,
-		}
-
-		transactions = append(transactions, transaction)
-
-		if status == "completed" {
-			successfulCount++
-		}
-	}
-
-	// Create all transactions in batches for better performance
-	batchSize := 100
-	for i := 0; i < len(transactions); i += batchSize {
-		end := i + batchSize
-		if end > len(transactions) {
-			end = len(transactions)
-		}
-
-		batch := transactions[i:end]
-		if err := DB.Create(&batch).Error; err != nil {
-			log.Printf("Failed to create transaction batch %d-%d: %v", i, end-1, err)
-			return err
-		}
-
-		log.Printf("Created transaction batch %d-%d", i+1, end)
-	}
-
-	log.Printf("✅ Created %d dummy transactions (%d successful, %d failed) over 1 year period",
-		len(transactions), successfulCount, len(transactions)-successfulCount)
-	return nil
-}
-
-// seedDummyUsersYearly creates 5000 dummy users distributed over 1 year
-func seedDummyUsersYearly() error {
-	log.Println("Seeding 5000 dummy users for yearly data...")
-
-	// Check if dummy users already exist
-	var count int64
-	DB.Model(&models.User{}).Where("phone LIKE ?", "628%").Count(&count)
-	if count >= 5000 {
-		log.Println("✅ 5000+ dummy users already exist")
-		return nil
-	}
-
-	// Clear existing dummy users if any exist but less than 5000
-	if count > 0 {
-		DB.Where("phone LIKE ?", "628%").Delete(&models.User{})
-		log.Println("Cleared existing dummy users")
-	}
-
-	// Generate start and end dates for 1 year period
-	endDate := time.Now()
-	startDate := endDate.AddDate(-1, 0, 0) // 1 year ago
-
-	// Indonesian names
-	firstNames := []string{
-		"Ahmad", "Budi", "Citra", "Dewi", "Eko", "Farah", "Gunawan", "Hana", "Indra", "Joko",
-		"Kartika", "Linda", "Maya", "Novi", "Omar", "Putri", "Qori", "Rina", "Sari", "Tono",
-		"Umi", "Vina", "Wati", "Xena", "Yuni", "Zahra", "Andi", "Bella", "Candra", "Dina",
-		"Erik", "Fifi", "Gita", "Heri", "Ika", "Jihan", "Kiki", "Lina", "Mira", "Nana",
-		"Oki", "Pita", "Qila", "Reza", "Sinta", "Titi", "Ully", "Vera", "Wahyu", "Yanto",
-	}
-
-	lastNames := []string{
-		"Pratama", "Sari", "Wijaya", "Kusuma", "Putri", "Santoso", "Maharani", "Firmansyah",
-		"Lestari", "Setiawan", "Handayani", "Nugroho", "Rahayu", "Kurniawan", "Wulandari",
-		"Purwanto", "Safitri", "Irawan", "Anggraini", "Susanto", "Permata", "Hakim", "Melati",
-		"Adiputra", "Kartini", "Baskara", "Cahyani", "Dharma", "Fadilla", "Gunawan", "Hapsari",
-		"Indriani", "Julianto", "Kencana", "Larasati", "Mahendra", "Nurhaliza", "Oktaviani",
-		"Pradana", "Qomaria", "Rachman", "Saputra", "Triyanto", "Utami", "Valeria", "Wardani",
-		"Yudhistira", "Zainal",
-	}
-
-	motherNames := []string{
-		"Siti Aminah", "Nur Khadijah", "Fatimah Zahra", "Aisyah Rahmawati", "Khadijah Sari",
-		"Aminah Putri", "Zahra Lestari", "Rahmawati Indah", "Sari Melati", "Putri Cahaya",
-		"Lestari Mawar", "Indah Permata", "Melati Sari", "Cahaya Bulan", "Mawar Indah",
-		"Permata Hati", "Bulan Purnama", "Indah Sari", "Hati Suci", "Purnama Indah",
-		"Suci Melati", "Dewi Sartika", "Kartini Putri", "Cut Nyak Dhien", "Roro Jonggrang",
-		"Dewi Sekartaji", "Srikandi Putri", "Shinta Dewi", "Gayatri Sari", "Ratna Sari",
-	}
-
-	var users []models.User
-	rand.Seed(time.Now().UnixNano())
-
-	for i := 0; i < 5000; i++ {
-		// Generate random creation time within the year
-		randomDuration := time.Duration(rand.Int63n(int64(endDate.Sub(startDate))))
-		createdAt := startDate.Add(randomDuration)
-
-		// Generate phone number
-		phoneNumber := fmt.Sprintf("6281%08d", 10000000+rand.Intn(90000000))
-
-		// Generate random name
-		firstName := firstNames[rand.Intn(len(firstNames))]
-		lastName := lastNames[rand.Intn(len(lastNames))]
-		fullName := firstName + " " + lastName
-
-		// Generate mother's name
-		motherName := motherNames[rand.Intn(len(motherNames))]
-
-		// Generate PIN
-		pin := fmt.Sprintf("%06d", rand.Intn(1000000))
-
-		// Generate initial balance (0 to 10,000,000)
-		balance := int64(rand.Float64() * 10000000)
-
-		// Generate status (90% active, 10% inactive)
-		status := 1
-		if rand.Float64() < 0.1 {
-			status = 0
-		}
-
-		user := models.User{
-			Name:       fullName,
-			Phone:      phoneNumber,
-			MotherName: motherName,
-			PinAtm:     pin,
-			Balance:    balance,
-			Status:     status,
-		}
-		user.CreatedAt = createdAt
-		user.UpdatedAt = createdAt
-
-		users = append(users, user)
-	}
-
-	// Create all users in batches for better performance
-	batchSize := 100
-	for i := 0; i < len(users); i += batchSize {
-		end := i + batchSize
-		if end > len(users) {
-			end = len(users)
-		}
-
-		batch := users[i:end]
-		if err := DB.Create(&batch).Error; err != nil {
-			log.Printf("Failed to create user batch %d-%d: %v", i, end-1, err)
-			return err
-		}
-
-		log.Printf("Created user batch %d-%d", i+1, end)
-	}
-
-	log.Printf("✅ Created 5000 dummy users over 1 year period")
-	return nil
-}
-
-// seedDummyAdminsYearly creates 32 dummy admins distributed over 1 year
-func seedDummyAdminsYearly() error {
-	log.Println("Seeding 32 dummy admins for yearly data...")
-
-	// Check if dummy admins already exist (excluding initial admins)
-	var count int64
-	DB.Model(&models.Admin{}).Where("email LIKE ?", "admin.%@mbankingcore.com").Count(&count)
-	if count >= 32 {
-		log.Println("✅ 32+ dummy admins already exist")
-		return nil
-	}
-
-	// Clear existing dummy admins if any exist but less than 32
-	if count > 0 {
-		DB.Where("email LIKE ?", "admin.%@mbankingcore.com").Delete(&models.Admin{})
-		log.Println("Cleared existing dummy admins")
-	}
-
-	// Generate start and end dates for 1 year period
-	endDate := time.Now()
-	startDate := endDate.AddDate(-1, 0, 0) // 1 year ago
-
-	// Admin names and roles
-	adminNames := []string{
-		"Ahmad Rizki", "Bella Sari", "Candra Wijaya", "Dina Kusuma", "Erik Pratama",
-		"Farah Putri", "Gunawan Santoso", "Hana Maharani", "Indra Firmansyah", "Jihan Lestari",
-		"Kiki Setiawan", "Linda Handayani", "Maya Nugroho", "Novi Rahayu", "Omar Kurniawan",
-		"Putri Wulandari", "Qori Purwanto", "Rina Safitri", "Sari Irawan", "Tono Anggraini",
-		"Umi Susanto", "Vina Permata", "Wati Hakim", "Xena Melati", "Yuni Adiputra",
-		"Zahra Kartini", "Andi Baskara", "Citra Cahyani", "Dewi Dharma", "Eko Fadilla",
-		"Gita Hapsari", "Heri Mahendra",
-	}
-
-	roles := []string{"admin", "admin", "admin", "super"} // Mostly admin, some super
-
-	var admins []models.Admin
-	rand.Seed(time.Now().UnixNano())
-
-	for i := 0; i < 32; i++ {
-		// Generate random creation time within the year
-		randomDuration := time.Duration(rand.Int63n(int64(endDate.Sub(startDate))))
-		createdAt := startDate.Add(randomDuration)
-
-		// Generate email
-		email := fmt.Sprintf("admin.%s@mbankingcore.com",
-			strings.ToLower(strings.ReplaceAll(adminNames[i], " ", ".")))
-
-		// Generate password hash
-		password := fmt.Sprintf("Admin%d!", 1000+i)
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-		if err != nil {
-			log.Printf("Failed to hash password for admin %s: %v", adminNames[i], err)
-			return err
-		}
-
-		// Generate role (75% admin, 25% super)
-		role := roles[rand.Intn(len(roles))]
-
-		// Generate status (95% active, 5% inactive)
-		status := 1
-		if rand.Float64() < 0.05 {
-			status = 0
-		}
-
-		admin := models.Admin{
-			Name:     adminNames[i],
-			Email:    email,
-			Password: string(hashedPassword),
-			Role:     role,
-			Status:   status,
-		}
-		admin.CreatedAt = createdAt
-		admin.UpdatedAt = createdAt
-
-		admins = append(admins, admin)
-	}
-
-	// Create all admins in batches for better performance
-	batchSize := 10
-	for i := 0; i < len(admins); i += batchSize {
-		end := i + batchSize
-		if end > len(admins) {
-			end = len(admins)
-		}
-
-		batch := admins[i:end]
-		if err := DB.Create(&batch).Error; err != nil {
-			log.Printf("Failed to create admin batch %d-%d: %v", i, end-1, err)
-			return err
-		}
-
-		log.Printf("Created admin batch %d-%d", i+1, end)
-	}
-
-	log.Printf("✅ Created 32 dummy admins over 1 year period")
-	return nil
-}
-
-// seedDummyTransactionsYearlyLarge creates 50000 dummy transactions distributed over 1 year
-func seedDummyTransactionsYearlyLarge() error {
-	log.Println("Seeding 50000 dummy transactions for yearly data...")
-
-	// Check if large dummy transactions already exist
-	var count int64
-	DB.Model(&models.Transaction{}).Count(&count)
-	if count >= 50000 {
-		log.Println("✅ 50000+ transactions already exist")
-		return nil
-	}
-
-	// Get all users for transaction assignment
-	var users []models.User
-	if err := DB.Find(&users).Error; err != nil {
-		log.Printf("Failed to get users: %v", err)
-		return err
-	}
-
-	if len(users) == 0 {
-		log.Println("No users found, creating basic user first")
-		return fmt.Errorf("no users available for transactions")
-	}
-
-	// Generate start and end dates for 1 year period
-	endDate := time.Now()
-	startDate := endDate.AddDate(-1, 0, 0) // 1 year ago
-
-	// Transaction types with weights
-	transactionTypes := []string{"topup", "withdraw", "transfer_out", "transfer_in"}
-	typeWeights := []float64{0.25, 0.25, 0.30, 0.20} // 25% topup, 25% withdraw, 30% transfer_out, 20% transfer_in
-
-	// Indonesian transaction descriptions
-	descriptions := map[string][]string{
-		"topup": {
-			"Top up via ATM BCA", "Top up via ATM Mandiri", "Top up via ATM BNI", "Top up via ATM BRI",
-			"Top up via mobile banking", "Top up via internet banking", "Top up via m-banking",
-			"Setor tunai via teller", "Transfer masuk dari rekening lain", "Top up untuk belanja online",
-			"Top up untuk traveling", "Top up gaji bulanan", "Top up bonus kerja", "Top up dari rekening utama",
-		},
-		"withdraw": {
-			"Tarik tunai untuk belanja", "Tarik tunai untuk bensin", "Tarik tunai untuk jajan",
-			"Tarik tunai untuk ongkos", "Tarik tunai weekend", "Tarik tunai darurat",
-			"Penarikan tunai di ATM", "Tarik tunai untuk keperluan", "Tarik tunai untuk shopping",
-			"Penarikan untuk belanja bulanan", "Penarikan untuk bayar warung", "Tarik tunai untuk keperluan harian",
-		},
-		"transfer_out": {
-			"Transfer ke orang tua", "Transfer donasi", "Bayar tagihan listrik", "Bayar tagihan internet",
-			"Bayar SPP kuliah", "Bayar sewa kos bulanan", "Bayar cicilan motor", "Bayar tagihan kartu kredit",
-			"Bayar asuransi bulanan", "Transfer untuk pembayaran", "Transfer ke teman - Bayar hutang",
-			"Transfer ke Maya - Split bill restoran", "Transfer ke Dina - Bayar patungan gift",
-		},
-		"transfer_in": {
-			"Terima gaji bulanan", "Terima bonus penjualan", "Terima cashback", "Transfer dari teman",
-			"Transfer komisi", "Terima hadiah ulang tahun", "Terima refund belanja", "Transfer dari klien",
-			"Transfer dari Test User - Bayar makan siang", "Transfer dari Sari - Split bill restoran",
-			"Transfer dari Demo User - Bayar makan siang", "Transfer dari Rizki - Bayar patungan gift",
-		},
-	}
-
-	var transactions []models.Transaction
-	var successfulCount int
-	rand.Seed(time.Now().UnixNano())
-
-	for i := 0; i < 50000; i++ {
-		// Generate random creation time within the year
-		randomDuration := time.Duration(rand.Int63n(int64(endDate.Sub(startDate))))
-		createdAt := startDate.Add(randomDuration)
-
-		// Select random user
-		user := users[rand.Intn(len(users))]
-
-		// Select transaction type based on weights
-		random := rand.Float64()
-		var transactionType string
-		cumulative := 0.0
-		for j, weight := range typeWeights {
-			cumulative += weight
-			if random <= cumulative {
-				transactionType = transactionTypes[j]
-				break
-			}
-		}
-
-		// Generate amount (25,000 to 2,500,000)
-		amount := int64(25000 + rand.Float64()*2475000)
-
-		// Generate description
-		typeDescriptions := descriptions[transactionType]
-		description := typeDescriptions[rand.Intn(len(typeDescriptions))]
-
-		// Generate realistic balance before/after
-		balanceBefore := int64(1000000 + rand.Float64()*4000000) // 1M to 5M
-		var balanceAfter int64
-		status := "completed"
-
-		switch transactionType {
-		case "topup", "transfer_in":
-			balanceAfter = balanceBefore + amount
-		case "withdraw", "transfer_out":
-			if balanceBefore >= amount {
-				balanceAfter = balanceBefore - amount
-			} else {
-				balanceAfter = balanceBefore
-				status = "failed"
-				description += " - Saldo tidak mencukupi"
-			}
-		}
-
-		// 10% chance for random failure
-		if rand.Float64() < 0.1 {
-			status = "failed"
-			balanceAfter = balanceBefore
-			description += " - Transaksi gagal"
-		}
-
-		if status == "completed" {
-			successfulCount++
-		}
-
-		transaction := models.Transaction{
-			UserID:        user.ID,
-			Type:          transactionType,
-			Amount:        amount,
-			BalanceBefore: balanceBefore,
-			BalanceAfter:  balanceAfter,
-			Description:   description,
-			Status:        status,
-		}
-		transaction.CreatedAt = createdAt
-		transaction.UpdatedAt = createdAt
-
-		transactions = append(transactions, transaction)
-	}
-
-	// Create all transactions in batches for better performance
-	batchSize := 100
-	for i := 0; i < len(transactions); i += batchSize {
-		end := i + batchSize
-		if end > len(transactions) {
-			end = len(transactions)
-		}
-
-		batch := transactions[i:end]
-		if err := DB.Create(&batch).Error; err != nil {
-			log.Printf("Failed to create transaction batch %d-%d: %v", i, end-1, err)
-			return err
-		}
-
-		log.Printf("Created transaction batch %d-%d", i+1, end)
-	}
-
-	log.Printf("✅ Created 50000 dummy transactions (%d successful, %d failed) over 1 year period",
-		successfulCount, 50000-successfulCount)
-	return nil
-}
-
 // getTermsConditionsContent returns comprehensive Terms & Conditions content for Indonesian banking app
 func getTermsConditionsContent() string {
 	return `<h1>SYARAT DAN KETENTUAN PENGGUNAAN MBANKINGCORE</h1>
@@ -1090,9 +498,11 @@ func getTermsConditionsContent() string {
 <p><b>Terakhir diperbarui: 31 Juli 2025</b></p>
 
 <h2>1. PENERIMAAN SYARAT DAN KETENTUAN</h2>
+
 <p>Dengan mengunduh, menginstal, mengakses atau menggunakan aplikasi MBankingCore ("<b>Aplikasi</b>"), Anda menyetujui untuk terikat oleh Syarat dan Ketentuan ini ("<b>S&K</b>"). Jika Anda tidak menyetujui S&K ini, harap tidak menggunakan Aplikasi.</p>
 
 <h2>2. DEFINISI</h2>
+
 <ul>
 <li><b>"Aplikasi"</b> adalah aplikasi mobile banking MBankingCore</li>
 <li><b>"Layanan"</b> adalah semua fitur dan layanan yang disediakan melalui Aplikasi</li>
@@ -1102,6 +512,7 @@ func getTermsConditionsContent() string {
 </ul>
 
 <h2>3. PERSYARATAN PENGGUNAAN</h2>
+
 <h3>3.1 Kelayakan</h3>
 <ul>
 <li>Anda harus berusia minimal 17 tahun</li>
@@ -1118,6 +529,7 @@ func getTermsConditionsContent() string {
 </ul>
 
 <h2>4. LAYANAN YANG TERSEDIA</h2>
+
 <h3>4.1 Informasi Rekening</h3>
 <ul>
 <li>Cek saldo</li>
@@ -1140,6 +552,7 @@ func getTermsConditionsContent() string {
 </ul>
 
 <h2>5. KEAMANAN DAN PERLINDUNGAN</h2>
+
 <h3>5.1 Kewajiban Pengguna</h3>
 <ul>
 <li>Menjaga kerahasiaan PIN/password</li>
@@ -1157,6 +570,7 @@ func getTermsConditionsContent() string {
 </ul>
 
 <h2>6. BATASAN DAN LARANGAN</h2>
+
 <h3>6.1 Larangan Penggunaan</h3>
 <ul>
 <li>Menggunakan Aplikasi untuk kegiatan ilegal</li>
@@ -1174,6 +588,7 @@ func getTermsConditionsContent() string {
 </ul>
 
 <h2>7. BIAYA DAN TARIF</h2>
+
 <h3>7.1 Biaya Layanan</h3>
 <ul>
 <li>Transfer antar bank: <b>Rp 6.500</b></li>
@@ -1189,6 +604,7 @@ func getTermsConditionsContent() string {
 </ul>
 
 <h2>8. PRIVASI DAN PERLINDUNGAN DATA</h2>
+
 <h3>8.1 Pengumpulan Data</h3>
 <ul>
 <li>Data pribadi dikumpulkan sesuai keperluan layanan</li>
@@ -1205,6 +621,7 @@ func getTermsConditionsContent() string {
 </ul>
 
 <h2>9. TANGGUNG JAWAB DAN GANTI RUGI</h2>
+
 <h3>9.1 Batasan Tanggung Jawab</h3>
 <ul>
 <li>Tidak bertanggung jawab atas kerugian akibat kelalaian pengguna</li>
@@ -1219,6 +636,7 @@ func getTermsConditionsContent() string {
 </ul>
 
 <h2>10. PENANGGUHAN DAN PENGHENTIAN</h2>
+
 <h3>10.1 Penangguhan Akun</h3>
 <ul>
 <li>Akun dapat ditangguhkan jika melanggar S&K</li>
@@ -1234,6 +652,7 @@ func getTermsConditionsContent() string {
 </ul>
 
 <h2>11. PERUBAHAN SYARAT DAN KETENTUAN</h2>
+
 <ul>
 <li>S&K dapat diubah sewaktu-waktu</li>
 <li>Perubahan akan diberitahukan melalui Aplikasi</li>
@@ -1242,6 +661,7 @@ func getTermsConditionsContent() string {
 </ul>
 
 <h2>12. PENYELESAIAN SENGKETA</h2>
+
 <h3>12.1 Hukum yang Berlaku</h3>
 <ul>
 <li>S&K ini tunduk pada hukum Republik Indonesia</li>
@@ -1255,6 +675,7 @@ func getTermsConditionsContent() string {
 </ul>
 
 <h2>13. KONTAK DAN BANTUAN</h2>
+
 <h3>Customer Service:</h3>
 <ul>
 <li>Email: <b>support@mbankingcore.com</b></li>
@@ -1271,240 +692,409 @@ func getTermsConditionsContent() string {
 </ul>
 
 <hr>
+
 <p><i>Dengan menggunakan Aplikasi MBankingCore, Anda menyatakan telah membaca, memahami, dan menyetujui seluruh Syarat dan Ketentuan di atas.</i></p>`
+}
+
+// getPrivacyPolicyContent returns comprehensive Privacy Policy content for Indonesian banking app  
+func getPrivacyPolicyContent() string {
+	return `<h1>KEBIJAKAN PRIVASI MBANKINGCORE</h1>
+
+### 5.1 Kewajiban Pengguna
+- Menjaga kerahasiaan PIN/password
+- Menggunakan koneksi internet yang aman
+- Melakukan logout setelah selesai menggunakan
+- Tidak berbagi informasi akun dengan pihak lain
+
+### 5.2 Sistem Keamanan
+- Enkripsi data end-to-end
+- Otentikasi dua faktor (2FA)
+- Monitoring transaksi real-time
+- Notifikasi setiap transaksi
+
+## 6. BATASAN DAN LARANGAN
+
+### 6.1 Larangan Penggunaan
+- Menggunakan Aplikasi untuk kegiatan ilegal
+- Melakukan transaksi fiktif atau penipuan
+- Mengganggu sistem atau server Aplikasi
+- Menyalahgunakan fitur atau layanan
+
+### 6.2 Batas Transaksi
+- Transfer harian: Rp 25.000.000
+- Transfer per transaksi: Rp 5.000.000
+- Pembayaran harian: Rp 10.000.000
+- Batas dapat disesuaikan sesuai profil risiko
+
+## 7. BIAYA DAN TARIF
+
+### 7.1 Biaya Layanan
+- Transfer antar bank: Rp 6.500
+- Transfer antar pengguna MBankingCore: GRATIS
+- Cek saldo dan mutasi: GRATIS
+- Pembayaran tagihan: Rp 2.500
+
+### 7.2 Perubahan Tarif
+- Kami berhak mengubah tarif dengan pemberitahuan 30 hari sebelumnya
+- Perubahan akan diberitahukan melalui Aplikasi atau email
+
+## 8. PRIVASI DAN PERLINDUNGAN DATA
+
+### 8.1 Pengumpulan Data
+- Data pribadi dikumpulkan sesuai keperluan layanan
+- Data transaksi disimpan untuk audit dan compliance
+- Lokasi perangkat untuk keamanan tambahan
+
+### 8.2 Penggunaan Data
+- Memproses transaksi dan layanan
+- Analisis risiko dan fraud detection
+- Peningkatan layanan dan fitur
+- Compliance dengan regulasi
+
+## 9. TANGGUNG JAWAB DAN GANTI RUGI
+
+### 9.1 Batasan Tanggung Jawab
+- Tidak bertanggung jawab atas kerugian akibat kelalaian pengguna
+- Tidak bertanggung jawab atas gangguan jaringan atau sistem bank
+- Tanggung jawab terbatas pada jumlah transaksi yang bermasalah
+
+### 9.2 Force Majeure
+- Tidak bertanggung jawab atas kejadian di luar kendali
+- Termasuk bencana alam, perang, atau gangguan pemerintah
+
+## 10. PENANGGUHAN DAN PENGHENTIAN
+
+### 10.1 Penangguhan Akun
+- Akun dapat ditangguhkan jika melanggar S&K
+- Penangguhan karena aktivitas mencurigakan
+- Pemberitahuan akan diberikan jika memungkinkan
+
+### 10.2 Penghentian Layanan
+- Pengguna dapat menghentikan layanan kapan saja
+- Kami dapat menghentikan layanan dengan pemberitahuan 30 hari
+- Saldo akan dikembalikan sesuai prosedur bank
+
+## 11. PERUBAHAN SYARAT DAN KETENTUAN
+
+- S&K dapat diubah sewaktu-waktu
+- Perubahan akan diberitahukan melalui Aplikasi
+- Penggunaan Aplikasi setelah perubahan dianggap sebagai persetujuan
+- Versi terbaru selalu tersedia di dalam Aplikasi
+
+## 12. PENYELESAIAN SENGKETA
+
+### 12.1 Hukum yang Berlaku
+- S&K ini tunduk pada hukum Republik Indonesia
+- Penyelesaian sengketa melalui pengadilan di Jakarta
+
+### 12.2 Mediasi
+- Upaya penyelesaian secara kekeluargaan terlebih dahulu
+- Mediasi melalui Otoritas Jasa Keuangan (OJK) jika diperlukan
+
+## 13. KONTAK DAN BANTUAN
+
+**Customer Service:**
+- Email: support@mbankingcore.com
+- Telepon: 1500-888 (24/7)
+- WhatsApp: +62-812-3456-7890
+- Live Chat: Tersedia di dalam Aplikasi
+
+**Jam Operasional:**
+- Senin - Jumat: 06.00 - 22.00 WIB
+- Sabtu - Minggu: 08.00 - 20.00 WIB
+- Emergency Support: 24/7
+
+---
+
+Dengan menggunakan Aplikasi MBankingCore, Anda menyatakan telah membaca, memahami, dan menyetujui seluruh Syarat dan Ketentuan di atas.`
 }
 
 // getPrivacyPolicyContent returns comprehensive Privacy Policy content for Indonesian banking app
 func getPrivacyPolicyContent() string {
-	return `<h1>KEBIJAKAN PRIVASI MBANKINGCORE</h1>
+	return `# KEBIJAKAN PRIVASI MBANKINGCORE
 
-<p><b>Terakhir diperbarui: 31 Juli 2025</b></p>
+**Terakhir diperbarui: 31 Juli 2025**
 
-<h2>1. PENDAHULUAN</h2>
-<p>MBankingCore ("<b>kami</b>", "<b>Aplikasi</b>") berkomitmen untuk melindungi privasi dan keamanan data pribadi Anda. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, menyimpan, dan melindungi informasi pribadi Anda saat menggunakan layanan kami.</p>
+## 1. PENDAHULUAN
 
-<h2>2. INFORMASI YANG KAMI KUMPULKAN</h2>
-<h3>2.1 Data Identitas Pribadi</h3>
-<ul>
-<li><b>Informasi Dasar:</b> Nama lengkap, tanggal lahir, nomor KTP/NIK</li>
-<li><b>Kontak:</b> Nomor telepon, alamat email, alamat rumah</li>
-<li><b>Foto:</b> Foto selfie, foto KTP untuk verifikasi identitas</li>
-<li><b>Biometrik:</b> Sidik jari, face recognition (jika diaktifkan)</li>
-</ul>
+MBankingCore ("kami", "Aplikasi") berkomitmen untuk melindungi privasi dan keamanan data pribadi Anda. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, menyimpan, dan melindungi informasi pribadi Anda saat menggunakan layanan kami.
 
-<h3>2.2 Data Keuangan</h3>
-<ul>
-<li><b>Informasi Rekening:</b> Nomor rekening, nama bank, saldo</li>
-<li><b>Riwayat Transaksi:</b> Transfer, pembayaran, top-up, withdrawals</li>
-<li><b>Pola Penggunaan:</b> Frekuensi transaksi, merchant favorit</li>
-<li><b>Data Kredit:</b> Riwayat kredit untuk scoring (jika tersedia)</li>
-</ul>
+## 2. INFORMASI YANG KAMI KUMPULKAN
 
-<h3>2.3 Data Teknis</h3>
-<ul>
-<li><b>Informasi Perangkat:</b> Model, OS, versi aplikasi, device ID</li>
-<li><b>Lokasi:</b> GPS location untuk keamanan transaksi</li>
-<li><b>Log Aktivitas:</b> Waktu login, IP address, aktivitas dalam aplikasi</li>
-<li><b>Cookies:</b> Preferensi pengguna, session management</li>
-</ul>
+### 2.1 Data Identitas Pribadi
+- **Informasi Dasar:** Nama lengkap, tanggal lahir, nomor KTP/NIK
+- **Kontak:** Nomor telepon, alamat email, alamat rumah
+- **Foto:** Foto selfie, foto KTP untuk verifikasi identitas
+- **Biometrik:** Sidik jari, face recognition (jika diaktifkan)
 
-<h3>2.4 Data Komunikasi</h3>
-<ul>
-<li><b>Customer Service:</b> Rekaman chat, email, telepon</li>
-<li><b>Notifikasi:</b> Preferensi push notification, SMS</li>
-<li><b>Feedback:</b> Rating, review, saran perbaikan</li>
-</ul>
+### 2.2 Data Keuangan
+- **Informasi Rekening:** Nomor rekening, nama bank, saldo
+- **Riwayat Transaksi:** Transfer, pembayaran, top-up, withdrawals
+- **Pola Penggunaan:** Frekuensi transaksi, merchant favorit
+- **Data Kredit:** Riwayat kredit untuk scoring (jika tersedia)
 
-<h2>3. CARA KAMI MENGUMPULKAN DATA</h2>
-<h3>3.1 Langsung dari Anda</h3>
-<ul>
-<li>Saat registrasi akun baru</li>
-<li>Pengisian profil dan verifikasi KYC</li>
-<li>Melakukan transaksi atau menggunakan fitur</li>
-<li>Menghubungi customer service</li>
-</ul>
+### 2.3 Data Teknis
+- **Informasi Perangkat:** Model, OS, versi aplikasi, device ID
+- **Lokasi:** GPS location untuk keamanan transaksi
+- **Log Aktivitas:** Waktu login, IP address, aktivitas dalam aplikasi
+- **Cookies:** Preferensi pengguna, session management
 
-<h3>3.2 Otomatis dari Aplikasi</h3>
-<ul>
-<li>Log aktivitas dan penggunaan aplikasi</li>
-<li>Data lokasi (dengan izin)</li>
-<li>Informasi perangkat dan jaringan</li>
-<li>Cookies dan teknologi tracking</li>
-</ul>
+### 2.4 Data Komunikasi
+- **Customer Service:** Rekaman chat, email, telepon
+- **Notifikasi:** Preferensi push notification, SMS
+- **Feedback:** Rating, review, saran perbaikan
 
-<h3>3.3 Dari Pihak Ketiga</h3>
-<ul>
-<li><b>Bank Partner:</b> Informasi rekening dan transaksi</li>
-<li><b>Credit Bureau:</b> Riwayat kredit dan scoring</li>
-<li><b>Anti-Fraud Provider:</b> Verifikasi identitas dan risk assessment</li>
-<li><b>Analytics Provider:</b> Data agregat untuk improvement</li>
-</ul>
+## 3. CARA KAMI MENGUMPULKAN DATA
 
-<h2>4. TUJUAN PENGGUNAAN DATA</h2>
-<h3>4.1 Penyediaan Layanan</h3>
-<ul>
-<li><b>Verifikasi Identitas:</b> KYC, AML compliance, fraud prevention</li>
-<li><b>Memproses Transaksi:</b> Transfer, pembayaran, top-up</li>
-<li><b>Customer Support:</b> Bantuan teknis dan layanan pelanggan</li>
-<li><b>Personalisasi:</b> Rekomendasi produk dan fitur yang relevan</li>
-</ul>
+### 3.1 Langsung dari Anda
+- Saat registrasi akun baru
+- Pengisian profil dan verifikasi KYC
+- Melakukan transaksi atau menggunakan fitur
+- Menghubungi customer service
 
-<h3>4.2 Keamanan dan Kepatuhan</h3>
-<ul>
-<li><b>Fraud Detection:</b> Monitoring transaksi mencurigakan</li>
-<li><b>Risk Management:</b> Penilaian risiko dan credit scoring</li>
-<li><b>Regulatory Compliance:</b> Pelaporan ke Bank Indonesia, OJK</li>
-<li><b>Audit Trail:</b> Jejak audit untuk investigasi</li>
-</ul>
+### 3.2 Otomatis dari Aplikasi
+- Log aktivitas dan penggunaan aplikasi
+- Data lokasi (dengan izin)
+- Informasi perangkat dan jaringan
+- Cookies dan teknologi tracking
 
-<h3>4.3 Peningkatan Layanan</h3>
-<ul>
-<li><b>Analytics:</b> Analisis penggunaan untuk improvement</li>
-<li><b>A/B Testing:</b> Testing fitur baru untuk user experience</li>
-<li><b>Machine Learning:</b> AI untuk fraud detection dan personalization</li>
-<li><b>Research:</b> Riset pasar untuk pengembangan produk</li>
-</ul>
+### 3.3 Dari Pihak Ketiga
+- **Bank Partner:** Informasi rekening dan transaksi
+- **Credit Bureau:** Riwayat kredit dan scoring
+- **Anti-Fraud Provider:** Verifikasi identitas dan risk assessment
+- **Analytics Provider:** Data agregat untuk improvement
 
-<h2>5. BERBAGI DATA DENGAN PIHAK KETIGA</h2>
-<h3>5.1 Bank dan Financial Institution</h3>
-<ul>
-<li><b>Bank Partner:</b> Untuk memproses transaksi perbankan</li>
-<li><b>Payment Gateway:</b> Pembayaran merchant dan e-commerce</li>
-<li><b>E-wallet Provider:</b> Top-up dan transfer antar e-wallet</li>
-<li><b>Credit Bureau:</b> Credit scoring dan risk assessment</li>
-</ul>
+## 4. TUJUAN PENGGUNAAN DATA
 
-<h3>5.2 Technology Provider</h3>
-<ul>
-<li><b>Cloud Provider:</b> AWS, Google Cloud untuk data storage</li>
-<li><b>Security Provider:</b> Anti-fraud, cybersecurity services</li>
-<li><b>Analytics Provider:</b> Google Analytics, Firebase</li>
-<li><b>Communication:</b> SMS gateway, email provider, push notification</li>
-</ul>
+### 4.1 Penyediaan Layanan
+- **Verifikasi Identitas:** KYC, AML compliance, fraud prevention
+- **Memproses Transaksi:** Transfer, pembayaran, top-up
+- **Customer Support:** Bantuan teknis dan layanan pelanggan
+- **Personalisasi:** Rekomendasi produk dan fitur yang relevan
 
-<h2>6. KEAMANAN DATA</h2>
-<h3>6.1 Enkripsi</h3>
-<ul>
-<li><b>Data at Rest:</b> AES-256 encryption untuk data storage</li>
-<li><b>Data in Transit:</b> TLS 1.3 untuk komunikasi</li>
-<li><b>Database:</b> Field-level encryption untuk data sensitif</li>
-<li><b>Backup:</b> Encrypted backup dengan secure key management</li>
-</ul>
+### 4.2 Keamanan dan Kepatuhan
+- **Fraud Detection:** Monitoring transaksi mencurigakan
+- **Risk Management:** Penilaian risiko dan credit scoring
+- **Regulatory Compliance:** Pelaporan ke Bank Indonesia, OJK
+- **Audit Trail:** Jejak audit untuk investigasi
 
-<h3>6.2 Access Control</h3>
-<ul>
-<li><b>Role-based Access:</b> Akses terbatas sesuai job function</li>
-<li><b>Multi-factor Authentication:</b> 2FA untuk admin access</li>
-<li><b>Audit Log:</b> Complete logging untuk semua akses data</li>
-<li><b>Privileged Access Management:</b> Secure admin access</li>
-</ul>
+### 4.3 Peningkatan Layanan
+- **Analytics:** Analisis penggunaan untuk improvement
+- **A/B Testing:** Testing fitur baru untuk user experience
+- **Machine Learning:** AI untuk fraud detection dan personalization
+- **Research:** Riset pasar untuk pengembangan produk
 
-<h2>7. HAK-HAK ANDA</h2>
-<h3>7.1 Hak Akses</h3>
-<ul>
-<li><b>Data Portability:</b> Ekspor data dalam format standar</li>
-<li><b>Data Transparency:</b> Informasi lengkap data yang dimiliki</li>
-<li><b>Processing Activity:</b> Detail bagaimana data digunakan</li>
-<li><b>Third Party Sharing:</b> List pihak ketiga yang menerima data</li>
-</ul>
+### 4.4 Marketing dan Komunikasi
+- **Promosi:** Penawaran produk dan layanan yang relevan
+- **Newsletter:** Update fitur, tips keuangan, promo
+- **Survey:** Penelitian kepuasan dan kebutuhan pengguna
+- **Event:** Undangan webinar, workshop keuangan
 
-<h3>7.2 Hak Koreksi</h3>
-<ul>
-<li><b>Update Profile:</b> Self-service untuk update data pribadi</li>
-<li><b>Data Correction:</b> Request koreksi data yang tidak akurat</li>
-<li><b>Verification Process:</b> Proses verifikasi untuk data sensitif</li>
-<li><b>Notification:</b> Pemberitahuan perubahan ke pihak ketiga</li>
-</ul>
+## 5. DASAR HUKUM PEMROSESAN
 
-<h3>7.3 Hak Penghapusan</h3>
-<ul>
-<li><b>Account Deletion:</b> Penghapusan akun dan data terkait</li>
-<li><b>Selective Deletion:</b> Penghapusan data spesifik</li>
-<li><b>Retention Override:</b> Penghapusan sebelum periode retensi</li>
-<li><b>Legal Basis:</b> Consideration terhadap kewajiban hukum</li>
-</ul>
+### 5.1 Persetujuan (Consent)
+- Persetujuan eksplisit untuk data sensitif
+- Opt-in untuk marketing communication
+- Consent withdrawal mechanism tersedia
 
-<h2>8. RETENSI DATA</h2>
-<h3>8.1 Periode Penyimpanan</h3>
-<ul>
-<li><b>Data Transaksi:</b> 10 tahun (sesuai regulasi BI)</li>
-<li><b>Data Identitas:</b> Selama akun aktif + 5 tahun</li>
-<li><b>Log Komunikasi:</b> 3 tahun untuk audit purpose</li>
-<li><b>Analytics Data:</b> 2 tahun dalam bentuk agregat</li>
-</ul>
+### 5.2 Kewajiban Kontrak
+- Pemrosesan data untuk memenuhi layanan yang diminta
+- Verifikasi identitas sesuai regulasi perbankan
+- Compliance dengan terms of service
 
-<h3>8.2 Penghapusan Data</h3>
-<ul>
-<li><b>Account Closure:</b> Data dihapus setelah periode retensi</li>
-<li><b>Right to be Forgotten:</b> Penghapusan atas permintaan</li>
-<li><b>Secure Deletion:</b> Cryptographic erasure dan overwriting</li>
-<li><b>Certificate of Destruction:</b> Bukti penghapusan data</li>
-</ul>
+### 5.3 Kewajiban Hukum
+- **Bank Indonesia:** Pelaporan transaksi, AML/CFT
+- **OJK:** Regulatory reporting, consumer protection
+- **Kemenkeu:** Tax reporting, PPATK
+- **Kepolisian:** Investigasi fraud, money laundering
 
-<h2>9. COOKIES DAN TRACKING</h2>
-<h3>9.1 Jenis Cookies</h3>
-<ul>
-<li><b>Essential Cookies:</b> Untuk fungsi dasar aplikasi</li>
-<li><b>Performance Cookies:</b> Analytics dan monitoring</li>
-<li><b>Functional Cookies:</b> Preferensi dan personalization</li>
-<li><b>Marketing Cookies:</b> Targeted advertising</li>
-</ul>
+### 5.4 Kepentingan Sah (Legitimate Interest)
+- Fraud prevention dan risk management
+- System security dan integrity
+- Business analytics untuk improvement
+- Customer service quality assurance
 
-<h3>9.2 Cookie Management</h3>
-<ul>
-<li><b>Cookie Settings:</b> Control di aplikasi settings</li>
-<li><b>Browser Settings:</b> Disable cookies di browser</li>
-<li><b>Third Party Cookies:</b> Opt-out dari advertising cookies</li>
-<li><b>Cookie Policy:</b> Detail lengkap di cookie policy page</li>
-</ul>
+## 6. BERBAGI DATA DENGAN PIHAK KETIGA
 
-<h2>10. ANAK DI BAWAH UMUR</h2>
-<ul>
-<li>Layanan tidak ditujukan untuk anak di bawah 17 tahun</li>
-<li>Verifikasi usia saat registrasi</li>
-<li>Immediate deletion jika ditemukan data anak</li>
-<li>Parental consent untuk usia 17-21 tahun</li>
-</ul>
+### 6.1 Bank dan Financial Institution
+- **Bank Partner:** Untuk memproses transaksi perbankan
+- **Payment Gateway:** Pembayaran merchant dan e-commerce
+- **E-wallet Provider:** Top-up dan transfer antar e-wallet
+- **Credit Bureau:** Credit scoring dan risk assessment
 
-<h2>11. PERUBAHAN KEBIJAKAN PRIVASI</h2>
-<h3>11.1 Notifikasi Perubahan</h3>
-<ul>
-<li><b>Material Changes:</b> Email notification 30 hari sebelumnya</li>
-<li><b>Minor Updates:</b> In-app notification</li>
-<li><b>Version History:</b> Archive versi sebelumnya</li>
-<li><b>Continued Use:</b> Deemed acceptance jika tetap menggunakan</li>
-</ul>
+### 6.2 Technology Provider
+- **Cloud Provider:** AWS, Google Cloud untuk data storage
+- **Security Provider:** Anti-fraud, cybersecurity services
+- **Analytics Provider:** Google Analytics, Firebase
+- **Communication:** SMS gateway, email provider, push notification
 
-<h2>12. KONTAK DATA PROTECTION</h2>
-<h3>12.1 Data Protection Officer</h3>
-<ul>
-<li><b>Email:</b> privacy@mbankingcore.com</li>
-<li><b>Telepon:</b> +62-21-5000-1234</li>
-<li><b>Alamat:</b> Menara MBankingCore, Jakarta 12345</li>
-<li><b>Response Time:</b> Maksimal 30 hari untuk complex request</li>
-</ul>
+### 6.3 Regulator dan Law Enforcement
+- **Bank Indonesia:** Regulatory reporting, monetary policy
+- **OJK:** Consumer protection, financial services oversight
+- **PPATK:** Anti money laundering, suspicious transaction
+- **Kepolisian:** Criminal investigation, court order
 
-<h3>12.2 Complaint Process</h3>
-<ul>
-<li><b>Internal Complaint:</b> Melalui customer service</li>
-<li><b>Regulator Complaint:</b> Ke Kementerian Kominfo</li>
-<li><b>International:</b> GDPR representative untuk EU residents</li>
-<li><b>Escalation:</b> Clear escalation process untuk unresolved issues</li>
-</ul>
+### 6.4 Professional Services
+- **Auditor:** External audit, compliance verification
+- **Legal Advisor:** Legal opinion, regulatory guidance
+- **Consultant:** Business process improvement
+- **Insurance:** Coverage untuk cyber risk, fraud loss
 
-<h2>13. KETENTUAN KHUSUS</h2>
-<h3>13.1 Emerging Technology</h3>
-<ul>
-<li><b>AI/ML Ethics:</b> Responsible AI untuk decision making</li>
-<li><b>Blockchain:</b> Privacy consideration untuk DLT</li>
-<li><b>IoT Integration:</b> Security untuk connected devices</li>
-<li><b>Quantum Computing:</b> Quantum-safe cryptography preparation</li>
-</ul>
+## 7. TRANSFER DATA INTERNASIONAL
 
-<hr>
-<p><b>Efektif sejak:</b> 31 Juli 2025<br>
-<b>Versi:</b> 2.1<br>
-<b>Bahasa:</b> Bahasa Indonesia (versi resmi), English (reference)</p>
+### 7.1 Cloud Storage
+- Data disimpan di server AWS Singapore dan Indonesia
+- Enkripsi end-to-end selama transfer data
+- Compliance dengan GDPR untuk EU data subjects
+- Data residency sesuai regulasi Indonesia
 
-<p><i>Dengan menggunakan layanan MBankingCore, Anda menyatakan telah membaca, memahami, dan menyetujui Kebijakan Privasi ini.</i></p>`
+### 7.2 Vendor International
+- Anti-fraud provider dengan server global
+- Analytics tools dengan data anonymization
+- Adequate level of protection assurance
+- Data Processing Agreement (DPA) dengan vendor
+
+## 8. KEAMANAN DATA
+
+### 8.1 Enkripsi
+- **Data at Rest:** AES-256 encryption untuk data storage
+- **Data in Transit:** TLS 1.3 untuk komunikasi
+- **Database:** Field-level encryption untuk data sensitif
+- **Backup:** Encrypted backup dengan secure key management
+
+### 8.2 Access Control
+- **Role-based Access:** Akses terbatas sesuai job function
+- **Multi-factor Authentication:** 2FA untuk admin access
+- **Audit Log:** Complete logging untuk semua akses data
+- **Privileged Access Management:** Secure admin access
+
+### 8.3 Infrastructure Security
+- **Network Security:** Firewall, IDS/IPS, DDoS protection
+- **Endpoint Security:** Antivirus, endpoint detection
+- **Vulnerability Management:** Regular security assessment
+- **Incident Response:** 24/7 SOC monitoring
+
+### 8.4 Application Security
+- **Secure Development:** OWASP best practices
+- **Code Review:** Security review untuk setiap release
+- **Penetration Testing:** Regular pentest oleh third party
+- **Bug Bounty:** Program untuk vulnerability disclosure
+
+## 9. RETENSI DATA
+
+### 9.1 Periode Penyimpanan
+- **Data Transaksi:** 10 tahun (sesuai regulasi BI)
+- **Data Identitas:** Selama akun aktif + 5 tahun
+- **Log Komunikasi:** 3 tahun untuk audit purpose
+- **Analytics Data:** 2 tahun dalam bentuk agregat
+
+### 9.2 Penghapusan Data
+- **Account Closure:** Data dihapus setelah periode retensi
+- **Right to be Forgotten:** Penghapusan atas permintaan
+- **Secure Deletion:** Cryptographic erasure dan overwriting
+- **Certificate of Destruction:** Bukti penghapusan data
+
+## 10. HAK-HAK ANDA
+
+### 10.1 Hak Akses
+- **Data Portability:** Ekspor data dalam format standar
+- **Data Transparency:** Informasi lengkap data yang dimiliki
+- **Processing Activity:** Detail bagaimana data digunakan
+- **Third Party Sharing:** List pihak ketiga yang menerima data
+
+### 10.2 Hak Koreksi
+- **Update Profile:** Self-service untuk update data pribadi
+- **Data Correction:** Request koreksi data yang tidak akurat
+- **Verification Process:** Proses verifikasi untuk data sensitif
+- **Notification:** Pemberitahuan perubahan ke pihak ketiga
+
+### 10.3 Hak Penghapusan
+- **Account Deletion:** Penghapusan akun dan data terkait
+- **Selective Deletion:** Penghapusan data spesifik
+- **Retention Override:** Penghapusan sebelum periode retensi
+- **Legal Basis:** Consideration terhadap kewajiban hukum
+
+### 10.4 Hak Pembatasan
+- **Processing Restriction:** Pembatasan penggunaan data
+- **Marketing Opt-out:** Unsubscribe dari komunikasi marketing
+- **Consent Withdrawal:** Pencabutan persetujuan
+- **Object to Processing:** Keberatan terhadap pemrosesan
+
+## 11. COOKIES DAN TRACKING
+
+### 11.1 Jenis Cookies
+- **Essential Cookies:** Untuk fungsi dasar aplikasi
+- **Performance Cookies:** Analytics dan monitoring
+- **Functional Cookies:** Preferensi dan personalization
+- **Marketing Cookies:** Targeted advertising
+
+### 11.2 Cookie Management
+- **Cookie Settings:** Control di aplikasi settings
+- **Browser Settings:** Disable cookies di browser
+- **Third Party Cookies:** Opt-out dari advertising cookies
+- **Cookie Policy:** Detail lengkap di cookie policy page
+
+## 12. ANAK DI BAWAH UMUR
+
+### 12.1 Pembatasan Usia
+- Layanan tidak ditujukan untuk anak di bawah 17 tahun
+- Verifikasi usia saat registrasi
+- Immediate deletion jika ditemukan data anak
+- Parental consent untuk usia 17-21 tahun
+
+### 12.2 Special Protection
+- Enhanced privacy protection untuk young adults
+- Limited data collection dan processing
+- No marketing communication untuk under 21
+- Regular review untuk compliance
+
+## 13. PERUBAHAN KEBIJAKAN PRIVASI
+
+### 13.1 Notifikasi Perubahan
+- **Material Changes:** Email notification 30 hari sebelumnya
+- **Minor Updates:** In-app notification
+- **Version History:** Archive versi sebelumnya
+- **Continued Use:** Deemed acceptance jika tetap menggunakan
+
+### 13.2 Review Process
+- Annual review kebijakan privasi
+- Compliance check dengan regulasi terbaru
+- Stakeholder consultation untuk perubahan material
+- Legal review untuk semua perubahan
+
+## 14. KONTAK DATA PROTECTION
+
+### 14.1 Data Protection Officer
+- **Email:** privacy@mbankingcore.com
+- **Telepon:** +62-21-5000-1234
+- **Alamat:** Menara MBankingCore, Jakarta 12345
+- **Response Time:** Maksimal 30 hari untuk complex request
+
+### 14.2 Complaint Process
+- **Internal Complaint:** Melalui customer service
+- **Regulator Complaint:** Ke Kementerian Kominfo
+- **International:** GDPR representative untuk EU residents
+- **Escalation:** Clear escalation process untuk unresolved issues
+
+## 15. KETENTUAN KHUSUS
+
+### 15.1 COVID-19 Response
+- Enhanced hygiene untuk physical verification
+- Remote onboarding dengan video call
+- Digital signature untuk document
+- Contactless transaction promotion
+
+### 15.2 Emerging Technology
+- **AI/ML Ethics:** Responsible AI untuk decision making
+- **Blockchain:** Privacy consideration untuk DLT
+- **IoT Integration:** Security untuk connected devices
+- **Quantum Computing:** Quantum-safe cryptography preparation
+
+---
+
+**Efektif sejak:** 31 Juli 2025  
+**Versi:** 2.1  
+**Bahasa:** Bahasa Indonesia (versi resmi), English (reference)
+
+Dengan menggunakan layanan MBankingCore, Anda menyatakan telah membaca, memahami, dan menyetujui Kebijakan Privasi ini.`
 }

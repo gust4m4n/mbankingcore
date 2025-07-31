@@ -16,7 +16,8 @@ Dokumentasi lengkap untuk RESTful API MBankingCore dengan JWT Authentication, Mu
 - ✅ **Comprehensive Audit System** untuk security monitoring
 - ✅ **Role-based Access Control** (Super Admin, Admin, User)
 - ✅ **HTTPS Support** dengan TLS 1.2+ encryption
-- ✅ **Demo Data Integration** dengan 67 users + 18 admins + 92 transactions
+- ✅ **Demo Data Integration** dengan 6,067 users + 50 admins + 35,375 transactions (yearly)
+- ✅ **Massive Dataset Simulation** untuk enterprise-scale testing scenarios
 - ✅ **Indonesian Localization** untuk realistic testing scenarios
 
 ## 📖 Response Format
@@ -68,8 +69,9 @@ API diorganisir ke dalam bagian-bagian berikut:
 - **[Article Management](#10-article-management-apis)** - Operasi CRUD artikel (5 endpoints)
 - **[Photo Management](#11-photo-management-apis)** - Sistem manajemen foto (4 endpoints)
 
-### 👑 Admin APIs (44+ endpoints)
+### 👑 Admin APIs (45+ endpoints)
 
+- **[Admin Dashboard](#12-admin-dashboard-api)** - Dashboard statistics & metrics (1 endpoint)
 - **[Admin Management](#13-admin-management-apis)** - Admin authentication & CRUD (7 endpoints)
 - **[Admin Transaction Management](#14-admin-transaction-management)** - Monitor & reverse transactions (2 endpoints)
 - **[Admin Article Management](#15-admin-article-management)** - Create artikel (1 endpoint)
@@ -81,16 +83,20 @@ API diorganisir ke dalam bagian-bagian berikut:
 - **[Admin Terms & Conditions](#21-admin-terms-conditions)** - Set T&C (1 endpoint)
 - **[Admin Privacy Policy](#22-admin-privacy-policy)** - Set Privacy Policy (1 endpoint)
 
-**Total: 73+ Active Endpoints** ✨
+**Total: 74+ Active Endpoints** ✨
 
-## 🎯 Demo Data Ready
+## 🎯 Massive Demo Data Ready
 
-Aplikasi sudah dilengkapi dengan data demo yang komprehensif:
+Aplikasi sudah dilengkapi dengan massive demo data yang komprehensif untuk enterprise-scale testing:
 
-- **18 Admin Users** - Termasuk super admin (`super@mbankingcore.com` / `Super123?`)
-- **67 Regular Users** - Dengan nama Indonesia dan data realistis
-- **92 Banking Transactions** - Top-up, transfer, withdraw dengan balance tracking yang akurat
+- **50 Admin Users** - Termasuk super admin (`super@mbankingcore.com` / `Super123?`)
+- **6,067 Regular Users** - Dengan nama Indonesia dan data realistis tersebar dalam 1 tahun
+- **35,375+ Banking Transactions** - Realistic time distribution dengan breakdown:
+  - **Topup**: 8,805 transactions this year
+  - **Withdraw**: 8,840 transactions this year  
+  - **Transfer**: 17,730 transactions this year
 - **Realistic Account Numbers** - Format 16-digit sesuai standar perbankan Indonesia
+- **Time-Distributed Data** - Data tersebar realistis sepanjang tahun untuk testing yang akurat
 - **Indonesian Localization** - Nama, nomor telepon, dan deskripsi transaksi dalam bahasa Indonesia
 
 ---
@@ -247,7 +253,7 @@ Complete list of all 73+ available API endpoints organized by access level and f
 2. **Banking Authentication** to get tokens using demo user credentials
 3. **Test Protected APIs** with user token
 4. **Admin APIs** using super admin credentials (`super@mbankingcore.com`)
-5. **Transaction Testing** with existing demo data (92 transactions available)
+5. **Transaction Testing** with massive demo data (35,375+ transactions available)
 
 ## 📄 Postman Collections Available
 
@@ -263,15 +269,16 @@ Complete list of all 73+ available API endpoints organized by access level and f
 5. Test any protected endpoint with automatic token handling
 6. Use super admin credentials for admin endpoint testing
 
-## 🏦 Demo Transaction Data
+## 🏦 Massive Demo Transaction Data
 
-The system includes 92 realistic transactions:
+The system includes 35,375+ realistic transactions distributed across the year:
 
-- **30 Top-up transactions** - Various amounts from Rp 50,000 to Rp 2,000,000
-- **31 Transfer transactions** - Inter-user transfers with Indonesian descriptions
-- **27 Withdraw transactions** - ATM withdrawals and cash-outs
-- **4 Failed transactions** - For error handling testing
+- **8,805 Topup transactions** - Various amounts from Rp 50,000 to Rp 5,000,000
+- **17,730 Transfer transactions** - Inter-user transfers with Indonesian descriptions
+- **8,840 Withdraw transactions** - ATM withdrawals and cash-outs
+- **Time-distributed** - Realistic transaction patterns throughout the year
 - **Balance tracking** - All transactions maintain accurate balance history
+- **Enterprise-scale testing** - Perfect for performance and scalability testing
 
 ---
 
@@ -2579,11 +2586,71 @@ Authorization: Bearer <admin_access_token>
 
 ---
 
-## 12. Admin Management APIs
+## 12. Admin Dashboard API
+
+**📊 Dashboard Statistics**: Comprehensive dashboard with user, admin, and transaction statistics for system monitoring.
+
+### 12.1 Get Dashboard Statistics
+
+**Endpoint:** `GET /api/admin/dashboard`  
+**Access:** Admin Required  
+**Headers:** `Authorization: Bearer <admin_token>`
+
+**Description:** Get comprehensive dashboard statistics including user counts, admin counts, and transaction summaries broken down by time periods (today, this month, this year).
+
+**Response:**
+
+```json
+{
+    "code": 200,
+    "message": "Dashboard data retrieved successfully",
+    "data": {
+        "total_users": 67,
+        "total_admins": 18,
+        "total_transactions": {
+            "today": 92,
+            "this_month": 92,
+            "this_year": 92
+        },
+        "topup_transactions": {
+            "today": 30,
+            "this_month": 30,
+            "this_year": 30
+        },
+        "withdraw_transactions": {
+            "today": 27,
+            "this_month": 27,
+            "this_year": 27
+        },
+        "transfer_transactions": {
+            "today": 35,
+            "this_month": 35,
+            "this_year": 35
+        }
+    }
+}
+```
+
+**Dashboard Fields:**
+- `total_users`: Total registered users in system
+- `total_admins`: Total admin users in system
+- `total_transactions`: All transaction types combined
+- `topup_transactions`: Only topup transactions
+- `withdraw_transactions`: Only withdraw transactions
+- `transfer_transactions`: Both transfer_in and transfer_out combined
+
+**Time Periods:**
+- `today`: Transactions from 00:00:00 to 23:59:59 today
+- `this_month`: Transactions from 1st to last day of current month
+- `this_year`: Transactions from January 1st to December 31st of current year
+
+---
+
+## 13. Admin Management APIs
 
 **🔧 Admin System**: Complete admin authentication and CRUD management system with role-based access control.
 
-### 12.1 Admin Login
+### 13.1 Admin Login
 
 **Endpoint:** `POST /api/admin/login`  
 **Access:** Public (Admin Credentials Required)  

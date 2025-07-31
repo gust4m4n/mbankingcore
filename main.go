@@ -167,6 +167,9 @@ func main() {
 			adminProtected := admin.Group("/")
 			adminProtected.Use(middleware.AdminAuthMiddleware())
 			{
+				// Dashboard (admin only)
+				adminProtected.GET("/dashboard", adminHandler.GetDashboard) // Get dashboard statistics
+
 				// Admin management
 				adminProtected.GET("/admins", adminHandler.GetAdmins)          // Get all admins
 				adminProtected.GET("/admins/:id", adminHandler.GetAdminByID)   // Get admin by ID
