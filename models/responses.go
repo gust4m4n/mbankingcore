@@ -355,6 +355,20 @@ func RetrieveFailedResponse() ErrorResponse {
 // DASHBOARD RESPONSE STRUCTURES
 // ===========================================
 
+// PerformanceDataPoint represents a single data point for chart
+type PerformanceDataPoint struct {
+	Period string `json:"period"`
+	Count  int64  `json:"count"`
+	Amount int64  `json:"amount"`
+}
+
+// PerformanceData represents chart data for different time ranges
+type PerformanceData struct {
+	Weekly  []PerformanceDataPoint `json:"weekly"`
+	Monthly []PerformanceDataPoint `json:"monthly"`
+	Yearly  []PerformanceDataPoint `json:"yearly"`
+}
+
 // DashboardStats represents dashboard statistics
 type DashboardStats struct {
 	TotalUsers           int64                        `json:"total_users"`
@@ -363,6 +377,7 @@ type DashboardStats struct {
 	TopupTransactions    TransactionPeriodsWithAmount `json:"topup_transactions"`
 	WithdrawTransactions TransactionPeriodsWithAmount `json:"withdraw_transactions"`
 	TransferTransactions TransactionPeriodsWithAmount `json:"transfer_transactions"`
+	Performance          PerformanceData              `json:"performance"`
 }
 
 // TransactionPeriods represents transaction counts for different time periods

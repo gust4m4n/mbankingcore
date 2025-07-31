@@ -95,6 +95,11 @@ func seedInitialData() error {
 		return err
 	}
 
+	// Seed 20000 dummy transactions from 2020-2025
+	if err := seedDummyTransactions2020To2025(); err != nil {
+		return err
+	}
+
 	log.Println("✅ Initial data seeding completed")
 	return nil
 }
@@ -712,120 +717,146 @@ func seedDummyTransactionsYearly() error {
 	return nil
 }
 
-// seedDummyUsersYearly creates 5000 dummy users distributed over 1 year
+// seedDummyUsersYearly creates 5000 dummy users distributed from 2020-2025
 func seedDummyUsersYearly() error {
-	log.Println("Seeding 5000 dummy users for yearly data...")
+	log.Println("Seeding 5000 dummy users with registration dates from 2020-2025...")
 
 	// Check if dummy users already exist
 	var count int64
-	DB.Model(&models.User{}).Where("phone LIKE ?", "628%").Count(&count)
+	DB.Model(&models.User{}).Where("phone LIKE ?", "08%").Count(&count)
 	if count >= 5000 {
-		log.Println("✅ 5000+ dummy users already exist")
+		log.Printf("✅ %d dummy users already exist", count)
 		return nil
 	}
 
-	// Clear existing dummy users if any exist but less than 5000
-	if count > 0 {
-		DB.Where("phone LIKE ?", "628%").Delete(&models.User{})
-		log.Println("Cleared existing dummy users")
-	}
-
-	// Generate start and end dates for 1 year period
-	endDate := time.Now()
-	startDate := endDate.AddDate(-1, 0, 0) // 1 year ago
-
-	// Indonesian names
+	// Indonesian names for variety
 	firstNames := []string{
-		"Ahmad", "Budi", "Citra", "Dewi", "Eko", "Farah", "Gunawan", "Hana", "Indra", "Joko",
-		"Kartika", "Linda", "Maya", "Novi", "Omar", "Putri", "Qori", "Rina", "Sari", "Tono",
-		"Umi", "Vina", "Wati", "Xena", "Yuni", "Zahra", "Andi", "Bella", "Candra", "Dina",
-		"Erik", "Fifi", "Gita", "Heri", "Ika", "Jihan", "Kiki", "Lina", "Mira", "Nana",
-		"Oki", "Pita", "Qila", "Reza", "Sinta", "Titi", "Ully", "Vera", "Wahyu", "Yanto",
+		"Andi", "Budi", "Citra", "Dewi", "Eko", "Fitri", "Gita", "Hadi",
+		"Indra", "Joko", "Kiki", "Luna", "Maya", "Nita", "Omar", "Putri",
+		"Qori", "Rina", "Sari", "Toni", "Udin", "Vina", "Wati", "Yani",
+		"Zaki", "Agus", "Bayu", "Cinta", "Doni", "Ella", "Farid", "Gina",
+		"Hendra", "Intan", "Johan", "Kartika", "Laras", "Mira", "Nando", "Ovi",
+		"Pras", "Quincy", "Rudi", "Sinta", "Tari", "Ucok", "Vera", "Wina",
+		"Yoga", "Zahra", "Arief", "Bella", "Cahyo", "Diana", "Edy", "Fara",
+		"Galih", "Hana", "Ivan", "Jelita", "Koko", "Lina", "Mega", "Noval",
 	}
 
 	lastNames := []string{
-		"Pratama", "Sari", "Wijaya", "Kusuma", "Putri", "Santoso", "Maharani", "Firmansyah",
-		"Lestari", "Setiawan", "Handayani", "Nugroho", "Rahayu", "Kurniawan", "Wulandari",
-		"Purwanto", "Safitri", "Irawan", "Anggraini", "Susanto", "Permata", "Hakim", "Melati",
-		"Adiputra", "Kartini", "Baskara", "Cahyani", "Dharma", "Fadilla", "Gunawan", "Hapsari",
-		"Indriani", "Julianto", "Kencana", "Larasati", "Mahendra", "Nurhaliza", "Oktaviani",
-		"Pradana", "Qomaria", "Rachman", "Saputra", "Triyanto", "Utami", "Valeria", "Wardani",
-		"Yudhistira", "Zainal",
+		"Pratama", "Sari", "Utomo", "Wijaya", "Santoso", "Kurniawan", "Handoko", "Susanto",
+		"Wibowo", "Setiawan", "Rahayu", "Lestari", "Mahendra", "Permana", "Saputra", "Kartini",
+		"Hidayat", "Fitriani", "Nugroho", "Anggraini", "Prasetyo", "Safitri", "Gunawan", "Melati",
+		"Adriansyah", "Puspita", "Ramadhan", "Cahyani", "Firmansyah", "Dewanti", "Syahputra", "Maharani",
+		"Maulana", "Pertiwi", "Wardana", "Salsabila", "Putranto", "Kusuma", "Saputri", "Hakim",
+		"Aditya", "Novita", "Rachman", "Wahyuni", "Subagyo", "Kirana", "Budiman", "Amelia",
+		"Iskandar", "Mentari", "Rahman", "Purnama", "Surya", "Mawar", "Firdaus", "Sekarsari",
+		"Ardiansyah", "Ananda", "Nurhayati", "Sutrisno", "Damayanti", "Purwanto", "Safira", "Hartono",
 	}
 
 	motherNames := []string{
-		"Siti Aminah", "Nur Khadijah", "Fatimah Zahra", "Aisyah Rahmawati", "Khadijah Sari",
-		"Aminah Putri", "Zahra Lestari", "Rahmawati Indah", "Sari Melati", "Putri Cahaya",
-		"Lestari Mawar", "Indah Permata", "Melati Sari", "Cahaya Bulan", "Mawar Indah",
-		"Permata Hati", "Bulan Purnama", "Indah Sari", "Hati Suci", "Purnama Indah",
-		"Suci Melati", "Dewi Sartika", "Kartini Putri", "Cut Nyak Dhien", "Roro Jonggrang",
-		"Dewi Sekartaji", "Srikandi Putri", "Shinta Dewi", "Gayatri Sari", "Ratna Sari",
+		"Siti", "Sri", "Umi", "Ibu", "Nyai", "Ratu", "Dewi", "Putri",
+		"Ratna", "Indira", "Kartika", "Melati", "Mawar", "Cempaka", "Anggrek", "Dahlia",
+		"Kenanga", "Seruni", "Tulip", "Sakura", "Lily", "Rose", "Jasmine", "Orchid",
+		"Bunga", "Cantika", "Anggun", "Jelita", "Ayu", "Endah", "Permata", "Intan",
 	}
+
+	// Time range: 2020-2025
+	startTime := time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
+	endTime := time.Date(2025, 12, 31, 23, 59, 59, 0, time.UTC)
+	timeRange := endTime.Unix() - startTime.Unix()
+
+	// Track used phone numbers to ensure uniqueness
+	usedPhones := make(map[string]bool)
 
 	var users []models.User
-	rand.Seed(time.Now().UnixNano())
+	batchSize := 100 // Insert in batches for better performance
 
 	for i := 0; i < 5000; i++ {
-		// Generate random creation time within the year
-		randomDuration := time.Duration(rand.Int63n(int64(endDate.Sub(startDate))))
-		createdAt := startDate.Add(randomDuration)
-
-		// Generate phone number
-		phoneNumber := fmt.Sprintf("6281%08d", 10000000+rand.Intn(90000000))
-
-		// Generate random name
-		firstName := firstNames[rand.Intn(len(firstNames))]
-		lastName := lastNames[rand.Intn(len(lastNames))]
-		fullName := firstName + " " + lastName
-
-		// Generate mother's name
-		motherName := motherNames[rand.Intn(len(motherNames))]
-
-		// Generate PIN
-		pin := fmt.Sprintf("%06d", rand.Intn(1000000))
-
-		// Generate initial balance (0 to 10,000,000)
-		balance := int64(rand.Float64() * 10000000)
-
-		// Generate status (90% active, 10% inactive)
-		status := 1
-		if rand.Float64() < 0.1 {
-			status = 0
+		// Generate unique phone number
+		var phone string
+		for {
+			// Indonesian phone format: 08xxxxxxxxx (10-12 digits)
+			phone = fmt.Sprintf("08%d", 1000000000+rand.Intn(9000000000))
+			if !usedPhones[phone] {
+				usedPhones[phone] = true
+				break
+			}
 		}
 
+		// Random registration time between 2020-2025
+		randomTime := startTime.Add(time.Duration(rand.Int63n(timeRange)) * time.Second)
+
+		// Generate random balance (0 to 50,000,000 rupiah)
+		balance := int64(rand.Intn(50000000))
+
+		// Random status (mostly active)
+		status := models.USER_STATUS_ACTIVE
+		if rand.Float32() < 0.1 { // 10% chance of inactive
+			status = models.USER_STATUS_INACTIVE
+		} else if rand.Float32() < 0.02 { // 2% chance of blocked
+			status = models.USER_STATUS_BLOCKED
+		}
+
+		// Create user
 		user := models.User{
-			Name:       fullName,
-			Phone:      phoneNumber,
-			MotherName: motherName,
-			PinAtm:     pin,
+			Name:       firstNames[rand.Intn(len(firstNames))] + " " + lastNames[rand.Intn(len(lastNames))],
+			Phone:      phone,
+			MotherName: motherNames[rand.Intn(len(motherNames))] + " " + lastNames[rand.Intn(len(lastNames))],
+			PinAtm:     "123456", // Default PIN for dummy users
 			Balance:    balance,
 			Status:     status,
+			Avatar:     "", // Empty avatar for dummy users
+			CreatedAt:  randomTime,
+			UpdatedAt:  randomTime,
 		}
-		user.CreatedAt = createdAt
-		user.UpdatedAt = createdAt
 
 		users = append(users, user)
+
+		// Insert in batches
+		if len(users) >= batchSize || i == 5000-1 {
+			if err := DB.CreateInBatches(&users, batchSize).Error; err != nil {
+				log.Printf("Error inserting batch: %v", err)
+				continue
+			}
+
+			log.Printf("Inserted batch: %d/5000 users", i+1)
+			users = []models.User{} // Reset batch
+		}
 	}
 
-	// Create all users in batches for better performance
-	batchSize := 100
-	for i := 0; i < len(users); i += batchSize {
-		end := i + batchSize
-		if end > len(users) {
-			end = len(users)
-		}
+	log.Printf("✅ Created 5000 dummy users with registration dates from 2020-2025")
 
-		batch := users[i:end]
-		if err := DB.Create(&batch).Error; err != nil {
-			log.Printf("Failed to create user batch %d-%d: %v", i, end-1, err)
-			return err
-		}
-
-		log.Printf("Created user batch %d-%d", i+1, end)
-	}
-
-	log.Printf("✅ Created 5000 dummy users over 1 year period")
+	// Show summary statistics
+	showUserStatistics()
 	return nil
+}
+
+// showUserStatistics displays user statistics after seeding
+func showUserStatistics() {
+	log.Println("\n=== User Statistics ===")
+
+	var totalUsers int64
+	DB.Model(&models.User{}).Count(&totalUsers)
+	log.Printf("Total users in database: %d", totalUsers)
+
+	// Count by year
+	for year := 2020; year <= 2025; year++ {
+		var yearCount int64
+		startOfYear := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
+		endOfYear := time.Date(year, 12, 31, 23, 59, 59, 0, time.UTC)
+
+		DB.Model(&models.User{}).Where("created_at BETWEEN ? AND ?", startOfYear, endOfYear).Count(&yearCount)
+		log.Printf("Users registered in %d: %d", year, yearCount)
+	}
+
+	// Count by status
+	var activeUsers, inactiveUsers, blockedUsers int64
+	DB.Model(&models.User{}).Where("status = ?", models.USER_STATUS_ACTIVE).Count(&activeUsers)
+	DB.Model(&models.User{}).Where("status = ?", models.USER_STATUS_INACTIVE).Count(&inactiveUsers)
+	DB.Model(&models.User{}).Where("status = ?", models.USER_STATUS_BLOCKED).Count(&blockedUsers)
+
+	log.Printf("Active users: %d", activeUsers)
+	log.Printf("Inactive users: %d", inactiveUsers)
+	log.Printf("Blocked users: %d", blockedUsers)
 }
 
 // seedDummyAdminsYearly creates 32 dummy admins distributed over 1 year
@@ -1507,4 +1538,263 @@ func getPrivacyPolicyContent() string {
 <b>Bahasa:</b> Bahasa Indonesia (versi resmi), English (reference)</p>
 
 <p><i>Dengan menggunakan layanan MBankingCore, Anda menyatakan telah membaca, memahami, dan menyetujui Kebijakan Privasi ini.</i></p>`
+}
+
+// seedDummyTransactions2020To2025 creates 20000 dummy transactions from 2020-2025
+func seedDummyTransactions2020To2025() error {
+	log.Println("Seeding 20000 dummy transactions from 2020-2025...")
+
+	// Check if transactions already exist (check for total count >= 20000)
+	var count int64
+	DB.Model(&models.Transaction{}).Count(&count)
+	if count >= 20000 {
+		log.Printf("✅ %d transactions already exist, skipping 2020-2025 dummy data", count)
+		return nil
+	}
+
+	// Get all user IDs for transaction generation
+	var userIDs []uint
+	if err := DB.Model(&models.User{}).Pluck("id", &userIDs).Error; err != nil {
+		log.Printf("Failed to get user IDs: %v", err)
+		return err
+	}
+
+	if len(userIDs) == 0 {
+		log.Println("No users found, skipping transaction generation")
+		return nil
+	}
+
+	// Time range: 2020-2025
+	startTime := time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
+	endTime := time.Date(2025, 12, 31, 23, 59, 59, 0, time.UTC)
+	timeRange := endTime.Unix() - startTime.Unix()
+
+	// Transaction types and their weights
+	transactionTypes := []struct {
+		Type   string
+		Weight int
+	}{
+		{"topup", 30},        // 30% topup
+		{"withdraw", 25},     // 25% withdraw
+		{"transfer_out", 20}, // 20% transfer out
+		{"transfer_in", 20},  // 20% transfer in
+		{"payment", 5},       // 5% payment
+	}
+
+	// Transaction descriptions by type
+	descriptions := map[string][]string{
+		"topup": {
+			"Top up via m-banking",
+			"Top up gaji bulanan",
+			"Top up bonus kerja",
+			"Isi saldo untuk transaksi",
+			"Transfer dari rekening bank",
+			"Top up via ATM",
+			"Isi saldo otomatis",
+		},
+		"withdraw": {
+			"Tarik tunai untuk keperluan harian",
+			"Withdraw untuk ongkos",
+			"Tarik tunai di ATM",
+			"Withdraw untuk belanja",
+			"Tarik tunai emergency",
+			"Withdraw untuk bayar parkir",
+			"Tarik tunai weekend",
+		},
+		"transfer_out": {
+			"Transfer ke keluarga",
+			"Transfer untuk split bill",
+			"Transfer ke teman",
+			"Bayar hutang",
+			"Transfer untuk hadiah",
+			"Transfer ke orang tua",
+			"Transfer untuk investasi",
+		},
+		"transfer_in": {
+			"Transfer dari keluarga",
+			"Terima transfer teman",
+			"Transfer gaji",
+			"Terima bayaran hutang",
+			"Transfer bonus",
+			"Terima hadiah ulang tahun",
+			"Transfer dari anak",
+		},
+		"payment": {
+			"Bayar tagihan listrik",
+			"Bayar pulsa",
+			"Bayar internet",
+			"Bayar PDAM",
+			"Bayar asuransi",
+			"Bayar cicilan",
+			"Bayar belanja online",
+		},
+	}
+
+	// Status distribution
+	statuses := []struct {
+		Status string
+		Weight int
+	}{
+		{"completed", 85}, // 85% completed
+		{"pending", 10},   // 10% pending
+		{"failed", 5},     // 5% failed
+	}
+
+	var transactions []models.Transaction
+	batchSize := 500 // Process in batches
+
+	rand.Seed(time.Now().UnixNano())
+
+	for i := 0; i < 20000; i++ {
+		// Random user
+		userID := userIDs[rand.Intn(len(userIDs))]
+
+		// Random transaction time between 2020-2025
+		randomTime := startTime.Add(time.Duration(rand.Int63n(timeRange)) * time.Second)
+
+		// Random transaction type based on weights
+		var txType string
+		totalWeight := 0
+		for _, t := range transactionTypes {
+			totalWeight += t.Weight
+		}
+		randomWeight := rand.Intn(totalWeight)
+		currentWeight := 0
+		for _, t := range transactionTypes {
+			currentWeight += t.Weight
+			if randomWeight < currentWeight {
+				txType = t.Type
+				break
+			}
+		}
+
+		// Random amount based on transaction type
+		var amount int64
+		switch txType {
+		case "topup":
+			// Topup: 50K - 5M IDR
+			amount = int64(rand.Intn(4950000) + 50000)
+		case "withdraw":
+			// Withdraw: 20K - 2M IDR
+			amount = int64(rand.Intn(1980000) + 20000)
+		case "transfer_out", "transfer_in":
+			// Transfer: 10K - 3M IDR
+			amount = int64(rand.Intn(2990000) + 10000)
+		case "payment":
+			// Payment: 5K - 1M IDR
+			amount = int64(rand.Intn(995000) + 5000)
+		default:
+			amount = int64(rand.Intn(500000) + 50000)
+		}
+
+		// Random balance before/after (simplified for dummy data)
+		balanceBefore := int64(rand.Intn(10000000) + 100000) // 100K - 10M IDR
+		var balanceAfter int64
+		switch txType {
+		case "topup", "transfer_in":
+			balanceAfter = balanceBefore + amount
+		case "withdraw", "transfer_out", "payment":
+			balanceAfter = balanceBefore - amount
+			if balanceAfter < 0 {
+				balanceAfter = 0
+			}
+		default:
+			balanceAfter = balanceBefore
+		}
+
+		// Random status based on weights
+		var status string
+		totalStatusWeight := 0
+		for _, s := range statuses {
+			totalStatusWeight += s.Weight
+		}
+		randomStatusWeight := rand.Intn(totalStatusWeight)
+		currentStatusWeight := 0
+		for _, s := range statuses {
+			currentStatusWeight += s.Weight
+			if randomStatusWeight < currentStatusWeight {
+				status = s.Status
+				break
+			}
+		}
+
+		// Random description
+		descList := descriptions[txType]
+		description := descList[rand.Intn(len(descList))]
+
+		// Create transaction
+		transaction := models.Transaction{
+			UserID:        userID,
+			Type:          txType,
+			Amount:        amount,
+			BalanceBefore: balanceBefore,
+			BalanceAfter:  balanceAfter,
+			Description:   description,
+			Status:        status,
+			CreatedAt:     randomTime,
+			UpdatedAt:     randomTime,
+		}
+
+		transactions = append(transactions, transaction)
+
+		// Insert in batches
+		if len(transactions) >= batchSize || i == 20000-1 {
+			if err := DB.CreateInBatches(&transactions, batchSize).Error; err != nil {
+				log.Printf("Error inserting transaction batch: %v", err)
+				continue
+			}
+
+			log.Printf("Inserted transaction batch: %d/20000 transactions", i+1)
+			transactions = []models.Transaction{} // Reset batch
+		}
+	}
+
+	log.Printf("✅ Created 20000 dummy transactions from 2020-2025")
+
+	// Show summary statistics
+	showTransactionStatistics()
+	return nil
+}
+
+// showTransactionStatistics displays transaction statistics after seeding
+func showTransactionStatistics() {
+	log.Println("\n=== Transaction Statistics ===")
+
+	var totalTransactions int64
+	DB.Model(&models.Transaction{}).Count(&totalTransactions)
+	log.Printf("Total transactions in database: %d", totalTransactions)
+
+	// Count by year
+	for year := 2020; year <= 2025; year++ {
+		var yearCount int64
+		startOfYear := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
+		endOfYear := time.Date(year, 12, 31, 23, 59, 59, 0, time.UTC)
+
+		DB.Model(&models.Transaction{}).Where("created_at BETWEEN ? AND ?", startOfYear, endOfYear).Count(&yearCount)
+		log.Printf("Transactions in %d: %d", year, yearCount)
+	}
+
+	// Count by type
+	var topupCount, withdrawCount, transferOutCount, transferInCount, paymentCount int64
+	DB.Model(&models.Transaction{}).Where("type = ?", "topup").Count(&topupCount)
+	DB.Model(&models.Transaction{}).Where("type = ?", "withdraw").Count(&withdrawCount)
+	DB.Model(&models.Transaction{}).Where("type = ?", "transfer_out").Count(&transferOutCount)
+	DB.Model(&models.Transaction{}).Where("type = ?", "transfer_in").Count(&transferInCount)
+	DB.Model(&models.Transaction{}).Where("type = ?", "payment").Count(&paymentCount)
+
+	log.Printf("Topup transactions: %d", topupCount)
+	log.Printf("Withdraw transactions: %d", withdrawCount)
+	log.Printf("Transfer out transactions: %d", transferOutCount)
+	log.Printf("Transfer in transactions: %d", transferInCount)
+	log.Printf("Payment transactions: %d", paymentCount)
+
+	// Count by status
+	var completedCount, pendingCount, failedCount int64
+	DB.Model(&models.Transaction{}).Where("status = ?", "completed").Count(&completedCount)
+	DB.Model(&models.Transaction{}).Where("status = ?", "pending").Count(&pendingCount)
+	DB.Model(&models.Transaction{}).Where("status = ?", "failed").Count(&failedCount)
+
+	log.Printf("Completed transactions: %d", completedCount)
+	log.Printf("Pending transactions: %d", pendingCount)
+	log.Printf("Failed transactions: %d", failedCount)
 }

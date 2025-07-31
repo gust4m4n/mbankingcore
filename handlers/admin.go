@@ -603,5 +603,78 @@ func (h *AdminHandler) GetDashboard(c *gin.Context) {
 		Where("type = ?", "transfer_out").
 		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TransferTransactions.AllTimeAmount)
 
+	// Get performance data for charts
+	// Weekly performance (last 7 weeks)
+	for i := 6; i >= 0; i-- {
+		weekStart := startOfWeek.AddDate(0, 0, -7*i)
+		weekEnd := weekStart.AddDate(0, 0, 7)
+		weekLabel := weekStart.Format("Jan 02")
+
+		var weekCount int64
+		var weekAmount int64
+
+		h.DB.Model(&models.Transaction{}).
+			Where("created_at >= ? AND created_at < ?", weekStart, weekEnd).
+			Count(&weekCount)
+
+		h.DB.Model(&models.Transaction{}).
+			Where("created_at >= ? AND created_at < ?", weekStart, weekEnd).
+			Select("COALESCE(SUM(amount), 0)").Row().Scan(&weekAmount)
+
+		dashboard.Performance.Weekly = append(dashboard.Performance.Weekly, models.PerformanceDataPoint{
+			Period: weekLabel,
+			Count:  weekCount,
+			Amount: weekAmount,
+		})
+	}
+
+	// Monthly performance (last 12 months)
+	for i := 11; i >= 0; i-- {
+		monthStart := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location()).AddDate(0, -i, 0)
+		monthEnd := monthStart.AddDate(0, 1, 0)
+		monthLabel := monthStart.Format("Jan 2006")
+
+		var monthCount int64
+		var monthAmount int64
+
+		h.DB.Model(&models.Transaction{}).
+			Where("created_at >= ? AND created_at < ?", monthStart, monthEnd).
+			Count(&monthCount)
+
+		h.DB.Model(&models.Transaction{}).
+			Where("created_at >= ? AND created_at < ?", monthStart, monthEnd).
+			Select("COALESCE(SUM(amount), 0)").Row().Scan(&monthAmount)
+
+		dashboard.Performance.Monthly = append(dashboard.Performance.Monthly, models.PerformanceDataPoint{
+			Period: monthLabel,
+			Count:  monthCount,
+			Amount: monthAmount,
+		})
+	}
+
+	// Yearly performance (last 5 years)
+	for i := 4; i >= 0; i-- {
+		yearStart := time.Date(now.Year()-i, 1, 1, 0, 0, 0, 0, now.Location())
+		yearEnd := yearStart.AddDate(1, 0, 0)
+		yearLabel := yearStart.Format("2006")
+
+		var yearCount int64
+		var yearAmount int64
+
+		h.DB.Model(&models.Transaction{}).
+			Where("created_at >= ? AND created_at < ?", yearStart, yearEnd).
+			Count(&yearCount)
+
+		h.DB.Model(&models.Transaction{}).
+			Where("created_at >= ? AND created_at < ?", yearStart, yearEnd).
+			Select("COALESCE(SUM(amount), 0)").Row().Scan(&yearAmount)
+
+		dashboard.Performance.Yearly = append(dashboard.Performance.Yearly, models.PerformanceDataPoint{
+			Period: yearLabel,
+			Count:  yearCount,
+			Amount: yearAmount,
+		})
+	}
+
 	c.JSON(http.StatusOK, models.DashboardSuccessResponse(dashboard))
 }
