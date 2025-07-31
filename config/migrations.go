@@ -123,9 +123,57 @@ func seedInitialAdmins() error {
 		return err
 	}
 
+	// Create 16 demo admin users with common names
+	demoAdmins := []struct {
+		Name  string
+		Email string
+	}{
+		{"John Smith", "john.smith@mbankingcore.com"},
+		{"Sarah Johnson", "sarah.johnson@mbankingcore.com"},
+		{"Michael Brown", "michael.brown@mbankingcore.com"},
+		{"Emily Davis", "emily.davis@mbankingcore.com"},
+		{"David Wilson", "david.wilson@mbankingcore.com"},
+		{"Lisa Miller", "lisa.miller@mbankingcore.com"},
+		{"Robert Garcia", "robert.garcia@mbankingcore.com"},
+		{"Jessica Martinez", "jessica.martinez@mbankingcore.com"},
+		{"William Anderson", "william.anderson@mbankingcore.com"},
+		{"Ashley Taylor", "ashley.taylor@mbankingcore.com"},
+		{"James Thomas", "james.thomas@mbankingcore.com"},
+		{"Amanda Jackson", "amanda.jackson@mbankingcore.com"},
+		{"Christopher White", "christopher.white@mbankingcore.com"},
+		{"Jennifer Harris", "jennifer.harris@mbankingcore.com"},
+		{"Matthew Clark", "matthew.clark@mbankingcore.com"},
+		{"Nicole Lewis", "nicole.lewis@mbankingcore.com"},
+	}
+
+	// Hash password for demo admins (using default password: Admin123!)
+	demoPassword := "Admin123!"
+	hashedDemoPassword, err := bcrypt.GenerateFromPassword([]byte(demoPassword), bcrypt.DefaultCost)
+	if err != nil {
+		log.Printf("Failed to hash demo admin password: %v", err)
+		return err
+	}
+
+	// Create demo admin users
+	for _, demo := range demoAdmins {
+		demoAdmin := models.Admin{
+			Name:     demo.Name,
+			Email:    demo.Email,
+			Password: string(hashedDemoPassword),
+			Role:     "admin",
+			Status:   1, // active
+		}
+
+		if err := DB.Create(&demoAdmin).Error; err != nil {
+			log.Printf("Failed to create demo admin %s: %v", demo.Name, err)
+			return err
+		}
+	}
+
 	log.Println("✅ Created admin users:")
 	log.Println("   - admin@mbankingcore.com (role: admin)")
 	log.Println("   - super@mbankingcore.com (role: super)")
+	log.Printf("   - %d demo admin users (role: admin, password: %s)", len(demoAdmins), demoPassword)
 	return nil
 }
 
