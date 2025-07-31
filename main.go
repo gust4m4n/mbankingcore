@@ -1,8 +1,12 @@
 package main
 
 import (
+	"crypto/tls"
 	"log"
+	"net/http"
 	"os"
+	"os/exec"
+	"path/filepath"
 
 	"mbankingcore/config"
 	"mbankingcore/handlers"
@@ -11,6 +15,67 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
+
+// generateSelfSignedCert creates a self-signed certificate for development
+func generateSelfSignedCert(certFile, keyFile string) error {
+	// Check if certificate files already exist
+	if _, err := os.Stat(certFile); err == nil {
+		if _, err := os.Stat(keyFile); err == nil {
+			log.Println("✅ SSL certificate files already exist")
+			return nil
+		}
+	}
+
+	log.Println("🔐 Generating self-signed SSL certificate for development...")
+
+	// Create certificates directory if it doesn't exist
+	certDir := filepath.Dir(certFile)
+	if err := os.MkdirAll(certDir, 0755); err != nil {
+		return err
+	}
+
+	// Generate certificate using openssl command
+	cmd := exec.Command("openssl", "req", "-x509", "-newkey", "rsa:4096",
+		"-keyout", keyFile, "-out", certFile, "-days", "365", "-nodes",
+		"-subj", "/C=ID/ST=Jakarta/L=Jakarta/O=MBankingCore/OU=Development/CN=localhost")
+
+	if err := cmd.Run(); err != nil {
+		// If openssl is not available, create a basic message
+		log.Println("⚠️  OpenSSL not found. Please install OpenSSL or provide your own certificates")
+		log.Printf("📁 Place your certificate files at: %s and %s", certFile, keyFile)
+		log.Println("💡 To install OpenSSL on macOS: brew install openssl")
+		return err
+	}
+
+	log.Println("✅ Self-signed SSL certificate generated successfully")
+	return nil
+}
+
+// startHTTPSServer starts the server with HTTPS support
+func startHTTPSServer(router *gin.Engine, address, certFile, keyFile string) error {
+	// Create TLS configuration
+	tlsConfig := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		CipherSuites: []uint16{
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
+			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+		},
+	}
+
+	// Create HTTP server with TLS
+	server := &http.Server{
+		Addr:      address,
+		Handler:   router,
+		TLSConfig: tlsConfig,
+	}
+
+	log.Printf("🔒 Starting HTTPS server on %s", address)
+	log.Printf("🔐 Using certificate: %s", certFile)
+	log.Printf("🔑 Using private key: %s", keyFile)
+
+	return server.ListenAndServeTLS(certFile, keyFile)
+}
 
 func main() {
 	// Load environment variables
@@ -24,17 +89,34 @@ func main() {
 	// Initialize Gin router
 	router := gin.Default()
 
-	// Add CORS middleware
+	// Add comprehensive CORS middleware for all APIs
 	router.Use(func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		origin := c.GetHeader("Origin")
 
+		// Log comprehensive CORS request details for debugging
+		log.Printf("CORS Request - Method: %s, Origin: %s, Path: %s, User-Agent: %s",
+			c.Request.Method, origin, c.Request.URL.Path, c.GetHeader("User-Agent"))
+
+		// Set CORS headers FIRST before any other processing
+		// Always set CORS headers regardless of method or origin
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD")
+		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With, X-Device-ID, X-App-Version, Accept, Accept-Language, Content-Language, DNT, User-Agent, Keep-Alive, Request-Id, X-Requested-With")
+		c.Header("Access-Control-Allow-Credentials", "false")
+		c.Header("Access-Control-Max-Age", "86400")
+		c.Header("Access-Control-Expose-Headers", "Content-Length, Content-Type, Authorization, X-Total-Count")
+
+		// Handle preflight OPTIONS requests immediately
 		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
+			log.Printf("CORS Preflight - Origin: %s, Request-Headers: %s, Request-Method: %s",
+				origin, c.GetHeader("Access-Control-Request-Headers"), c.GetHeader("Access-Control-Request-Method"))
+
+			// Respond immediately to preflight
+			c.Status(204)
 			return
 		}
 
+		// Continue to next middleware
 		c.Next()
 	})
 
@@ -181,8 +263,60 @@ func main() {
 		port = "8080"
 	}
 
-	log.Printf("Server starting on port %s", port)
-	if err := router.Run(":" + port); err != nil {
-		log.Fatal("Failed to start server:", err)
+	// Get host from environment or default to all interfaces for Flutter compatibility
+	host := os.Getenv("HOST")
+	if host == "" {
+		host = "0.0.0.0" // Bind to all interfaces to allow Flutter emulator/device access
+	}
+
+	// Check if HTTPS is enabled
+	enableHTTPS := os.Getenv("ENABLE_HTTPS")
+	httpsPort := os.Getenv("HTTPS_PORT")
+	if httpsPort == "" {
+		httpsPort = "8443"
+	}
+
+	address := host + ":" + port
+	httpsAddress := host + ":" + httpsPort
+
+	// Certificate file paths
+	certDir := os.Getenv("CERT_DIR")
+	if certDir == "" {
+		certDir = "./certs"
+	}
+	certFile := filepath.Join(certDir, "server.crt")
+	keyFile := filepath.Join(certDir, "server.key")
+
+	if enableHTTPS == "true" || enableHTTPS == "1" {
+		// HTTPS Mode
+		log.Println("🔒 HTTPS mode enabled")
+
+		// Generate self-signed certificate if not exists
+		if err := generateSelfSignedCert(certFile, keyFile); err != nil {
+			log.Printf("❌ Failed to generate SSL certificate: %v", err)
+			log.Println("🔄 Falling back to HTTP mode...")
+			enableHTTPS = "false"
+		} else {
+			log.Printf("🚀 Starting HTTPS server on %s", httpsAddress)
+			log.Printf("🔐 Health check available at: https://%s/health", httpsAddress)
+			log.Printf("🔒 API base URL: https://%s/api", httpsAddress)
+
+			// Start HTTPS server
+			if err := startHTTPSServer(router, httpsAddress, certFile, keyFile); err != nil {
+				log.Fatal("❌ Failed to start HTTPS server:", err)
+			}
+		}
+	}
+
+	if enableHTTPS != "true" && enableHTTPS != "1" {
+		// HTTP Mode (default)
+		log.Println("🌐 HTTP mode enabled")
+		log.Printf("🚀 Starting HTTP server on %s", address)
+		log.Printf("📋 Health check available at: http://%s/health", address)
+		log.Printf("🔗 API base URL: http://%s/api", address)
+
+		if err := router.Run(address); err != nil {
+			log.Fatal("❌ Failed to start HTTP server:", err)
+		}
 	}
 }
