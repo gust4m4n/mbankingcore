@@ -61,6 +61,11 @@ func seedInitialData() error {
 		return err
 	}
 
+	// Seed initial users for testing
+	if err := seedInitialUsers(); err != nil {
+		return err
+	}
+
 	log.Println("✅ Initial data seeding completed")
 	return nil
 }
@@ -78,27 +83,49 @@ func seedInitialAdmins() error {
 		return nil
 	}
 
-	// Create default super admin
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte("admin123"), bcrypt.DefaultCost)
+	// Create admin user 1: admin@mbankingcore.com
+	hashedPassword1, err := bcrypt.GenerateFromPassword([]byte("Admin123?"), bcrypt.DefaultCost)
 	if err != nil {
 		log.Printf("Failed to hash admin password: %v", err)
 		return err
 	}
 
-	superAdmin := models.Admin{
-		Name:     "Super Admin",
+	admin1 := models.Admin{
+		Name:     "Admin User",
 		Email:    "admin@mbankingcore.com",
-		Password: string(hashedPassword),
+		Password: string(hashedPassword1),
+		Role:     "admin",
+		Status:   1, // active
+	}
+
+	if err := DB.Create(&admin1).Error; err != nil {
+		log.Printf("Failed to create admin user: %v", err)
+		return err
+	}
+
+	// Create super admin user 2: super@mbankingcore.com
+	hashedPassword2, err := bcrypt.GenerateFromPassword([]byte("Super123?"), bcrypt.DefaultCost)
+	if err != nil {
+		log.Printf("Failed to hash super admin password: %v", err)
+		return err
+	}
+
+	admin2 := models.Admin{
+		Name:     "Super Admin",
+		Email:    "super@mbankingcore.com",
+		Password: string(hashedPassword2),
 		Role:     "super",
 		Status:   1, // active
 	}
 
-	if err := DB.Create(&superAdmin).Error; err != nil {
+	if err := DB.Create(&admin2).Error; err != nil {
 		log.Printf("Failed to create super admin: %v", err)
 		return err
 	}
 
-	log.Println("✅ Created default super admin (admin@mbankingcore.com / admin123)")
+	log.Println("✅ Created admin users:")
+	log.Println("   - admin@mbankingcore.com (role: admin)")
+	log.Println("   - super@mbankingcore.com (role: super)")
 	return nil
 }
 
@@ -185,5 +212,56 @@ func seedInitialOnboarding() error {
 	}
 
 	log.Printf("✅ Created %d initial onboarding slides", len(initialOnboarding))
+	return nil
+}
+
+// seedInitialUsers creates default users for testing
+func seedInitialUsers() error {
+	log.Println("Seeding initial users...")
+
+	// Check if users already exist
+	var count int64
+	DB.Model(&models.User{}).Count(&count)
+
+	if count > 0 {
+		log.Println("✅ Users already exist")
+		return nil
+	}
+
+	initialUsers := []models.User{
+		{
+			Name:       "Demo User",
+			Phone:      "081234567890",
+			MotherName: "Maria Sari",
+			PinAtm:     "123456", // Note: In real app, this should be hashed
+			Balance:    1000000,  // 1 million IDR for demo
+			Status:     1,        // active
+		},
+		{
+			Name:       "Test User",
+			Phone:      "082345678901",
+			MotherName: "Siti Nurhaliza",
+			PinAtm:     "654321", // Note: In real app, this should be hashed
+			Balance:    500000,   // 500 thousand IDR for demo
+			Status:     1,        // active
+		},
+		{
+			Name:       "John Doe",
+			Phone:      "083456789012",
+			MotherName: "Jane Smith",
+			PinAtm:     "111111", // Note: In real app, this should be hashed
+			Balance:    2000000,  // 2 million IDR for demo
+			Status:     1,        // active
+		},
+	}
+
+	for _, user := range initialUsers {
+		if err := DB.Create(&user).Error; err != nil {
+			log.Printf("Failed to create user %s: %v", user.Name, err)
+			return err
+		}
+	}
+
+	log.Printf("✅ Created %d initial users for testing", len(initialUsers))
 	return nil
 }
