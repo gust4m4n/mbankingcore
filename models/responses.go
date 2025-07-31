@@ -357,29 +357,44 @@ func RetrieveFailedResponse() ErrorResponse {
 
 // DashboardStats represents dashboard statistics
 type DashboardStats struct {
-	TotalUsers              int64                    `json:"total_users"`
-	TotalAdmins             int64                    `json:"total_admins"`
-	TotalTransactions       TransactionPeriods       `json:"total_transactions"`
-	TopupTransactions       TransactionPeriods       `json:"topup_transactions"`
-	WithdrawTransactions    TransactionPeriods       `json:"withdraw_transactions"`
-	TransferTransactions    TransactionPeriods       `json:"transfer_transactions"`
-	TotalTransactionsAmount TransactionAmountPeriods `json:"total_transactions_amount"`
-	TotalTopupAmount        TransactionAmountPeriods `json:"total_topup_amount"`
-	TotalTransferAmount     TransactionAmountPeriods `json:"total_transfer_amount"`
+	TotalUsers           int64                        `json:"total_users"`
+	TotalAdmins          int64                        `json:"total_admins"`
+	TotalTransactions    TransactionPeriodsWithAmount `json:"total_transactions"`
+	TopupTransactions    TransactionPeriodsWithAmount `json:"topup_transactions"`
+	WithdrawTransactions TransactionPeriodsWithAmount `json:"withdraw_transactions"`
+	TransferTransactions TransactionPeriodsWithAmount `json:"transfer_transactions"`
 }
 
 // TransactionPeriods represents transaction counts for different time periods
 type TransactionPeriods struct {
 	Today     int64 `json:"today"`
+	ThisWeek  int64 `json:"this_week"`
 	ThisMonth int64 `json:"this_month"`
 	ThisYear  int64 `json:"this_year"`
+	AllTime   int64 `json:"all_time"`
 }
 
 // TransactionAmountPeriods represents transaction amounts for different time periods
 type TransactionAmountPeriods struct {
 	Today     int64 `json:"today"`
+	ThisWeek  int64 `json:"this_week"`
 	ThisMonth int64 `json:"this_month"`
 	ThisYear  int64 `json:"this_year"`
+	AllTime   int64 `json:"all_time"`
+}
+
+// TransactionPeriodsWithAmount represents transaction counts and amounts for different time periods
+type TransactionPeriodsWithAmount struct {
+	Today           int64 `json:"today"`
+	TodayAmount     int64 `json:"today_amount"`
+	ThisWeek        int64 `json:"this_week"`
+	ThisWeekAmount  int64 `json:"this_week_amount"`
+	ThisMonth       int64 `json:"this_month"`
+	ThisMonthAmount int64 `json:"this_month_amount"`
+	ThisYear        int64 `json:"this_year"`
+	ThisYearAmount  int64 `json:"this_year_amount"`
+	AllTime         int64 `json:"all_time"`
+	AllTimeAmount   int64 `json:"all_time_amount"`
 }
 
 // Dashboard Success Responses

@@ -385,6 +385,15 @@ func (h *AdminHandler) GetDashboard(c *gin.Context) {
 	// Get current time and calculate time ranges
 	now := time.Now()
 	startOfToday := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+
+	// Calculate start of week (Monday)
+	weekday := now.Weekday()
+	daysFromMonday := int(weekday) - 1
+	if weekday == time.Sunday {
+		daysFromMonday = 6
+	}
+	startOfWeek := startOfToday.AddDate(0, 0, -daysFromMonday)
+
 	startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
 	startOfYear := time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
 
@@ -393,6 +402,11 @@ func (h *AdminHandler) GetDashboard(c *gin.Context) {
 	h.DB.Model(&models.Transaction{}).
 		Where("created_at >= ? AND created_at < ?", startOfToday, startOfToday.AddDate(0, 0, 1)).
 		Count(&dashboard.TotalTransactions.Today)
+
+	// This week's transactions
+	h.DB.Model(&models.Transaction{}).
+		Where("created_at >= ? AND created_at < ?", startOfWeek, startOfWeek.AddDate(0, 0, 7)).
+		Count(&dashboard.TotalTransactions.ThisWeek)
 
 	// This month's transactions
 	h.DB.Model(&models.Transaction{}).
@@ -404,11 +418,45 @@ func (h *AdminHandler) GetDashboard(c *gin.Context) {
 		Where("created_at >= ? AND created_at < ?", startOfYear, startOfYear.AddDate(1, 0, 0)).
 		Count(&dashboard.TotalTransactions.ThisYear)
 
+	// All time transactions
+	h.DB.Model(&models.Transaction{}).
+		Count(&dashboard.TotalTransactions.AllTime)
+
+	// Get total transaction amounts for all periods
+	// Today's total transaction amount
+	h.DB.Model(&models.Transaction{}).
+		Where("created_at >= ? AND created_at < ?", startOfToday, startOfToday.AddDate(0, 0, 1)).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTransactions.TodayAmount)
+
+	// This week's total transaction amount
+	h.DB.Model(&models.Transaction{}).
+		Where("created_at >= ? AND created_at < ?", startOfWeek, startOfWeek.AddDate(0, 0, 7)).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTransactions.ThisWeekAmount)
+
+	// This month's total transaction amount
+	h.DB.Model(&models.Transaction{}).
+		Where("created_at >= ? AND created_at < ?", startOfMonth, startOfMonth.AddDate(0, 1, 0)).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTransactions.ThisMonthAmount)
+
+	// This year's total transaction amount
+	h.DB.Model(&models.Transaction{}).
+		Where("created_at >= ? AND created_at < ?", startOfYear, startOfYear.AddDate(1, 0, 0)).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTransactions.ThisYearAmount)
+
+	// All time total transaction amount
+	h.DB.Model(&models.Transaction{}).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTransactions.AllTimeAmount)
+
 	// Get topup transactions for all periods
 	// Today's topup transactions
 	h.DB.Model(&models.Transaction{}).
 		Where("type = ? AND created_at >= ? AND created_at < ?", "topup", startOfToday, startOfToday.AddDate(0, 0, 1)).
 		Count(&dashboard.TopupTransactions.Today)
+
+	// This week's topup transactions
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ? AND created_at < ?", "topup", startOfWeek, startOfWeek.AddDate(0, 0, 7)).
+		Count(&dashboard.TopupTransactions.ThisWeek)
 
 	// This month's topup transactions
 	h.DB.Model(&models.Transaction{}).
@@ -420,11 +468,47 @@ func (h *AdminHandler) GetDashboard(c *gin.Context) {
 		Where("type = ? AND created_at >= ? AND created_at < ?", "topup", startOfYear, startOfYear.AddDate(1, 0, 0)).
 		Count(&dashboard.TopupTransactions.ThisYear)
 
+	// All time topup transactions
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ?", "topup").
+		Count(&dashboard.TopupTransactions.AllTime)
+
+	// Get total topup amounts for all periods
+	// Today's topup amount
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ? AND created_at < ?", "topup", startOfToday, startOfToday.AddDate(0, 0, 1)).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TopupTransactions.TodayAmount)
+
+	// This week's topup amount
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ? AND created_at < ?", "topup", startOfWeek, startOfWeek.AddDate(0, 0, 7)).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TopupTransactions.ThisWeekAmount)
+
+	// This month's topup amount
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ? AND created_at < ?", "topup", startOfMonth, startOfMonth.AddDate(0, 1, 0)).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TopupTransactions.ThisMonthAmount)
+
+	// This year's topup amount
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ? AND created_at < ?", "topup", startOfYear, startOfYear.AddDate(1, 0, 0)).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TopupTransactions.ThisYearAmount)
+
+	// All time topup amount
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ?", "topup").
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TopupTransactions.AllTimeAmount)
+
 	// Get withdraw transactions for all periods
 	// Today's withdraw transactions
 	h.DB.Model(&models.Transaction{}).
 		Where("type = ? AND created_at >= ? AND created_at < ?", "withdraw", startOfToday, startOfToday.AddDate(0, 0, 1)).
 		Count(&dashboard.WithdrawTransactions.Today)
+
+	// This week's withdraw transactions
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ? AND created_at < ?", "withdraw", startOfWeek, startOfWeek.AddDate(0, 0, 7)).
+		Count(&dashboard.WithdrawTransactions.ThisWeek)
 
 	// This month's withdraw transactions
 	h.DB.Model(&models.Transaction{}).
@@ -436,11 +520,47 @@ func (h *AdminHandler) GetDashboard(c *gin.Context) {
 		Where("type = ? AND created_at >= ? AND created_at < ?", "withdraw", startOfYear, startOfYear.AddDate(1, 0, 0)).
 		Count(&dashboard.WithdrawTransactions.ThisYear)
 
+	// All time withdraw transactions
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ?", "withdraw").
+		Count(&dashboard.WithdrawTransactions.AllTime)
+
+	// Get total withdraw amounts for all periods
+	// Today's withdraw amount
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ? AND created_at < ?", "withdraw", startOfToday, startOfToday.AddDate(0, 0, 1)).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.WithdrawTransactions.TodayAmount)
+
+	// This week's withdraw amount
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ? AND created_at < ?", "withdraw", startOfWeek, startOfWeek.AddDate(0, 0, 7)).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.WithdrawTransactions.ThisWeekAmount)
+
+	// This month's withdraw amount
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ? AND created_at < ?", "withdraw", startOfMonth, startOfMonth.AddDate(0, 1, 0)).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.WithdrawTransactions.ThisMonthAmount)
+
+	// This year's withdraw amount
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ? AND created_at < ?", "withdraw", startOfYear, startOfYear.AddDate(1, 0, 0)).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.WithdrawTransactions.ThisYearAmount)
+
+	// All time withdraw amount
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ?", "withdraw").
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.WithdrawTransactions.AllTimeAmount)
+
 	// Get transfer transactions for all periods (both transfer_out and transfer_in)
 	// Today's transfer transactions
 	h.DB.Model(&models.Transaction{}).
 		Where("(type = ? OR type = ?) AND created_at >= ? AND created_at < ?", "transfer_out", "transfer_in", startOfToday, startOfToday.AddDate(0, 0, 1)).
 		Count(&dashboard.TransferTransactions.Today)
+
+	// This week's transfer transactions
+	h.DB.Model(&models.Transaction{}).
+		Where("(type = ? OR type = ?) AND created_at >= ? AND created_at < ?", "transfer_out", "transfer_in", startOfWeek, startOfWeek.AddDate(0, 0, 7)).
+		Count(&dashboard.TransferTransactions.ThisWeek)
 
 	// This month's transfer transactions
 	h.DB.Model(&models.Transaction{}).
@@ -452,53 +572,36 @@ func (h *AdminHandler) GetDashboard(c *gin.Context) {
 		Where("(type = ? OR type = ?) AND created_at >= ? AND created_at < ?", "transfer_out", "transfer_in", startOfYear, startOfYear.AddDate(1, 0, 0)).
 		Count(&dashboard.TransferTransactions.ThisYear)
 
-	// Get total transaction amounts for all periods
-	// Today's total transaction amount
+	// All time transfer transactions
 	h.DB.Model(&models.Transaction{}).
-		Where("created_at >= ? AND created_at < ?", startOfToday, startOfToday.AddDate(0, 0, 1)).
-		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTransactionsAmount.Today)
-
-	// This month's total transaction amount
-	h.DB.Model(&models.Transaction{}).
-		Where("created_at >= ? AND created_at < ?", startOfMonth, startOfMonth.AddDate(0, 1, 0)).
-		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTransactionsAmount.ThisMonth)
-
-	// This year's total transaction amount
-	h.DB.Model(&models.Transaction{}).
-		Where("created_at >= ? AND created_at < ?", startOfYear, startOfYear.AddDate(1, 0, 0)).
-		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTransactionsAmount.ThisYear)
-
-	// Get total topup amounts for all periods
-	// Today's topup amount
-	h.DB.Model(&models.Transaction{}).
-		Where("type = ? AND created_at >= ? AND created_at < ?", "topup", startOfToday, startOfToday.AddDate(0, 0, 1)).
-		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTopupAmount.Today)
-
-	// This month's topup amount
-	h.DB.Model(&models.Transaction{}).
-		Where("type = ? AND created_at >= ? AND created_at < ?", "topup", startOfMonth, startOfMonth.AddDate(0, 1, 0)).
-		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTopupAmount.ThisMonth)
-
-	// This year's topup amount
-	h.DB.Model(&models.Transaction{}).
-		Where("type = ? AND created_at >= ? AND created_at < ?", "topup", startOfYear, startOfYear.AddDate(1, 0, 0)).
-		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTopupAmount.ThisYear)
+		Where("(type = ? OR type = ?)", "transfer_out", "transfer_in").
+		Count(&dashboard.TransferTransactions.AllTime)
 
 	// Get total transfer amounts for all periods (only transfer_out to avoid double counting)
 	// Today's transfer amount
 	h.DB.Model(&models.Transaction{}).
 		Where("type = ? AND created_at >= ? AND created_at < ?", "transfer_out", startOfToday, startOfToday.AddDate(0, 0, 1)).
-		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTransferAmount.Today)
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TransferTransactions.TodayAmount)
+
+	// This week's transfer amount
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ? AND created_at < ?", "transfer_out", startOfWeek, startOfWeek.AddDate(0, 0, 7)).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TransferTransactions.ThisWeekAmount)
 
 	// This month's transfer amount
 	h.DB.Model(&models.Transaction{}).
 		Where("type = ? AND created_at >= ? AND created_at < ?", "transfer_out", startOfMonth, startOfMonth.AddDate(0, 1, 0)).
-		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTransferAmount.ThisMonth)
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TransferTransactions.ThisMonthAmount)
 
 	// This year's transfer amount
 	h.DB.Model(&models.Transaction{}).
 		Where("type = ? AND created_at >= ? AND created_at < ?", "transfer_out", startOfYear, startOfYear.AddDate(1, 0, 0)).
-		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTransferAmount.ThisYear)
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TransferTransactions.ThisYearAmount)
+
+	// All time transfer amount
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ?", "transfer_out").
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TransferTransactions.AllTimeAmount)
 
 	c.JSON(http.StatusOK, models.DashboardSuccessResponse(dashboard))
 }

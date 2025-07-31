@@ -28,38 +28,52 @@ Authorization: Bearer <admin_access_token>
         "total_admins": 50,
         "total_transactions": {
             "today": 159,
+            "this_week": 1105,
             "this_month": 5133,
-            "this_year": 35375
+            "this_year": 35375,
+            "all_time": 61000
         },
         "topup_transactions": {
             "today": 43,
+            "this_week": 301,
             "this_month": 1258,
-            "this_year": 8805
+            "this_year": 8805,
+            "all_time": 15250
         },
         "withdraw_transactions": {
             "today": 50,
+            "this_week": 350,
             "this_month": 1300,
-            "this_year": 8840
+            "this_year": 8840,
+            "all_time": 15300
         },
         "transfer_transactions": {
             "today": 66,
+            "this_week": 454,
             "this_month": 2575,
-            "this_year": 17730
+            "this_year": 17730,
+            "all_time": 30450
         },
         "total_transactions_amount": {
             "today": 15000000,
+            "this_week": 110500000,
             "this_month": 513300000,
-            "this_year": 3537500000
+            "this_year": 3537500000,
+            "all_time": 6100000000
         },
         "total_topup_amount": {
             "today": 4300000,
+            "this_week": 30100000,
             "this_month": 125800000,
-            "this_year": 880500000
+            "this_year": 880500000,
+            "all_time": 1525000000
         },
         "total_transfer_amount": {
             "today": 6600000,
+            "this_week": 45400000,
             "this_month": 257500000,
-            "this_year": 1773000000
+            "this_year": 1773000000,
+            "all_time": 3045000000
         }
     }
 }
@@ -72,10 +86,12 @@ Authorization: Bearer <admin_access_token>
 - **total_admins** (integer): Total number of admin users in the system
 
 ### Transaction Periods
-Each transaction type includes three time period counts:
+Each transaction type includes five time period counts:
 - **today** (integer): Transactions created today (from 00:00:00 to 23:59:59)
+- **this_week** (integer): Transactions created this week (from Monday 00:00:00 to Sunday 23:59:59)
 - **this_month** (integer): Transactions created this month (from 1st to last day of current month)
 - **this_year** (integer): Transactions created this year (from January 1st to December 31st)
+- **all_time** (integer): All transactions ever created in the system
 
 ### Transaction Types
 - **total_transactions**: All transactions combined (topup, withdraw, transfer_in, transfer_out, etc.)
