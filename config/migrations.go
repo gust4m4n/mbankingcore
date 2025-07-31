@@ -198,8 +198,8 @@ func seedInitialConfigs() error {
 	initialConfigs := []models.Config{
 		{Key: "app_name", Value: "MBankingCore"},
 		{Key: "app_version", Value: "1.0.0"},
-		{Key: "terms_conditions", Value: "Default terms and conditions content"},
-		{Key: "privacy_policy", Value: "Default privacy policy content"},
+		{Key: "terms_conditions", Value: getTermsConditionsContent()},
+		{Key: "privacy_policy", Value: getPrivacyPolicyContent()},
 		{Key: "contact_email", Value: "support@mbankingcore.com"},
 		{Key: "contact_phone", Value: "+62-21-12345678"},
 		{Key: "maintenance_mode", Value: "false"},
@@ -489,4 +489,453 @@ func seedInitialTransactions() error {
 
 	log.Printf("✅ Created %d initial transactions for testing", len(transactions))
 	return nil
+}
+
+// getTermsConditionsContent returns comprehensive Terms & Conditions content for Indonesian banking app
+func getTermsConditionsContent() string {
+	return `# SYARAT DAN KETENTUAN PENGGUNAAN MBANKINGCORE
+
+**Terakhir diperbarui: 31 Juli 2025**
+
+## 1. PENERIMAAN SYARAT DAN KETENTUAN
+
+Dengan mengunduh, menginstal, mengakses atau menggunakan aplikasi MBankingCore ("Aplikasi"), Anda menyetujui untuk terikat oleh Syarat dan Ketentuan ini ("S&K"). Jika Anda tidak menyetujui S&K ini, harap tidak menggunakan Aplikasi.
+
+## 2. DEFINISI
+
+- **"Aplikasi"** adalah aplikasi mobile banking MBankingCore
+- **"Layanan"** adalah semua fitur dan layanan yang disediakan melalui Aplikasi
+- **"Pengguna"** adalah individu yang telah terdaftar dan menggunakan Layanan
+- **"Kami"** adalah penyedia Aplikasi MBankingCore
+- **"Rekening"** adalah rekening bank yang terhubung dengan Aplikasi
+
+## 3. PERSYARATAN PENGGUNAAN
+
+### 3.1 Kelayakan
+- Anda harus berusia minimal 17 tahun
+- Memiliki rekening bank yang valid di Indonesia
+- Memiliki nomor telepon aktif yang terdaftar di bank
+- Menyediakan informasi yang akurat dan lengkap
+
+### 3.2 Registrasi Akun
+- Satu nomor telepon hanya dapat digunakan untuk satu akun
+- Anda bertanggung jawab menjaga kerahasiaan PIN dan password
+- Segera laporkan jika terjadi penyalahgunaan akun
+
+## 4. LAYANAN YANG TERSEDIA
+
+### 4.1 Informasi Rekening
+- Cek saldo
+- Riwayat transaksi
+- Informasi rekening
+
+### 4.2 Transfer Dana
+- Transfer antar bank
+- Transfer antar pengguna MBankingCore
+- Transfer terjadwal
+
+### 4.3 Pembayaran
+- Pembayaran tagihan (listrik, air, telepon)
+- Pembayaran merchant
+- Top-up e-wallet
+
+## 5. KEAMANAN DAN PERLINDUNGAN
+
+### 5.1 Kewajiban Pengguna
+- Menjaga kerahasiaan PIN/password
+- Menggunakan koneksi internet yang aman
+- Melakukan logout setelah selesai menggunakan
+- Tidak berbagi informasi akun dengan pihak lain
+
+### 5.2 Sistem Keamanan
+- Enkripsi data end-to-end
+- Otentikasi dua faktor (2FA)
+- Monitoring transaksi real-time
+- Notifikasi setiap transaksi
+
+## 6. BATASAN DAN LARANGAN
+
+### 6.1 Larangan Penggunaan
+- Menggunakan Aplikasi untuk kegiatan ilegal
+- Melakukan transaksi fiktif atau penipuan
+- Mengganggu sistem atau server Aplikasi
+- Menyalahgunakan fitur atau layanan
+
+### 6.2 Batas Transaksi
+- Transfer harian: Rp 25.000.000
+- Transfer per transaksi: Rp 5.000.000
+- Pembayaran harian: Rp 10.000.000
+- Batas dapat disesuaikan sesuai profil risiko
+
+## 7. BIAYA DAN TARIF
+
+### 7.1 Biaya Layanan
+- Transfer antar bank: Rp 6.500
+- Transfer antar pengguna MBankingCore: GRATIS
+- Cek saldo dan mutasi: GRATIS
+- Pembayaran tagihan: Rp 2.500
+
+### 7.2 Perubahan Tarif
+- Kami berhak mengubah tarif dengan pemberitahuan 30 hari sebelumnya
+- Perubahan akan diberitahukan melalui Aplikasi atau email
+
+## 8. PRIVASI DAN PERLINDUNGAN DATA
+
+### 8.1 Pengumpulan Data
+- Data pribadi dikumpulkan sesuai keperluan layanan
+- Data transaksi disimpan untuk audit dan compliance
+- Lokasi perangkat untuk keamanan tambahan
+
+### 8.2 Penggunaan Data
+- Memproses transaksi dan layanan
+- Analisis risiko dan fraud detection
+- Peningkatan layanan dan fitur
+- Compliance dengan regulasi
+
+## 9. TANGGUNG JAWAB DAN GANTI RUGI
+
+### 9.1 Batasan Tanggung Jawab
+- Tidak bertanggung jawab atas kerugian akibat kelalaian pengguna
+- Tidak bertanggung jawab atas gangguan jaringan atau sistem bank
+- Tanggung jawab terbatas pada jumlah transaksi yang bermasalah
+
+### 9.2 Force Majeure
+- Tidak bertanggung jawab atas kejadian di luar kendali
+- Termasuk bencana alam, perang, atau gangguan pemerintah
+
+## 10. PENANGGUHAN DAN PENGHENTIAN
+
+### 10.1 Penangguhan Akun
+- Akun dapat ditangguhkan jika melanggar S&K
+- Penangguhan karena aktivitas mencurigakan
+- Pemberitahuan akan diberikan jika memungkinkan
+
+### 10.2 Penghentian Layanan
+- Pengguna dapat menghentikan layanan kapan saja
+- Kami dapat menghentikan layanan dengan pemberitahuan 30 hari
+- Saldo akan dikembalikan sesuai prosedur bank
+
+## 11. PERUBAHAN SYARAT DAN KETENTUAN
+
+- S&K dapat diubah sewaktu-waktu
+- Perubahan akan diberitahukan melalui Aplikasi
+- Penggunaan Aplikasi setelah perubahan dianggap sebagai persetujuan
+- Versi terbaru selalu tersedia di dalam Aplikasi
+
+## 12. PENYELESAIAN SENGKETA
+
+### 12.1 Hukum yang Berlaku
+- S&K ini tunduk pada hukum Republik Indonesia
+- Penyelesaian sengketa melalui pengadilan di Jakarta
+
+### 12.2 Mediasi
+- Upaya penyelesaian secara kekeluargaan terlebih dahulu
+- Mediasi melalui Otoritas Jasa Keuangan (OJK) jika diperlukan
+
+## 13. KONTAK DAN BANTUAN
+
+**Customer Service:**
+- Email: support@mbankingcore.com
+- Telepon: 1500-888 (24/7)
+- WhatsApp: +62-812-3456-7890
+- Live Chat: Tersedia di dalam Aplikasi
+
+**Jam Operasional:**
+- Senin - Jumat: 06.00 - 22.00 WIB
+- Sabtu - Minggu: 08.00 - 20.00 WIB
+- Emergency Support: 24/7
+
+---
+
+Dengan menggunakan Aplikasi MBankingCore, Anda menyatakan telah membaca, memahami, dan menyetujui seluruh Syarat dan Ketentuan di atas.`
+}
+
+// getPrivacyPolicyContent returns comprehensive Privacy Policy content for Indonesian banking app
+func getPrivacyPolicyContent() string {
+	return `# KEBIJAKAN PRIVASI MBANKINGCORE
+
+**Terakhir diperbarui: 31 Juli 2025**
+
+## 1. PENDAHULUAN
+
+MBankingCore ("kami", "Aplikasi") berkomitmen untuk melindungi privasi dan keamanan data pribadi Anda. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, menyimpan, dan melindungi informasi pribadi Anda saat menggunakan layanan kami.
+
+## 2. INFORMASI YANG KAMI KUMPULKAN
+
+### 2.1 Data Identitas Pribadi
+- **Informasi Dasar:** Nama lengkap, tanggal lahir, nomor KTP/NIK
+- **Kontak:** Nomor telepon, alamat email, alamat rumah
+- **Foto:** Foto selfie, foto KTP untuk verifikasi identitas
+- **Biometrik:** Sidik jari, face recognition (jika diaktifkan)
+
+### 2.2 Data Keuangan
+- **Informasi Rekening:** Nomor rekening, nama bank, saldo
+- **Riwayat Transaksi:** Transfer, pembayaran, top-up, withdrawals
+- **Pola Penggunaan:** Frekuensi transaksi, merchant favorit
+- **Data Kredit:** Riwayat kredit untuk scoring (jika tersedia)
+
+### 2.3 Data Teknis
+- **Informasi Perangkat:** Model, OS, versi aplikasi, device ID
+- **Lokasi:** GPS location untuk keamanan transaksi
+- **Log Aktivitas:** Waktu login, IP address, aktivitas dalam aplikasi
+- **Cookies:** Preferensi pengguna, session management
+
+### 2.4 Data Komunikasi
+- **Customer Service:** Rekaman chat, email, telepon
+- **Notifikasi:** Preferensi push notification, SMS
+- **Feedback:** Rating, review, saran perbaikan
+
+## 3. CARA KAMI MENGUMPULKAN DATA
+
+### 3.1 Langsung dari Anda
+- Saat registrasi akun baru
+- Pengisian profil dan verifikasi KYC
+- Melakukan transaksi atau menggunakan fitur
+- Menghubungi customer service
+
+### 3.2 Otomatis dari Aplikasi
+- Log aktivitas dan penggunaan aplikasi
+- Data lokasi (dengan izin)
+- Informasi perangkat dan jaringan
+- Cookies dan teknologi tracking
+
+### 3.3 Dari Pihak Ketiga
+- **Bank Partner:** Informasi rekening dan transaksi
+- **Credit Bureau:** Riwayat kredit dan scoring
+- **Anti-Fraud Provider:** Verifikasi identitas dan risk assessment
+- **Analytics Provider:** Data agregat untuk improvement
+
+## 4. TUJUAN PENGGUNAAN DATA
+
+### 4.1 Penyediaan Layanan
+- **Verifikasi Identitas:** KYC, AML compliance, fraud prevention
+- **Memproses Transaksi:** Transfer, pembayaran, top-up
+- **Customer Support:** Bantuan teknis dan layanan pelanggan
+- **Personalisasi:** Rekomendasi produk dan fitur yang relevan
+
+### 4.2 Keamanan dan Kepatuhan
+- **Fraud Detection:** Monitoring transaksi mencurigakan
+- **Risk Management:** Penilaian risiko dan credit scoring
+- **Regulatory Compliance:** Pelaporan ke Bank Indonesia, OJK
+- **Audit Trail:** Jejak audit untuk investigasi
+
+### 4.3 Peningkatan Layanan
+- **Analytics:** Analisis penggunaan untuk improvement
+- **A/B Testing:** Testing fitur baru untuk user experience
+- **Machine Learning:** AI untuk fraud detection dan personalization
+- **Research:** Riset pasar untuk pengembangan produk
+
+### 4.4 Marketing dan Komunikasi
+- **Promosi:** Penawaran produk dan layanan yang relevan
+- **Newsletter:** Update fitur, tips keuangan, promo
+- **Survey:** Penelitian kepuasan dan kebutuhan pengguna
+- **Event:** Undangan webinar, workshop keuangan
+
+## 5. DASAR HUKUM PEMROSESAN
+
+### 5.1 Persetujuan (Consent)
+- Persetujuan eksplisit untuk data sensitif
+- Opt-in untuk marketing communication
+- Consent withdrawal mechanism tersedia
+
+### 5.2 Kewajiban Kontrak
+- Pemrosesan data untuk memenuhi layanan yang diminta
+- Verifikasi identitas sesuai regulasi perbankan
+- Compliance dengan terms of service
+
+### 5.3 Kewajiban Hukum
+- **Bank Indonesia:** Pelaporan transaksi, AML/CFT
+- **OJK:** Regulatory reporting, consumer protection
+- **Kemenkeu:** Tax reporting, PPATK
+- **Kepolisian:** Investigasi fraud, money laundering
+
+### 5.4 Kepentingan Sah (Legitimate Interest)
+- Fraud prevention dan risk management
+- System security dan integrity
+- Business analytics untuk improvement
+- Customer service quality assurance
+
+## 6. BERBAGI DATA DENGAN PIHAK KETIGA
+
+### 6.1 Bank dan Financial Institution
+- **Bank Partner:** Untuk memproses transaksi perbankan
+- **Payment Gateway:** Pembayaran merchant dan e-commerce
+- **E-wallet Provider:** Top-up dan transfer antar e-wallet
+- **Credit Bureau:** Credit scoring dan risk assessment
+
+### 6.2 Technology Provider
+- **Cloud Provider:** AWS, Google Cloud untuk data storage
+- **Security Provider:** Anti-fraud, cybersecurity services
+- **Analytics Provider:** Google Analytics, Firebase
+- **Communication:** SMS gateway, email provider, push notification
+
+### 6.3 Regulator dan Law Enforcement
+- **Bank Indonesia:** Regulatory reporting, monetary policy
+- **OJK:** Consumer protection, financial services oversight
+- **PPATK:** Anti money laundering, suspicious transaction
+- **Kepolisian:** Criminal investigation, court order
+
+### 6.4 Professional Services
+- **Auditor:** External audit, compliance verification
+- **Legal Advisor:** Legal opinion, regulatory guidance
+- **Consultant:** Business process improvement
+- **Insurance:** Coverage untuk cyber risk, fraud loss
+
+## 7. TRANSFER DATA INTERNASIONAL
+
+### 7.1 Cloud Storage
+- Data disimpan di server AWS Singapore dan Indonesia
+- Enkripsi end-to-end selama transfer data
+- Compliance dengan GDPR untuk EU data subjects
+- Data residency sesuai regulasi Indonesia
+
+### 7.2 Vendor International
+- Anti-fraud provider dengan server global
+- Analytics tools dengan data anonymization
+- Adequate level of protection assurance
+- Data Processing Agreement (DPA) dengan vendor
+
+## 8. KEAMANAN DATA
+
+### 8.1 Enkripsi
+- **Data at Rest:** AES-256 encryption untuk data storage
+- **Data in Transit:** TLS 1.3 untuk komunikasi
+- **Database:** Field-level encryption untuk data sensitif
+- **Backup:** Encrypted backup dengan secure key management
+
+### 8.2 Access Control
+- **Role-based Access:** Akses terbatas sesuai job function
+- **Multi-factor Authentication:** 2FA untuk admin access
+- **Audit Log:** Complete logging untuk semua akses data
+- **Privileged Access Management:** Secure admin access
+
+### 8.3 Infrastructure Security
+- **Network Security:** Firewall, IDS/IPS, DDoS protection
+- **Endpoint Security:** Antivirus, endpoint detection
+- **Vulnerability Management:** Regular security assessment
+- **Incident Response:** 24/7 SOC monitoring
+
+### 8.4 Application Security
+- **Secure Development:** OWASP best practices
+- **Code Review:** Security review untuk setiap release
+- **Penetration Testing:** Regular pentest oleh third party
+- **Bug Bounty:** Program untuk vulnerability disclosure
+
+## 9. RETENSI DATA
+
+### 9.1 Periode Penyimpanan
+- **Data Transaksi:** 10 tahun (sesuai regulasi BI)
+- **Data Identitas:** Selama akun aktif + 5 tahun
+- **Log Komunikasi:** 3 tahun untuk audit purpose
+- **Analytics Data:** 2 tahun dalam bentuk agregat
+
+### 9.2 Penghapusan Data
+- **Account Closure:** Data dihapus setelah periode retensi
+- **Right to be Forgotten:** Penghapusan atas permintaan
+- **Secure Deletion:** Cryptographic erasure dan overwriting
+- **Certificate of Destruction:** Bukti penghapusan data
+
+## 10. HAK-HAK ANDA
+
+### 10.1 Hak Akses
+- **Data Portability:** Ekspor data dalam format standar
+- **Data Transparency:** Informasi lengkap data yang dimiliki
+- **Processing Activity:** Detail bagaimana data digunakan
+- **Third Party Sharing:** List pihak ketiga yang menerima data
+
+### 10.2 Hak Koreksi
+- **Update Profile:** Self-service untuk update data pribadi
+- **Data Correction:** Request koreksi data yang tidak akurat
+- **Verification Process:** Proses verifikasi untuk data sensitif
+- **Notification:** Pemberitahuan perubahan ke pihak ketiga
+
+### 10.3 Hak Penghapusan
+- **Account Deletion:** Penghapusan akun dan data terkait
+- **Selective Deletion:** Penghapusan data spesifik
+- **Retention Override:** Penghapusan sebelum periode retensi
+- **Legal Basis:** Consideration terhadap kewajiban hukum
+
+### 10.4 Hak Pembatasan
+- **Processing Restriction:** Pembatasan penggunaan data
+- **Marketing Opt-out:** Unsubscribe dari komunikasi marketing
+- **Consent Withdrawal:** Pencabutan persetujuan
+- **Object to Processing:** Keberatan terhadap pemrosesan
+
+## 11. COOKIES DAN TRACKING
+
+### 11.1 Jenis Cookies
+- **Essential Cookies:** Untuk fungsi dasar aplikasi
+- **Performance Cookies:** Analytics dan monitoring
+- **Functional Cookies:** Preferensi dan personalization
+- **Marketing Cookies:** Targeted advertising
+
+### 11.2 Cookie Management
+- **Cookie Settings:** Control di aplikasi settings
+- **Browser Settings:** Disable cookies di browser
+- **Third Party Cookies:** Opt-out dari advertising cookies
+- **Cookie Policy:** Detail lengkap di cookie policy page
+
+## 12. ANAK DI BAWAH UMUR
+
+### 12.1 Pembatasan Usia
+- Layanan tidak ditujukan untuk anak di bawah 17 tahun
+- Verifikasi usia saat registrasi
+- Immediate deletion jika ditemukan data anak
+- Parental consent untuk usia 17-21 tahun
+
+### 12.2 Special Protection
+- Enhanced privacy protection untuk young adults
+- Limited data collection dan processing
+- No marketing communication untuk under 21
+- Regular review untuk compliance
+
+## 13. PERUBAHAN KEBIJAKAN PRIVASI
+
+### 13.1 Notifikasi Perubahan
+- **Material Changes:** Email notification 30 hari sebelumnya
+- **Minor Updates:** In-app notification
+- **Version History:** Archive versi sebelumnya
+- **Continued Use:** Deemed acceptance jika tetap menggunakan
+
+### 13.2 Review Process
+- Annual review kebijakan privasi
+- Compliance check dengan regulasi terbaru
+- Stakeholder consultation untuk perubahan material
+- Legal review untuk semua perubahan
+
+## 14. KONTAK DATA PROTECTION
+
+### 14.1 Data Protection Officer
+- **Email:** privacy@mbankingcore.com
+- **Telepon:** +62-21-5000-1234
+- **Alamat:** Menara MBankingCore, Jakarta 12345
+- **Response Time:** Maksimal 30 hari untuk complex request
+
+### 14.2 Complaint Process
+- **Internal Complaint:** Melalui customer service
+- **Regulator Complaint:** Ke Kementerian Kominfo
+- **International:** GDPR representative untuk EU residents
+- **Escalation:** Clear escalation process untuk unresolved issues
+
+## 15. KETENTUAN KHUSUS
+
+### 15.1 COVID-19 Response
+- Enhanced hygiene untuk physical verification
+- Remote onboarding dengan video call
+- Digital signature untuk document
+- Contactless transaction promotion
+
+### 15.2 Emerging Technology
+- **AI/ML Ethics:** Responsible AI untuk decision making
+- **Blockchain:** Privacy consideration untuk DLT
+- **IoT Integration:** Security untuk connected devices
+- **Quantum Computing:** Quantum-safe cryptography preparation
+
+---
+
+**Efektif sejak:** 31 Juli 2025  
+**Versi:** 2.1  
+**Bahasa:** Bahasa Indonesia (versi resmi), English (reference)
+
+Dengan menggunakan layanan MBankingCore, Anda menyatakan telah membaca, memahami, dan menyetujui Kebijakan Privasi ini.`
 }
