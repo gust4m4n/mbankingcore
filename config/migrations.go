@@ -5,7 +5,6 @@ import (
 	"log"
 	"math/rand"
 	"mbankingcore/models"
-	"strings"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -65,38 +64,38 @@ func seedInitialData() error {
 		return err
 	}
 
-	// Seed initial users for testing
-	if err := seedInitialUsers(); err != nil {
-		return err
-	}
+	// DISABLED: Seed initial users for testing
+	// if err := seedInitialUsers(); err != nil {
+	// 	return err
+	// }
 
-	// Seed initial transactions for testing
-	if err := seedInitialTransactions(); err != nil {
-		return err
-	}
+	// DISABLED: Seed initial transactions for testing
+	// if err := seedInitialTransactions(); err != nil {
+	// 	return err
+	// }
 
-	// Seed 1000 dummy transactions for yearly data
-	if err := seedDummyTransactionsYearly(); err != nil {
-		return err
-	}
+	// DISABLED: Seed 1000 dummy transactions for yearly data
+	// if err := seedDummyTransactionsYearly(); err != nil {
+	// 	return err
+	// }
 
-	// Seed 1000 dummy users for yearly data
-	if err := seedDummyUsersYearly(); err != nil {
-		return err
-	}
+	// DISABLED: Clear and seed 2000 dummy users for 2020-2025
+	// if err := clearAndSeed2000Users(); err != nil {
+	// 	return err
+	// }
 
-	// Seed 32 dummy admins for yearly data
-	if err := seedDummyAdminsYearly(); err != nil {
-		return err
-	}
+	// DISABLED: Seed 10000 dummy transactions for yearly data
+	// if err := seedDummyTransactionsYearlyLarge(); err != nil {
+	// 	return err
+	// }
 
-	// Seed 10000 dummy transactions for yearly data
-	if err := seedDummyTransactionsYearlyLarge(); err != nil {
-		return err
-	}
+	// DISABLED: Clear existing transactions and seed new 20000 transactions from 2020-2025 with 300% growth
+	// if err := clearAndSeedTransactionsWithGrowth(); err != nil {
+	// 	return err
+	// }
 
-	// Seed 20000 dummy transactions from 2020-2025
-	if err := seedDummyTransactions2020To2025(); err != nil {
+	// Generate 10,000 dummy transactions from 2010 to 2025
+	if err := seed10KTransactions2010to2025(); err != nil {
 		return err
 	}
 
@@ -157,57 +156,9 @@ func seedInitialAdmins() error {
 		return err
 	}
 
-	// Create 16 demo admin users with common names
-	demoAdmins := []struct {
-		Name  string
-		Email string
-	}{
-		{"John Smith", "john.smith@mbankingcore.com"},
-		{"Sarah Johnson", "sarah.johnson@mbankingcore.com"},
-		{"Michael Brown", "michael.brown@mbankingcore.com"},
-		{"Emily Davis", "emily.davis@mbankingcore.com"},
-		{"David Wilson", "david.wilson@mbankingcore.com"},
-		{"Lisa Miller", "lisa.miller@mbankingcore.com"},
-		{"Robert Garcia", "robert.garcia@mbankingcore.com"},
-		{"Jessica Martinez", "jessica.martinez@mbankingcore.com"},
-		{"William Anderson", "william.anderson@mbankingcore.com"},
-		{"Ashley Taylor", "ashley.taylor@mbankingcore.com"},
-		{"James Thomas", "james.thomas@mbankingcore.com"},
-		{"Amanda Jackson", "amanda.jackson@mbankingcore.com"},
-		{"Christopher White", "christopher.white@mbankingcore.com"},
-		{"Jennifer Harris", "jennifer.harris@mbankingcore.com"},
-		{"Matthew Clark", "matthew.clark@mbankingcore.com"},
-		{"Nicole Lewis", "nicole.lewis@mbankingcore.com"},
-	}
-
-	// Hash password for demo admins (using default password: Admin123!)
-	demoPassword := "Admin123!"
-	hashedDemoPassword, err := bcrypt.GenerateFromPassword([]byte(demoPassword), bcrypt.DefaultCost)
-	if err != nil {
-		log.Printf("Failed to hash demo admin password: %v", err)
-		return err
-	}
-
-	// Create demo admin users
-	for _, demo := range demoAdmins {
-		demoAdmin := models.Admin{
-			Name:     demo.Name,
-			Email:    demo.Email,
-			Password: string(hashedDemoPassword),
-			Role:     "admin",
-			Status:   1, // active
-		}
-
-		if err := DB.Create(&demoAdmin).Error; err != nil {
-			log.Printf("Failed to create demo admin %s: %v", demo.Name, err)
-			return err
-		}
-	}
-
-	log.Println("✅ Created admin users:")
+	log.Println("✅ Created essential admin users:")
 	log.Println("   - admin@mbankingcore.com (role: admin)")
 	log.Println("   - super@mbankingcore.com (role: super)")
-	log.Printf("   - %d demo admin users (role: admin, password: %s)", len(demoAdmins), demoPassword)
 	return nil
 }
 
@@ -414,307 +365,175 @@ func seedInitialUsers() error {
 	return nil
 }
 
-// seedInitialTransactions creates sample transactions for testing
-func seedInitialTransactions() error {
-	log.Println("Seeding initial transactions...")
+// clearAndSeed2000Users clears existing users and creates 2000 dummy users distributed from 2020-2025
+func clearAndSeed2000Users() error {
+	log.Println("Clearing existing users and seeding 2000 dummy users from 2020-2025...")
 
-	// Check if transactions already exist
-	var count int64
-	DB.Model(&models.Transaction{}).Count(&count)
-
-	if count > 0 {
-		log.Println("✅ Transactions already exist")
-		return nil
-	}
-
-	// Get all users to assign transactions
-	var users []models.User
-	if err := DB.Find(&users).Error; err != nil {
-		log.Printf("Failed to get users for transaction seeding: %v", err)
+	// Clear existing transactions first (due to foreign key constraint)
+	if err := DB.Exec("DELETE FROM transactions").Error; err != nil {
+		log.Printf("Failed to clear existing transactions: %v", err)
 		return err
 	}
+	log.Println("✅ Cleared existing transactions")
 
-	if len(users) == 0 {
-		log.Println("No users found for transaction seeding")
-		return nil
+	// Clear existing users
+	if err := DB.Exec("DELETE FROM users").Error; err != nil {
+		log.Printf("Failed to clear existing users: %v", err)
+		return err
+	}
+	log.Println("✅ Cleared existing users")
+
+	// Indonesian names for variety
+	firstNames := []string{
+		"Andi", "Budi", "Citra", "Dewi", "Eko", "Fitri", "Gita", "Hadi",
+		"Indra", "Joko", "Kiki", "Luna", "Maya", "Nita", "Omar", "Putri",
+		"Qori", "Rina", "Sari", "Toni", "Udin", "Vina", "Wati", "Yani",
+		"Zaki", "Agus", "Bayu", "Cinta", "Doni", "Ella", "Farid", "Gina",
+		"Hendra", "Intan", "Johan", "Kartika", "Laras", "Mira", "Nando", "Ovi",
+		"Pras", "Quincy", "Rudi", "Sinta", "Tari", "Ucok", "Vera", "Wina",
+		"Yoga", "Zahra", "Arief", "Bella", "Cahyo", "Diana", "Edy", "Fara",
+		"Galih", "Hana", "Ivan", "Jelita", "Koko", "Lina", "Mega", "Noval",
+		"Adrian", "Bianca", "Carlos", "Dinda", "Elena", "Felix", "Grace", "Henry",
+		"Irene", "Javier", "Karina", "Lucas", "Monica", "Nathan", "Olivia", "Patrick",
+		"Queen", "Roberto", "Sofia", "Thomas", "Ursula", "Victor", "Wendy", "Xavier",
+		"Yasmin", "Zidane", "Amanda", "Bryan", "Charlotte", "David", "Emma", "Fabio",
 	}
 
-	// Create a map of user IDs for easier access
-	userIDs := make([]uint, len(users))
-	for i, user := range users {
-		userIDs[i] = user.ID
+	lastNames := []string{
+		"Pratama", "Sari", "Utomo", "Wijaya", "Santoso", "Kurniawan", "Handoko", "Susanto",
+		"Wibowo", "Setiawan", "Rahayu", "Lestari", "Mahendra", "Permana", "Saputra", "Kartini",
+		"Hidayat", "Fitriani", "Nugroho", "Anggraini", "Prasetyo", "Safitri", "Gunawan", "Melati",
+		"Adriansyah", "Puspita", "Ramadhan", "Cahyani", "Firmansyah", "Dewanti", "Syahputra", "Maharani",
+		"Maulana", "Pertiwi", "Wardana", "Salsabila", "Putranto", "Kusuma", "Saputri", "Hakim",
+		"Aditya", "Novita", "Rachman", "Wahyuni", "Subagyo", "Kirana", "Budiman", "Amelia",
+		"Iskandar", "Mentari", "Rahman", "Purnama", "Surya", "Mawar", "Firdaus", "Sekarsari",
+		"Ardiansyah", "Ananda", "Nurhayati", "Sutrisno", "Damayanti", "Purwanto", "Safira", "Hartono",
+		"Baskara", "Cantika", "Darmawan", "Ester", "Farhan", "Ghina", "Hasibuan", "Indira",
+		"Jefri", "Kencana", "Langit", "Maheswari", "Nirwana", "Oktavia", "Pradana", "Qadira",
 	}
 
-	// Create sample transactions with realistic Indonesian mobile banking scenarios
-	// Using actual user IDs from the database
-	transactions := []models.Transaction{
-		// First 3 users (Demo User, Test User, John Doe)
-		{UserID: userIDs[0], Type: "topup", Amount: 500000, BalanceBefore: 1000000, BalanceAfter: 1500000, Status: "completed", Description: "Top up via ATM BCA"},
-		{UserID: userIDs[0], Type: "transfer_out", Amount: 50000, BalanceBefore: 1500000, BalanceAfter: 1450000, Status: "completed", Description: "Transfer ke Sari - Bayar makan siang"},
-		{UserID: userIDs[0], Type: "withdraw", Amount: 100000, BalanceBefore: 1450000, BalanceAfter: 1350000, Status: "completed", Description: "Tarik tunai untuk belanja"},
-
-		{UserID: userIDs[1], Type: "transfer_in", Amount: 50000, BalanceBefore: 500000, BalanceAfter: 550000, Status: "completed", Description: "Transfer dari Demo User - Bayar makan siang"},
-		{UserID: userIDs[1], Type: "topup", Amount: 200000, BalanceBefore: 550000, BalanceAfter: 750000, Status: "completed", Description: "Top up via m-banking"},
-		{UserID: userIDs[1], Type: "transfer_out", Amount: 75000, BalanceBefore: 750000, BalanceAfter: 675000, Status: "completed", Description: "Transfer ke Ahmad - Bayar hutang"},
-
-		{UserID: userIDs[2], Type: "topup", Amount: 1000000, BalanceBefore: 2000000, BalanceAfter: 3000000, Status: "completed", Description: "Top up gaji bulanan"},
-		{UserID: userIDs[2], Type: "transfer_out", Amount: 500000, BalanceBefore: 3000000, BalanceAfter: 2500000, Status: "completed", Description: "Transfer ke keluarga"},
-		{UserID: userIDs[2], Type: "withdraw", Amount: 200000, BalanceBefore: 2500000, BalanceAfter: 2300000, Status: "completed", Description: "Tarik tunai untuk keperluan harian"},
-
-		// Continue with the rest of the users
-		{UserID: userIDs[3], Type: "transfer_in", Amount: 75000, BalanceBefore: 750000, BalanceAfter: 825000, Status: "completed", Description: "Transfer dari Test User - Bayar hutang"},
-		{UserID: userIDs[3], Type: "topup", Amount: 300000, BalanceBefore: 825000, BalanceAfter: 1125000, Status: "completed", Description: "Top up via internet banking"},
-		{UserID: userIDs[3], Type: "transfer_out", Amount: 100000, BalanceBefore: 1125000, BalanceAfter: 1025000, Status: "completed", Description: "Bayar tagihan listrik"},
-
-		{UserID: userIDs[4], Type: "topup", Amount: 250000, BalanceBefore: 850000, BalanceAfter: 1100000, Status: "completed", Description: "Top up via ATM Mandiri"},
-		{UserID: userIDs[4], Type: "transfer_out", Amount: 80000, BalanceBefore: 1100000, BalanceAfter: 1020000, Status: "completed", Description: "Transfer ke Maya - Split bill restoran"},
-		{UserID: userIDs[4], Type: "withdraw", Amount: 50000, BalanceBefore: 1020000, BalanceAfter: 970000, Status: "completed", Description: "Tarik tunai untuk ongkos"},
-
-		{UserID: userIDs[5], Type: "topup", Amount: 400000, BalanceBefore: 920000, BalanceAfter: 1320000, Status: "completed", Description: "Top up bonus kerja"},
-		{UserID: userIDs[5], Type: "transfer_out", Amount: 150000, BalanceBefore: 1320000, BalanceAfter: 1170000, Status: "completed", Description: "Bayar asuransi bulanan"},
-		{UserID: userIDs[5], Type: "transfer_out", Amount: 200000, BalanceBefore: 1170000, BalanceAfter: 970000, Status: "completed", Description: "Transfer ke orang tua"},
-
-		{UserID: userIDs[6], Type: "transfer_in", Amount: 80000, BalanceBefore: 680000, BalanceAfter: 760000, Status: "completed", Description: "Transfer dari Sari - Split bill restoran"},
-		{UserID: userIDs[6], Type: "topup", Amount: 150000, BalanceBefore: 760000, BalanceAfter: 910000, Status: "completed", Description: "Top up untuk belanja online"},
-		{UserID: userIDs[6], Type: "withdraw", Amount: 100000, BalanceBefore: 910000, BalanceAfter: 810000, Status: "completed", Description: "Tarik tunai untuk shopping"},
-
-		{UserID: userIDs[7], Type: "topup", Amount: 600000, BalanceBefore: 1200000, BalanceAfter: 1800000, Status: "completed", Description: "Top up dari rekening utama"},
-		{UserID: userIDs[7], Type: "transfer_out", Amount: 300000, BalanceBefore: 1800000, BalanceAfter: 1500000, Status: "completed", Description: "Bayar sewa kos bulanan"},
-		{UserID: userIDs[7], Type: "transfer_out", Amount: 100000, BalanceBefore: 1500000, BalanceAfter: 1400000, Status: "completed", Description: "Transfer ke Dina - Bayar patungan gift"},
-
-		{UserID: userIDs[8], Type: "transfer_in", Amount: 100000, BalanceBefore: 450000, BalanceAfter: 550000, Status: "completed", Description: "Transfer dari Rizki - Bayar patungan gift"},
-		{UserID: userIDs[8], Type: "topup", Amount: 200000, BalanceBefore: 550000, BalanceAfter: 750000, Status: "completed", Description: "Top up untuk traveling"},
-		{UserID: userIDs[8], Type: "withdraw", Amount: 75000, BalanceBefore: 750000, BalanceAfter: 675000, Status: "completed", Description: "Tarik tunai untuk jajan"},
-
-		// Continue with more users if available
+	motherNames := []string{
+		"Siti", "Sri", "Umi", "Ibu", "Nyai", "Ratu", "Dewi", "Putri",
+		"Ratna", "Indira", "Kartika", "Melati", "Mawar", "Cempaka", "Anggrek", "Dahlia",
+		"Kenanga", "Seruni", "Tulip", "Sakura", "Lily", "Rose", "Jasmine", "Orchid",
+		"Bunga", "Cantika", "Anggun", "Jelita", "Ayu", "Endah", "Permata", "Intan",
+		"Sari", "Wulan", "Lestari", "Cahaya", "Bintang", "Fajar", "Mega", "Citra",
+		"Rina", "Nina", "Dina", "Tina", "Mira", "Dira", "Kira", "Lira",
 	}
 
-	// Add more transactions for remaining users dynamically
-	for i := 9; i < len(userIDs) && i < 30; i++ {
-		baseTransactions := []models.Transaction{
-			{UserID: userIDs[i], Type: "topup", Amount: int64(200000 + (i * 10000)), BalanceBefore: int64(800000 + (i * 50000)), BalanceAfter: int64(1000000 + (i * 60000)), Status: "completed", Description: "Top up via mobile banking"},
-			{UserID: userIDs[i], Type: "withdraw", Amount: int64(50000 + (i * 5000)), BalanceBefore: int64(1000000 + (i * 60000)), BalanceAfter: int64(950000 + (i * 55000)), Status: "completed", Description: "Tarik tunai untuk keperluan"},
-			{UserID: userIDs[i], Type: "transfer_out", Amount: int64(75000 + (i * 3000)), BalanceBefore: int64(950000 + (i * 55000)), BalanceAfter: int64(875000 + (i * 52000)), Status: "completed", Description: "Transfer untuk pembayaran"},
-		}
-		transactions = append(transactions, baseTransactions...)
-	}
+	// Time range: 2020-2025
+	startTime := time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
+	endTime := time.Date(2025, 12, 31, 23, 59, 59, 0, time.UTC)
+	timeRange := endTime.Unix() - startTime.Unix()
 
-	// Add some failed transactions for realistic scenarios
-	if len(userIDs) > 20 {
-		failedTransactions := []models.Transaction{
-			{UserID: userIDs[20], Type: "transfer_out", Amount: 2000000, BalanceBefore: 520000, BalanceAfter: 520000, Status: "failed", Description: "Transfer gagal - Saldo tidak mencukupi"},
-			{UserID: userIDs[21], Type: "withdraw", Amount: 5000000, BalanceBefore: 680000, BalanceAfter: 680000, Status: "failed", Description: "Penarikan gagal - Melebihi limit harian"},
-		}
-		transactions = append(transactions, failedTransactions...)
-	}
+	// Track used phone numbers to ensure uniqueness
+	usedPhones := make(map[string]bool)
 
-	// Create all transactions
-	for _, transaction := range transactions {
-		if err := DB.Create(&transaction).Error; err != nil {
-			log.Printf("Failed to create transaction for user %d: %v", transaction.UserID, err)
-			return err
-		}
-	}
+	var users []models.User
+	batchSize := 100 // Insert in batches for better performance
 
-	log.Printf("✅ Created %d initial transactions for testing", len(transactions))
-	return nil
-}
-
-// seedDummyTransactionsYearly creates 1000 dummy transactions over 1 year period
-func seedDummyTransactionsYearly() error {
-	log.Println("Seeding 1000 dummy transactions for yearly data...")
-
-	// Initialize random seed for reproducible results
+	// Seed random number generator
 	rand.Seed(time.Now().UnixNano())
 
-	// Check if we already have enough transactions (threshold: 1000+)
-	var count int64
-	DB.Model(&models.Transaction{}).Count(&count)
-
-	if count >= 1000 {
-		log.Printf("✅ Already have %d transactions, skipping yearly dummy data", count)
-		return nil
-	}
-
-	// Clear existing transactions to regenerate with yearly data
-	if count > 0 {
-		log.Println("Clearing existing transactions to regenerate with yearly data...")
-		if err := DB.Where("1 = 1").Delete(&models.Transaction{}).Error; err != nil {
-			log.Printf("Failed to clear existing transactions: %v", err)
-			return err
-		}
-		log.Println("✅ Existing transactions cleared")
-	}
-
-	// Get all users to assign transactions
-	var users []models.User
-	if err := DB.Find(&users).Error; err != nil {
-		log.Printf("Failed to get users for yearly transaction seeding: %v", err)
-		return err
-	}
-
-	if len(users) == 0 {
-		log.Println("No users found for yearly transaction seeding")
-		return nil
-	}
-
-	// Create a map of user IDs for easier access
-	userIDs := make([]uint, len(users))
-	for i, user := range users {
-		userIDs[i] = user.ID
-	}
-
-	// Base time: 1 year ago from now
-	now := time.Now()
-	baseTime := now.AddDate(-1, 0, 0)
-
-	// Transaction types and their relative frequencies
-	transactionTypes := []string{"topup", "withdraw", "transfer_out", "transfer_in"}
-	typeWeights := []int{25, 25, 30, 20} // Percentages
-
-	// Indonesian banking descriptions for realism
-	descriptions := map[string][]string{
-		"topup": {
-			"Top up via ATM BCA", "Top up via m-banking", "Top up gaji bulanan",
-			"Top up via internet banking", "Top up via ATM Mandiri", "Top up bonus kerja",
-			"Top up dari rekening utama", "Top up untuk traveling", "Top up via mobile banking",
-			"Top up untuk belanja online", "Setor tunai via teller", "Transfer masuk dari rekening lain",
-		},
-		"withdraw": {
-			"Tarik tunai untuk belanja", "Tarik tunai untuk keperluan harian", "Tarik tunai untuk ongkos",
-			"Tarik tunai untuk shopping", "Tarik tunai untuk jajan", "Tarik tunai untuk keperluan",
-			"Penarikan tunai di ATM", "Tarik tunai untuk bensin", "Penarikan untuk bayar warung",
-			"Tarik tunai darurat", "Penarikan untuk belanja bulanan", "Tarik tunai weekend",
-		},
-		"transfer_out": {
-			"Transfer ke keluarga", "Bayar tagihan listrik", "Transfer ke Maya - Split bill restoran",
-			"Bayar asuransi bulanan", "Transfer ke orang tua", "Bayar sewa kos bulanan",
-			"Transfer ke Dina - Bayar patungan gift", "Transfer untuk pembayaran", "Bayar tagihan internet",
-			"Transfer ke teman - Bayar hutang", "Bayar SPP kuliah", "Transfer donasi",
-			"Bayar cicilan motor", "Transfer ke adik - Uang saku", "Bayar tagihan kartu kredit",
-		},
-		"transfer_in": {
-			"Transfer dari Demo User - Bayar makan siang", "Transfer dari Test User - Bayar hutang",
-			"Transfer dari Sari - Split bill restoran", "Transfer dari Rizki - Bayar patungan gift",
-			"Terima gaji bulanan", "Transfer dari orang tua", "Terima bonus penjualan",
-			"Transfer dari klien", "Terima refund belanja", "Transfer dari teman",
-			"Terima cashback", "Transfer komisi", "Terima hadiah ulang tahun",
-		},
-	}
-
-	var transactions []models.Transaction
-	successfulCount := 0
-
-	// Generate 1000 transactions
-	for i := 0; i < 1000; i++ {
-		// Random user
-		userID := userIDs[i%len(userIDs)]
-
-		// Random time within the year
-		dayOffset := rand.Intn(365)
-		hourOffset := rand.Intn(24)
-		minuteOffset := rand.Intn(60)
-		transactionTime := baseTime.AddDate(0, 0, dayOffset).
-			Add(time.Duration(hourOffset) * time.Hour).
-			Add(time.Duration(minuteOffset) * time.Minute)
-
-		// Determine transaction type based on weights
-		randomNum := rand.Intn(100)
-		var transactionType string
-		cumulative := 0
-		for j, weight := range typeWeights {
-			cumulative += weight
-			if randomNum < cumulative {
-				transactionType = transactionTypes[j]
+	for i := 0; i < 2000; i++ {
+		// Generate unique phone number
+		var phone string
+		for {
+			// Indonesian phone format: 08xxxxxxxxx (10-12 digits)
+			phone = fmt.Sprintf("08%d", 1000000000+rand.Intn(9000000000))
+			if !usedPhones[phone] {
+				usedPhones[phone] = true
 				break
 			}
 		}
 
-		// Random amount based on transaction type
-		var amount int64
-		switch transactionType {
-		case "topup":
-			amount = int64(rand.Intn(2000000) + 100000) // 100k - 2.1M
-		case "withdraw":
-			amount = int64(rand.Intn(1000000) + 50000) // 50k - 1.05M
-		case "transfer_out", "transfer_in":
-			amount = int64(rand.Intn(1500000) + 25000) // 25k - 1.525M
+		// Random registration time between 2020-2025
+		randomTime := startTime.Add(time.Duration(rand.Int63n(timeRange)) * time.Second)
+
+		// Generate random balance (0 to 50,000,000 rupiah)
+		balance := int64(rand.Intn(50000000))
+
+		// Random status (mostly active)
+		status := models.USER_STATUS_ACTIVE
+		if rand.Float32() < 0.1 { // 10% chance of inactive
+			status = models.USER_STATUS_INACTIVE
+		} else if rand.Float32() < 0.02 { // 2% chance of blocked
+			status = models.USER_STATUS_BLOCKED
 		}
 
-		// Random balance before (simulate realistic balances)
-		balanceBefore := int64(rand.Intn(5000000) + 100000) // 100k - 5.1M
+		// Create user
+		user := models.User{
+			Name:       firstNames[rand.Intn(len(firstNames))] + " " + lastNames[rand.Intn(len(lastNames))],
+			Phone:      phone,
+			MotherName: motherNames[rand.Intn(len(motherNames))] + " " + lastNames[rand.Intn(len(lastNames))],
+			PinAtm:     "123456", // Default PIN for dummy users
+			Balance:    balance,
+			Status:     status,
+			Avatar:     "", // Empty avatar for dummy users
+			CreatedAt:  randomTime,
+			UpdatedAt:  randomTime,
+		}
 
-		// Calculate balance after based on transaction type
-		var balanceAfter int64
-		switch transactionType {
-		case "topup", "transfer_in":
-			balanceAfter = balanceBefore + amount
-		case "withdraw", "transfer_out":
-			balanceAfter = balanceBefore - amount
-			// Ensure balance doesn't go negative for successful transactions
-			if balanceAfter < 0 {
-				balanceAfter = balanceBefore // Keep original balance for failed transaction
+		users = append(users, user)
+
+		// Insert in batches
+		if len(users) >= batchSize || i == 2000-1 {
+			if err := DB.CreateInBatches(&users, batchSize).Error; err != nil {
+				log.Printf("Error inserting batch: %v", err)
+				continue
 			}
-		}
 
-		// Determine transaction status (95% success rate)
-		status := "completed"
-		if rand.Intn(100) < 5 { // 5% failure rate
-			status = "failed"
-			balanceAfter = balanceBefore // Keep original balance for failed transactions
-		}
-
-		// Random description
-		descOptions := descriptions[transactionType]
-		description := descOptions[rand.Intn(len(descOptions))]
-		if status == "failed" {
-			switch transactionType {
-			case "withdraw", "transfer_out":
-				description += " - Saldo tidak mencukupi"
-			default:
-				description += " - Transaksi gagal"
-			}
-		}
-
-		transaction := models.Transaction{
-			UserID:        userID,
-			Type:          transactionType,
-			Amount:        amount,
-			BalanceBefore: balanceBefore,
-			BalanceAfter:  balanceAfter,
-			Status:        status,
-			Description:   description,
-			CreatedAt:     transactionTime,
-			UpdatedAt:     transactionTime,
-		}
-
-		transactions = append(transactions, transaction)
-
-		if status == "completed" {
-			successfulCount++
+			log.Printf("Inserted batch: %d/2000 users", i+1)
+			users = []models.User{} // Reset batch
 		}
 	}
 
-	// Create all transactions in batches for better performance
-	batchSize := 100
-	for i := 0; i < len(transactions); i += batchSize {
-		end := i + batchSize
-		if end > len(transactions) {
-			end = len(transactions)
-		}
+	log.Printf("✅ Created 2000 dummy users with registration dates from 2020-2025")
 
-		batch := transactions[i:end]
-		if err := DB.Create(&batch).Error; err != nil {
-			log.Printf("Failed to create transaction batch %d-%d: %v", i, end-1, err)
-			return err
-		}
-
-		log.Printf("Created transaction batch %d-%d", i+1, end)
-	}
-
-	log.Printf("✅ Created %d dummy transactions (%d successful, %d failed) over 1 year period",
-		len(transactions), successfulCount, len(transactions)-successfulCount)
+	// Show summary statistics
+	show2000UserStatistics()
 	return nil
+}
+
+// show2000UserStatistics displays user statistics after seeding 2000 users
+func show2000UserStatistics() {
+	log.Println("\n=== User Statistics (2000 Users) ===")
+
+	var totalUsers int64
+	DB.Model(&models.User{}).Count(&totalUsers)
+	log.Printf("Total users in database: %d", totalUsers)
+
+	// Count by year
+	var totalGrowth float64
+	var baselineYear int64
+	for year := 2020; year <= 2025; year++ {
+		var yearCount int64
+		startOfYear := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
+		endOfYear := time.Date(year, 12, 31, 23, 59, 59, 0, time.UTC)
+
+		DB.Model(&models.User{}).Where("created_at BETWEEN ? AND ?", startOfYear, endOfYear).Count(&yearCount)
+		log.Printf("Users registered in %d: %d", year, yearCount)
+
+		if year == 2020 {
+			baselineYear = yearCount
+		} else if year == 2025 && baselineYear > 0 {
+			totalGrowth = (float64(yearCount)/float64(baselineYear) - 1) * 100
+		}
+	}
+
+	if baselineYear > 0 {
+		log.Printf("Total Growth (2020-2025): %.1f%%", totalGrowth)
+	}
+
+	// Count by status
+	var activeUsers, inactiveUsers, blockedUsers int64
+	DB.Model(&models.User{}).Where("status = ?", models.USER_STATUS_ACTIVE).Count(&activeUsers)
+	DB.Model(&models.User{}).Where("status = ?", models.USER_STATUS_INACTIVE).Count(&inactiveUsers)
+	DB.Model(&models.User{}).Where("status = ?", models.USER_STATUS_BLOCKED).Count(&blockedUsers)
+
+	log.Printf("Active users: %d (%.1f%%)", activeUsers, float64(activeUsers)/float64(totalUsers)*100)
+	log.Printf("Inactive users: %d (%.1f%%)", inactiveUsers, float64(inactiveUsers)/float64(totalUsers)*100)
+	log.Printf("Blocked users: %d (%.1f%%)", blockedUsers, float64(blockedUsers)/float64(totalUsers)*100)
 }
 
 // seedDummyUsersYearly creates 5000 dummy users distributed from 2020-2025
@@ -857,261 +676,6 @@ func showUserStatistics() {
 	log.Printf("Active users: %d", activeUsers)
 	log.Printf("Inactive users: %d", inactiveUsers)
 	log.Printf("Blocked users: %d", blockedUsers)
-}
-
-// seedDummyAdminsYearly creates 32 dummy admins distributed over 1 year
-func seedDummyAdminsYearly() error {
-	log.Println("Seeding 32 dummy admins for yearly data...")
-
-	// Check if dummy admins already exist (excluding initial admins)
-	var count int64
-	DB.Model(&models.Admin{}).Where("email LIKE ?", "admin.%@mbankingcore.com").Count(&count)
-	if count >= 32 {
-		log.Println("✅ 32+ dummy admins already exist")
-		return nil
-	}
-
-	// Clear existing dummy admins if any exist but less than 32
-	if count > 0 {
-		DB.Where("email LIKE ?", "admin.%@mbankingcore.com").Delete(&models.Admin{})
-		log.Println("Cleared existing dummy admins")
-	}
-
-	// Generate start and end dates for 1 year period
-	endDate := time.Now()
-	startDate := endDate.AddDate(-1, 0, 0) // 1 year ago
-
-	// Admin names and roles
-	adminNames := []string{
-		"Ahmad Rizki", "Bella Sari", "Candra Wijaya", "Dina Kusuma", "Erik Pratama",
-		"Farah Putri", "Gunawan Santoso", "Hana Maharani", "Indra Firmansyah", "Jihan Lestari",
-		"Kiki Setiawan", "Linda Handayani", "Maya Nugroho", "Novi Rahayu", "Omar Kurniawan",
-		"Putri Wulandari", "Qori Purwanto", "Rina Safitri", "Sari Irawan", "Tono Anggraini",
-		"Umi Susanto", "Vina Permata", "Wati Hakim", "Xena Melati", "Yuni Adiputra",
-		"Zahra Kartini", "Andi Baskara", "Citra Cahyani", "Dewi Dharma", "Eko Fadilla",
-		"Gita Hapsari", "Heri Mahendra",
-	}
-
-	roles := []string{"admin", "admin", "admin", "super"} // Mostly admin, some super
-
-	var admins []models.Admin
-	rand.Seed(time.Now().UnixNano())
-
-	for i := 0; i < 32; i++ {
-		// Generate random creation time within the year
-		randomDuration := time.Duration(rand.Int63n(int64(endDate.Sub(startDate))))
-		createdAt := startDate.Add(randomDuration)
-
-		// Generate email
-		email := fmt.Sprintf("admin.%s@mbankingcore.com",
-			strings.ToLower(strings.ReplaceAll(adminNames[i], " ", ".")))
-
-		// Generate password hash
-		password := fmt.Sprintf("Admin%d!", 1000+i)
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-		if err != nil {
-			log.Printf("Failed to hash password for admin %s: %v", adminNames[i], err)
-			return err
-		}
-
-		// Generate role (75% admin, 25% super)
-		role := roles[rand.Intn(len(roles))]
-
-		// Generate status (95% active, 5% inactive)
-		status := 1
-		if rand.Float64() < 0.05 {
-			status = 0
-		}
-
-		admin := models.Admin{
-			Name:     adminNames[i],
-			Email:    email,
-			Password: string(hashedPassword),
-			Role:     role,
-			Status:   status,
-		}
-		admin.CreatedAt = createdAt
-		admin.UpdatedAt = createdAt
-
-		admins = append(admins, admin)
-	}
-
-	// Create all admins in batches for better performance
-	batchSize := 10
-	for i := 0; i < len(admins); i += batchSize {
-		end := i + batchSize
-		if end > len(admins) {
-			end = len(admins)
-		}
-
-		batch := admins[i:end]
-		if err := DB.Create(&batch).Error; err != nil {
-			log.Printf("Failed to create admin batch %d-%d: %v", i, end-1, err)
-			return err
-		}
-
-		log.Printf("Created admin batch %d-%d", i+1, end)
-	}
-
-	log.Printf("✅ Created 32 dummy admins over 1 year period")
-	return nil
-}
-
-// seedDummyTransactionsYearlyLarge creates 50000 dummy transactions distributed over 1 year
-func seedDummyTransactionsYearlyLarge() error {
-	log.Println("Seeding 50000 dummy transactions for yearly data...")
-
-	// Check if large dummy transactions already exist
-	var count int64
-	DB.Model(&models.Transaction{}).Count(&count)
-	if count >= 50000 {
-		log.Println("✅ 50000+ transactions already exist")
-		return nil
-	}
-
-	// Get all users for transaction assignment
-	var users []models.User
-	if err := DB.Find(&users).Error; err != nil {
-		log.Printf("Failed to get users: %v", err)
-		return err
-	}
-
-	if len(users) == 0 {
-		log.Println("No users found, creating basic user first")
-		return fmt.Errorf("no users available for transactions")
-	}
-
-	// Generate start and end dates for 1 year period
-	endDate := time.Now()
-	startDate := endDate.AddDate(-1, 0, 0) // 1 year ago
-
-	// Transaction types with weights
-	transactionTypes := []string{"topup", "withdraw", "transfer_out", "transfer_in"}
-	typeWeights := []float64{0.25, 0.25, 0.30, 0.20} // 25% topup, 25% withdraw, 30% transfer_out, 20% transfer_in
-
-	// Indonesian transaction descriptions
-	descriptions := map[string][]string{
-		"topup": {
-			"Top up via ATM BCA", "Top up via ATM Mandiri", "Top up via ATM BNI", "Top up via ATM BRI",
-			"Top up via mobile banking", "Top up via internet banking", "Top up via m-banking",
-			"Setor tunai via teller", "Transfer masuk dari rekening lain", "Top up untuk belanja online",
-			"Top up untuk traveling", "Top up gaji bulanan", "Top up bonus kerja", "Top up dari rekening utama",
-		},
-		"withdraw": {
-			"Tarik tunai untuk belanja", "Tarik tunai untuk bensin", "Tarik tunai untuk jajan",
-			"Tarik tunai untuk ongkos", "Tarik tunai weekend", "Tarik tunai darurat",
-			"Penarikan tunai di ATM", "Tarik tunai untuk keperluan", "Tarik tunai untuk shopping",
-			"Penarikan untuk belanja bulanan", "Penarikan untuk bayar warung", "Tarik tunai untuk keperluan harian",
-		},
-		"transfer_out": {
-			"Transfer ke orang tua", "Transfer donasi", "Bayar tagihan listrik", "Bayar tagihan internet",
-			"Bayar SPP kuliah", "Bayar sewa kos bulanan", "Bayar cicilan motor", "Bayar tagihan kartu kredit",
-			"Bayar asuransi bulanan", "Transfer untuk pembayaran", "Transfer ke teman - Bayar hutang",
-			"Transfer ke Maya - Split bill restoran", "Transfer ke Dina - Bayar patungan gift",
-		},
-		"transfer_in": {
-			"Terima gaji bulanan", "Terima bonus penjualan", "Terima cashback", "Transfer dari teman",
-			"Transfer komisi", "Terima hadiah ulang tahun", "Terima refund belanja", "Transfer dari klien",
-			"Transfer dari Test User - Bayar makan siang", "Transfer dari Sari - Split bill restoran",
-			"Transfer dari Demo User - Bayar makan siang", "Transfer dari Rizki - Bayar patungan gift",
-		},
-	}
-
-	var transactions []models.Transaction
-	var successfulCount int
-	rand.Seed(time.Now().UnixNano())
-
-	for i := 0; i < 50000; i++ {
-		// Generate random creation time within the year
-		randomDuration := time.Duration(rand.Int63n(int64(endDate.Sub(startDate))))
-		createdAt := startDate.Add(randomDuration)
-
-		// Select random user
-		user := users[rand.Intn(len(users))]
-
-		// Select transaction type based on weights
-		random := rand.Float64()
-		var transactionType string
-		cumulative := 0.0
-		for j, weight := range typeWeights {
-			cumulative += weight
-			if random <= cumulative {
-				transactionType = transactionTypes[j]
-				break
-			}
-		}
-
-		// Generate amount (25,000 to 2,500,000)
-		amount := int64(25000 + rand.Float64()*2475000)
-
-		// Generate description
-		typeDescriptions := descriptions[transactionType]
-		description := typeDescriptions[rand.Intn(len(typeDescriptions))]
-
-		// Generate realistic balance before/after
-		balanceBefore := int64(1000000 + rand.Float64()*4000000) // 1M to 5M
-		var balanceAfter int64
-		status := "completed"
-
-		switch transactionType {
-		case "topup", "transfer_in":
-			balanceAfter = balanceBefore + amount
-		case "withdraw", "transfer_out":
-			if balanceBefore >= amount {
-				balanceAfter = balanceBefore - amount
-			} else {
-				balanceAfter = balanceBefore
-				status = "failed"
-				description += " - Saldo tidak mencukupi"
-			}
-		}
-
-		// 10% chance for random failure
-		if rand.Float64() < 0.1 {
-			status = "failed"
-			balanceAfter = balanceBefore
-			description += " - Transaksi gagal"
-		}
-
-		if status == "completed" {
-			successfulCount++
-		}
-
-		transaction := models.Transaction{
-			UserID:        user.ID,
-			Type:          transactionType,
-			Amount:        amount,
-			BalanceBefore: balanceBefore,
-			BalanceAfter:  balanceAfter,
-			Description:   description,
-			Status:        status,
-		}
-		transaction.CreatedAt = createdAt
-		transaction.UpdatedAt = createdAt
-
-		transactions = append(transactions, transaction)
-	}
-
-	// Create all transactions in batches for better performance
-	batchSize := 100
-	for i := 0; i < len(transactions); i += batchSize {
-		end := i + batchSize
-		if end > len(transactions) {
-			end = len(transactions)
-		}
-
-		batch := transactions[i:end]
-		if err := DB.Create(&batch).Error; err != nil {
-			log.Printf("Failed to create transaction batch %d-%d: %v", i, end-1, err)
-			return err
-		}
-
-		log.Printf("Created transaction batch %d-%d", i+1, end)
-	}
-
-	log.Printf("✅ Created 50000 dummy transactions (%d successful, %d failed) over 1 year period",
-		successfulCount, 50000-successfulCount)
-	return nil
 }
 
 // getTermsConditionsContent returns comprehensive Terms & Conditions content for Indonesian banking app
@@ -1540,17 +1104,9 @@ func getPrivacyPolicyContent() string {
 <p><i>Dengan menggunakan layanan MBankingCore, Anda menyatakan telah membaca, memahami, dan menyetujui Kebijakan Privasi ini.</i></p>`
 }
 
-// seedDummyTransactions2020To2025 creates 20000 dummy transactions from 2020-2025
-func seedDummyTransactions2020To2025() error {
-	log.Println("Seeding 20000 dummy transactions from 2020-2025...")
-
-	// Check if transactions already exist (check for total count >= 20000)
-	var count int64
-	DB.Model(&models.Transaction{}).Count(&count)
-	if count >= 20000 {
-		log.Printf("✅ %d transactions already exist, skipping 2020-2025 dummy data", count)
-		return nil
-	}
+// seed10KTransactions2010to2025 creates 10,000 dummy transactions from 2010 to 2025
+func seed10KTransactions2010to2025() error {
+	log.Println("Creating 10,000 dummy transactions from 2010 to 2025...")
 
 	// Get all user IDs for transaction generation
 	var userIDs []uint
@@ -1564,10 +1120,42 @@ func seedDummyTransactions2020To2025() error {
 		return nil
 	}
 
-	// Time range: 2020-2025
-	startTime := time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
-	endTime := time.Date(2025, 12, 31, 23, 59, 59, 0, time.UTC)
-	timeRange := endTime.Unix() - startTime.Unix()
+	log.Printf("Found %d users for transaction generation", len(userIDs))
+
+	// Clear existing transactions first
+	log.Println("Clearing existing transactions...")
+	if err := DB.Exec("DELETE FROM transactions").Error; err != nil {
+		log.Printf("Failed to clear transactions: %v", err)
+		return err
+	}
+	log.Println("✅ All existing transactions cleared")
+
+	// Calculate transaction distribution by year (2010-2025)
+	totalTransactions := 10000
+	yearCount := 16 // 2010 to 2025 inclusive
+	basePerYear := totalTransactions / yearCount
+
+	// Distribute transactions with some variation
+	yearDistribution := make(map[int]int)
+	remaining := totalTransactions
+
+	for year := 2010; year <= 2025; year++ {
+		if year == 2025 { // Last year gets remaining
+			yearDistribution[year] = remaining
+		} else {
+			// Add some variation ±20%
+			variation := rand.Float64()*0.4 - 0.2 // -20% to +20%
+			count := int(float64(basePerYear) * (1 + variation))
+			if count < 200 {
+				count = 200 // Minimum 200 per year
+			}
+			if count > remaining-15+year-2010 {
+				count = remaining - 15 + year - 2010
+			}
+			yearDistribution[year] = count
+			remaining -= count
+		}
+	}
 
 	// Transaction types and their weights
 	transactionTypes := []struct {
@@ -1581,52 +1169,40 @@ func seedDummyTransactions2020To2025() error {
 		{"payment", 5},       // 5% payment
 	}
 
-	// Transaction descriptions by type
+	// Enhanced transaction descriptions by type
 	descriptions := map[string][]string{
 		"topup": {
-			"Top up via m-banking",
-			"Top up gaji bulanan",
-			"Top up bonus kerja",
-			"Isi saldo untuk transaksi",
-			"Transfer dari rekening bank",
-			"Top up via ATM",
-			"Isi saldo otomatis",
+			"Top up via m-banking", "Top up gaji bulanan", "Top up bonus kerja", "Top up via ATM BCA",
+			"Top up via ATM BRI", "Top up via ATM BNI", "Top up via ATM Mandiri", "Top up untuk traveling",
+			"Top up untuk belanja online", "Top up bonus kerja", "Top up gaji bulanan", "Top up dari rekening utama",
+			"Top up via mobile banking", "Top up via internet banking", "Transfer masuk dari rekening lain",
+			"Setor tunai via teller", "Top up dari kartu kredit", "Top up untuk investasi",
 		},
 		"withdraw": {
-			"Tarik tunai untuk keperluan harian",
-			"Withdraw untuk ongkos",
-			"Tarik tunai di ATM",
-			"Withdraw untuk belanja",
-			"Tarik tunai emergency",
-			"Withdraw untuk bayar parkir",
-			"Tarik tunai weekend",
+			"Tarik tunai untuk keperluan harian", "Tarik tunai untuk ongkos", "Tarik tunai di ATM",
+			"Tarik tunai untuk belanja", "Tarik tunai darurat", "Tarik tunai weekend", "Tarik tunai untuk bensin",
+			"Tarik tunai untuk jajan", "Tarik tunai untuk shopping", "Penarikan tunai di ATM",
+			"Penarikan untuk belanja bulanan", "Penarikan untuk bayar warung", "Tarik tunai untuk keperluan",
+			"Penarikan dana darurat", "Tarik tunai untuk liburan",
 		},
 		"transfer_out": {
-			"Transfer ke keluarga",
-			"Transfer untuk split bill",
-			"Transfer ke teman",
-			"Bayar hutang",
-			"Transfer untuk hadiah",
-			"Transfer ke orang tua",
-			"Transfer untuk investasi",
+			"Transfer ke keluarga", "Transfer ke teman - Bayar hutang", "Transfer ke orang tua",
+			"Transfer ke Maya - Split bill restoran", "Transfer ke Dina - Bayar patungan gift",
+			"Transfer donasi", "Transfer untuk pembayaran", "Bayar tagihan listrik", "Bayar tagihan kartu kredit",
+			"Bayar tagihan internet", "Bayar asuransi bulanan", "Bayar sewa kos bulanan", "Bayar SPP kuliah",
+			"Bayar cicilan motor", "Transfer ke vendor", "Bayar tagihan PDAM", "Transfer ke supplier",
 		},
 		"transfer_in": {
-			"Transfer dari keluarga",
-			"Terima transfer teman",
-			"Transfer gaji",
-			"Terima bayaran hutang",
-			"Transfer bonus",
-			"Terima hadiah ulang tahun",
-			"Transfer dari anak",
+			"Transfer dari keluarga", "Transfer dari teman", "Transfer dari klien", "Terima gaji bulanan",
+			"Transfer dari Demo User - Bayar makan siang", "Transfer dari Test User - Bayar makan siang",
+			"Transfer dari Sari - Split bill restoran", "Transfer dari Rizki - Bayar patungan gift",
+			"Terima hadiah ulang tahun", "Terima bonus penjualan", "Terima cashback", "Terima refund belanja",
+			"Transfer komisi", "Terima pembayaran freelance", "Terima dividen", "Terima royalti",
 		},
 		"payment": {
-			"Bayar tagihan listrik",
-			"Bayar pulsa",
-			"Bayar internet",
-			"Bayar PDAM",
-			"Bayar asuransi",
-			"Bayar cicilan",
-			"Bayar belanja online",
+			"Bayar tagihan listrik", "Bayar pulsa", "Bayar tagihan internet", "Bayar PDAM",
+			"Bayar asuransi", "Bayar cicilan", "Bayar belanja online", "Bayar tagihan kartu kredit",
+			"Bayar Netflix", "Bayar Spotify", "Bayar Google Play", "Bayar Apple Store",
 		},
 	}
 
@@ -1635,166 +1211,219 @@ func seedDummyTransactions2020To2025() error {
 		Status string
 		Weight int
 	}{
-		{"completed", 85}, // 85% completed
-		{"pending", 10},   // 10% pending
-		{"failed", 5},     // 5% failed
+		{"completed", 90}, // 90% completed
+		{"failed", 10},    // 10% failed
 	}
-
-	var transactions []models.Transaction
-	batchSize := 500 // Process in batches
 
 	rand.Seed(time.Now().UnixNano())
+	batchSize := 500
+	transactionID := 1
 
-	for i := 0; i < 20000; i++ {
-		// Random user
-		userID := userIDs[rand.Intn(len(userIDs))]
+	log.Printf("Starting transaction generation across %d years...", yearCount)
 
-		// Random transaction time between 2020-2025
-		randomTime := startTime.Add(time.Duration(rand.Int63n(timeRange)) * time.Second)
+	// Generate transactions year by year
+	for year := 2010; year <= 2025; year++ {
+		yearTransactions := yearDistribution[year]
+		log.Printf("Generating %d transactions for year %d...", yearTransactions, year)
 
-		// Random transaction type based on weights
-		var txType string
-		totalWeight := 0
-		for _, t := range transactionTypes {
-			totalWeight += t.Weight
-		}
-		randomWeight := rand.Intn(totalWeight)
-		currentWeight := 0
-		for _, t := range transactionTypes {
-			currentWeight += t.Weight
-			if randomWeight < currentWeight {
-				txType = t.Type
-				break
+		var transactions []models.Transaction
+
+		// Distribute transactions across months
+		monthlyDistribution := make([]int, 12)
+		basePerMonth := yearTransactions / 12
+		remainingForYear := yearTransactions
+
+		for month := 0; month < 12; month++ {
+			if month == 11 { // Last month gets remaining
+				monthlyDistribution[month] = remainingForYear
+			} else {
+				// Random fluctuation ±15%
+				fluctuation := rand.Float64()*0.3 - 0.15 // -15% to +15%
+				monthCount := int(float64(basePerMonth) * (1 + fluctuation))
+				if monthCount < 1 {
+					monthCount = 1
+				}
+				if monthCount > remainingForYear-11+month {
+					monthCount = remainingForYear - 11 + month
+				}
+				monthlyDistribution[month] = monthCount
+				remainingForYear -= monthCount
 			}
 		}
 
-		// Random amount based on transaction type
-		var amount int64
-		switch txType {
-		case "topup":
-			// Topup: 50K - 5M IDR
-			amount = int64(rand.Intn(4950000) + 50000)
-		case "withdraw":
-			// Withdraw: 20K - 2M IDR
-			amount = int64(rand.Intn(1980000) + 20000)
-		case "transfer_out", "transfer_in":
-			// Transfer: 10K - 3M IDR
-			amount = int64(rand.Intn(2990000) + 10000)
-		case "payment":
-			// Payment: 5K - 1M IDR
-			amount = int64(rand.Intn(995000) + 5000)
-		default:
-			amount = int64(rand.Intn(500000) + 50000)
-		}
+		// Generate transactions for each month
+		for month := 0; month < 12; month++ {
+			monthCount := monthlyDistribution[month]
 
-		// Random balance before/after (simplified for dummy data)
-		balanceBefore := int64(rand.Intn(10000000) + 100000) // 100K - 10M IDR
-		var balanceAfter int64
-		switch txType {
-		case "topup", "transfer_in":
-			balanceAfter = balanceBefore + amount
-		case "withdraw", "transfer_out", "payment":
-			balanceAfter = balanceBefore - amount
-			if balanceAfter < 0 {
-				balanceAfter = 0
+			for i := 0; i < monthCount; i++ {
+				// Random user
+				userID := userIDs[rand.Intn(len(userIDs))]
+
+				// Random day and time within the month
+				startOfMonth := time.Date(year, time.Month(month+1), 1, 0, 0, 0, 0, time.UTC)
+				var endOfMonth time.Time
+				if month == 11 { // December
+					endOfMonth = time.Date(year+1, 1, 1, 0, 0, 0, 0, time.UTC).Add(-time.Second)
+				} else {
+					endOfMonth = time.Date(year, time.Month(month+2), 1, 0, 0, 0, 0, time.UTC).Add(-time.Second)
+				}
+
+				timeRange := endOfMonth.Unix() - startOfMonth.Unix()
+				randomTime := startOfMonth.Add(time.Duration(rand.Int63n(timeRange)) * time.Second)
+
+				// Random transaction type based on weights
+				var txType string
+				totalWeight := 0
+				for _, t := range transactionTypes {
+					totalWeight += t.Weight
+				}
+				randomWeight := rand.Intn(totalWeight)
+				currentWeight := 0
+				for _, t := range transactionTypes {
+					currentWeight += t.Weight
+					if randomWeight < currentWeight {
+						txType = t.Type
+						break
+					}
+				}
+
+				// Amount calculation with year-based inflation (2% per year from 2010)
+				inflationFactor := 1.0 + float64(year-2010)*0.02 // 2% inflation per year
+				var baseAmount int64
+
+				switch txType {
+				case "topup":
+					// Topup: 50K - 5M IDR
+					baseAmount = int64(rand.Intn(4950000) + 50000)
+				case "withdraw":
+					// Withdraw: 20K - 2M IDR
+					baseAmount = int64(rand.Intn(1980000) + 20000)
+				case "transfer_out", "transfer_in":
+					// Transfer: 10K - 3M IDR
+					baseAmount = int64(rand.Intn(2990000) + 10000)
+				case "payment":
+					// Payment: 5K - 1M IDR
+					baseAmount = int64(rand.Intn(995000) + 5000)
+				default:
+					baseAmount = int64(rand.Intn(500000) + 50000)
+				}
+
+				amount := int64(float64(baseAmount) * inflationFactor)
+
+				// Random balance calculation
+				balanceBefore := int64(rand.Intn(20000000) + 100000) // 100K - 20M IDR
+				var balanceAfter int64
+
+				// Random status based on weights
+				var status string
+				totalStatusWeight := 0
+				for _, s := range statuses {
+					totalStatusWeight += s.Weight
+				}
+				randomStatusWeight := rand.Intn(totalStatusWeight)
+				currentStatusWeight := 0
+				for _, s := range statuses {
+					currentStatusWeight += s.Weight
+					if randomStatusWeight < currentStatusWeight {
+						status = s.Status
+						break
+					}
+				}
+
+				// Calculate balance after based on transaction type and status
+				if status == "completed" {
+					switch txType {
+					case "topup", "transfer_in":
+						balanceAfter = balanceBefore + amount
+					case "withdraw", "transfer_out", "payment":
+						balanceAfter = balanceBefore - amount
+						if balanceAfter < 0 {
+							balanceAfter = 0
+						}
+					default:
+						balanceAfter = balanceBefore
+					}
+				} else {
+					balanceAfter = balanceBefore // Failed transactions don't change balance
+				}
+
+				// Random description with failure reason for failed transactions
+				descList := descriptions[txType]
+				description := descList[rand.Intn(len(descList))]
+
+				if status == "failed" {
+					failureReasons := []string{
+						" - Saldo tidak mencukupi",
+						" - Transaksi gagal",
+						" - Timeout",
+						" - Gangguan jaringan",
+						" - Sistem maintenance",
+					}
+					description += failureReasons[rand.Intn(len(failureReasons))]
+				}
+
+				// Create transaction
+				transaction := models.Transaction{
+					UserID:        userID,
+					Type:          txType,
+					Amount:        amount,
+					BalanceBefore: balanceBefore,
+					BalanceAfter:  balanceAfter,
+					Description:   description,
+					Status:        status,
+					CreatedAt:     randomTime,
+					UpdatedAt:     randomTime,
+				}
+
+				transactions = append(transactions, transaction)
+
+				// Insert in batches
+				if len(transactions) >= batchSize {
+					if err := DB.CreateInBatches(&transactions, batchSize).Error; err != nil {
+						log.Printf("Error inserting transaction batch: %v", err)
+						continue
+					}
+					log.Printf("Created transaction batch %d-%d for year %d", transactionID, transactionID+len(transactions)-1, year)
+					transactionID += len(transactions)
+					transactions = []models.Transaction{} // Reset batch
+				}
 			}
-		default:
-			balanceAfter = balanceBefore
 		}
 
-		// Random status based on weights
-		var status string
-		totalStatusWeight := 0
-		for _, s := range statuses {
-			totalStatusWeight += s.Weight
-		}
-		randomStatusWeight := rand.Intn(totalStatusWeight)
-		currentStatusWeight := 0
-		for _, s := range statuses {
-			currentStatusWeight += s.Weight
-			if randomStatusWeight < currentStatusWeight {
-				status = s.Status
-				break
+		// Insert remaining transactions for this year
+		if len(transactions) > 0 {
+			if err := DB.CreateInBatches(&transactions, len(transactions)).Error; err != nil {
+				log.Printf("Error inserting final transaction batch for year %d: %v", year, err)
+			} else {
+				log.Printf("Created final transaction batch %d-%d for year %d", transactionID, transactionID+len(transactions)-1, year)
+				transactionID += len(transactions)
 			}
 		}
 
-		// Random description
-		descList := descriptions[txType]
-		description := descList[rand.Intn(len(descList))]
-
-		// Create transaction
-		transaction := models.Transaction{
-			UserID:        userID,
-			Type:          txType,
-			Amount:        amount,
-			BalanceBefore: balanceBefore,
-			BalanceAfter:  balanceAfter,
-			Description:   description,
-			Status:        status,
-			CreatedAt:     randomTime,
-			UpdatedAt:     randomTime,
-		}
-
-		transactions = append(transactions, transaction)
-
-		// Insert in batches
-		if len(transactions) >= batchSize || i == 20000-1 {
-			if err := DB.CreateInBatches(&transactions, batchSize).Error; err != nil {
-				log.Printf("Error inserting transaction batch: %v", err)
-				continue
-			}
-
-			log.Printf("Inserted transaction batch: %d/20000 transactions", i+1)
-			transactions = []models.Transaction{} // Reset batch
-		}
+		log.Printf("✅ Completed %d transactions for year %d", yearTransactions, year)
 	}
 
-	log.Printf("✅ Created 20000 dummy transactions from 2020-2025")
-
-	// Show summary statistics
-	showTransactionStatistics()
-	return nil
-}
-
-// showTransactionStatistics displays transaction statistics after seeding
-func showTransactionStatistics() {
-	log.Println("\n=== Transaction Statistics ===")
-
-	var totalTransactions int64
-	DB.Model(&models.Transaction{}).Count(&totalTransactions)
-	log.Printf("Total transactions in database: %d", totalTransactions)
-
-	// Count by year
-	for year := 2020; year <= 2025; year++ {
-		var yearCount int64
-		startOfYear := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
-		endOfYear := time.Date(year, 12, 31, 23, 59, 59, 0, time.UTC)
-
-		DB.Model(&models.Transaction{}).Where("created_at BETWEEN ? AND ?", startOfYear, endOfYear).Count(&yearCount)
-		log.Printf("Transactions in %d: %d", year, yearCount)
-	}
+	// Show statistics
+	log.Println("\n=== Transaction Generation Summary ===")
+	var totalCount int64
+	DB.Model(&models.Transaction{}).Count(&totalCount)
+	log.Printf("Total transactions created: %d", totalCount)
 
 	// Count by type
-	var topupCount, withdrawCount, transferOutCount, transferInCount, paymentCount int64
-	DB.Model(&models.Transaction{}).Where("type = ?", "topup").Count(&topupCount)
-	DB.Model(&models.Transaction{}).Where("type = ?", "withdraw").Count(&withdrawCount)
-	DB.Model(&models.Transaction{}).Where("type = ?", "transfer_out").Count(&transferOutCount)
-	DB.Model(&models.Transaction{}).Where("type = ?", "transfer_in").Count(&transferInCount)
-	DB.Model(&models.Transaction{}).Where("type = ?", "payment").Count(&paymentCount)
-
-	log.Printf("Topup transactions: %d", topupCount)
-	log.Printf("Withdraw transactions: %d", withdrawCount)
-	log.Printf("Transfer out transactions: %d", transferOutCount)
-	log.Printf("Transfer in transactions: %d", transferInCount)
-	log.Printf("Payment transactions: %d", paymentCount)
+	for _, txType := range transactionTypes {
+		var count int64
+		DB.Model(&models.Transaction{}).Where("type = ?", txType.Type).Count(&count)
+		percentage := float64(count) / float64(totalCount) * 100
+		log.Printf("%s: %d transactions (%.1f%%)", txType.Type, count, percentage)
+	}
 
 	// Count by status
-	var completedCount, pendingCount, failedCount int64
+	var completedCount, failedCount int64
 	DB.Model(&models.Transaction{}).Where("status = ?", "completed").Count(&completedCount)
-	DB.Model(&models.Transaction{}).Where("status = ?", "pending").Count(&pendingCount)
 	DB.Model(&models.Transaction{}).Where("status = ?", "failed").Count(&failedCount)
+	log.Printf("Completed: %d (%.1f%%)", completedCount, float64(completedCount)/float64(totalCount)*100)
+	log.Printf("Failed: %d (%.1f%%)", failedCount, float64(failedCount)/float64(totalCount)*100)
 
-	log.Printf("Completed transactions: %d", completedCount)
-	log.Printf("Pending transactions: %d", pendingCount)
-	log.Printf("Failed transactions: %d", failedCount)
+	log.Printf("✅ Successfully created 10,000 dummy transactions from 2010-2025")
+	return nil
 }
