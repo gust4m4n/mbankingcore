@@ -45,6 +45,21 @@ Authorization: Bearer <admin_access_token>
             "today": 66,
             "this_month": 2575,
             "this_year": 17730
+        },
+        "total_transactions_amount": {
+            "today": 15000000,
+            "this_month": 513300000,
+            "this_year": 3537500000
+        },
+        "total_topup_amount": {
+            "today": 4300000,
+            "this_month": 125800000,
+            "this_year": 880500000
+        },
+        "total_transfer_amount": {
+            "today": 6600000,
+            "this_month": 257500000,
+            "this_year": 1773000000
         }
     }
 }
@@ -67,6 +82,13 @@ Each transaction type includes three time period counts:
 - **topup_transactions**: Only topup transactions
 - **withdraw_transactions**: Only withdraw transactions  
 - **transfer_transactions**: Both transfer_in and transfer_out transactions combined
+
+### Transaction Amount Types  
+- **total_transactions_amount**: Total amount of all transactions combined (topup, withdraw, transfer_in, transfer_out, etc.)
+- **total_topup_amount**: Total amount of topup transactions only
+- **total_transfer_amount**: Total amount of transfer_out transactions only (to avoid double counting)
+
+**Note**: All amounts are in Indonesian Rupiah (IDR) and represented as integers.
 
 ## Authentication
 

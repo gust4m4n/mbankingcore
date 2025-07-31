@@ -357,16 +357,26 @@ func RetrieveFailedResponse() ErrorResponse {
 
 // DashboardStats represents dashboard statistics
 type DashboardStats struct {
-	TotalUsers           int64              `json:"total_users"`
-	TotalAdmins          int64              `json:"total_admins"`
-	TotalTransactions    TransactionPeriods `json:"total_transactions"`
-	TopupTransactions    TransactionPeriods `json:"topup_transactions"`
-	WithdrawTransactions TransactionPeriods `json:"withdraw_transactions"`
-	TransferTransactions TransactionPeriods `json:"transfer_transactions"`
+	TotalUsers              int64                    `json:"total_users"`
+	TotalAdmins             int64                    `json:"total_admins"`
+	TotalTransactions       TransactionPeriods       `json:"total_transactions"`
+	TopupTransactions       TransactionPeriods       `json:"topup_transactions"`
+	WithdrawTransactions    TransactionPeriods       `json:"withdraw_transactions"`
+	TransferTransactions    TransactionPeriods       `json:"transfer_transactions"`
+	TotalTransactionsAmount TransactionAmountPeriods `json:"total_transactions_amount"`
+	TotalTopupAmount        TransactionAmountPeriods `json:"total_topup_amount"`
+	TotalTransferAmount     TransactionAmountPeriods `json:"total_transfer_amount"`
 }
 
 // TransactionPeriods represents transaction counts for different time periods
 type TransactionPeriods struct {
+	Today     int64 `json:"today"`
+	ThisMonth int64 `json:"this_month"`
+	ThisYear  int64 `json:"this_year"`
+}
+
+// TransactionAmountPeriods represents transaction amounts for different time periods
+type TransactionAmountPeriods struct {
 	Today     int64 `json:"today"`
 	ThisMonth int64 `json:"this_month"`
 	ThisYear  int64 `json:"this_year"`

@@ -452,5 +452,53 @@ func (h *AdminHandler) GetDashboard(c *gin.Context) {
 		Where("(type = ? OR type = ?) AND created_at >= ? AND created_at < ?", "transfer_out", "transfer_in", startOfYear, startOfYear.AddDate(1, 0, 0)).
 		Count(&dashboard.TransferTransactions.ThisYear)
 
+	// Get total transaction amounts for all periods
+	// Today's total transaction amount
+	h.DB.Model(&models.Transaction{}).
+		Where("created_at >= ? AND created_at < ?", startOfToday, startOfToday.AddDate(0, 0, 1)).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTransactionsAmount.Today)
+
+	// This month's total transaction amount
+	h.DB.Model(&models.Transaction{}).
+		Where("created_at >= ? AND created_at < ?", startOfMonth, startOfMonth.AddDate(0, 1, 0)).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTransactionsAmount.ThisMonth)
+
+	// This year's total transaction amount
+	h.DB.Model(&models.Transaction{}).
+		Where("created_at >= ? AND created_at < ?", startOfYear, startOfYear.AddDate(1, 0, 0)).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTransactionsAmount.ThisYear)
+
+	// Get total topup amounts for all periods
+	// Today's topup amount
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ? AND created_at < ?", "topup", startOfToday, startOfToday.AddDate(0, 0, 1)).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTopupAmount.Today)
+
+	// This month's topup amount
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ? AND created_at < ?", "topup", startOfMonth, startOfMonth.AddDate(0, 1, 0)).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTopupAmount.ThisMonth)
+
+	// This year's topup amount
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ? AND created_at < ?", "topup", startOfYear, startOfYear.AddDate(1, 0, 0)).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTopupAmount.ThisYear)
+
+	// Get total transfer amounts for all periods (only transfer_out to avoid double counting)
+	// Today's transfer amount
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ? AND created_at < ?", "transfer_out", startOfToday, startOfToday.AddDate(0, 0, 1)).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTransferAmount.Today)
+
+	// This month's transfer amount
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ? AND created_at < ?", "transfer_out", startOfMonth, startOfMonth.AddDate(0, 1, 0)).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTransferAmount.ThisMonth)
+
+	// This year's transfer amount
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ? AND created_at < ?", "transfer_out", startOfYear, startOfYear.AddDate(1, 0, 0)).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTransferAmount.ThisYear)
+
 	c.JSON(http.StatusOK, models.DashboardSuccessResponse(dashboard))
 }
