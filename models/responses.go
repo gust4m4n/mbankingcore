@@ -364,10 +364,6 @@ type PerformanceDataPoint struct {
 
 // PerformanceData represents chart data for different time ranges
 type PerformanceData struct {
-	Daily      []PerformanceDataPoint `json:"daily"`        // Last 7 days
-	Weekly     []PerformanceDataPoint `json:"weekly"`       // Last 7 weeks
-	Monthly    []PerformanceDataPoint `json:"monthly"`      // Last 12 months
-	Yearly     []PerformanceDataPoint `json:"yearly"`       // Last 5 years
 	Last7Days  []PerformanceDataPoint `json:"last_7_days"`  // Daily data for last 7 days (for charts)
 	Last30Days []PerformanceDataPoint `json:"last_30_days"` // Daily data for last 30 days (for charts)
 }
