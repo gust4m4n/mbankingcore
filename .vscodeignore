@@ -1,0 +1,44 @@
+# .vscodeignore - Files to exclude from VS Code indexing
+
+# Git objects and history (very large)
+.git/
+
+# Build directory and binaries
+bin/
+mbankingcore
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Large JSON files (Postman collections)
+postman/*.json
+
+# Certificates
+certs/
+
+# Environment files
+.env
+
+# OS files
+.DS_Store
+._*
+
+# SQL update files (large)
+update_*.sql
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Test files
+*.test
+*.out
+
+# Coverage files
+coverage.*
+*.coverprofile
+profile.cov

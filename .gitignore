@@ -1,6 +1,10 @@
-# If you prefer the allow list template instead of the deny list, see community template:
-# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
-#
+# Go .gitignore - Optimized for Go projects
+# Based on GitHub's official Go gitignore template
+
+# =============================================================================
+# Go specific files
+# =============================================================================
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -8,35 +12,286 @@
 *.so
 *.dylib
 
-# Test binary, built with `go test -c`
+# Test binaries built with `go test -c`
 *.test
 
-# Code coverage profiles and other test artifacts
+# Output of the go coverage tool
 *.out
 coverage.*
 *.coverprofile
 profile.cov
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
-
-# Go workspace file
+# Go workspace files
 go.work
 go.work.sum
 
-# env file
-.env
+# Vendor directory (uncomment if using vendoring)
+vendor/
 
-# Editor/IDE
-# .idea/
-# .vscode/
+# Go build cache
+.cache/
 
-.mbankingcore
-.migrate
-__debug_bin*
+# =============================================================================
+# Project specific binaries and build artifacts
+# =============================================================================
 
+# Main application binaries
 mbankingcore
 migrate
 
-./mbankingcore
-./migrate
+# Build and dist directories
+bin/
+dist/
+build/
+
+# Debug binaries
+__debug_bin*
+*.debug
+
+# Application specific files
+.mbankingcore
+.migrate
+
+# =============================================================================
+# Environment and configuration files
+# =============================================================================
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Configuration files with sensitive data
+config.json
+config.yaml
+config.yml
+*.secret
+
+# =============================================================================
+# Database files
+# =============================================================================
+
+# SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Database dumps
+*.sql.gz
+*.dump
+
+# Migration files (if auto-generated)
+# migrations/*.sql
+
+# =============================================================================
+# Logs and temporary files
+# =============================================================================
+
+# Log files
+*.log
+logs/
+log/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*~
+
+# Crash dumps
+crash.log
+*.stackdump
+
+# =============================================================================
+# Security and certificates
+# =============================================================================
+
+# SSL certificates (auto-generated)
+certs/
+*.crt
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Private keys
+*.private
+id_rsa
+id_dsa
+
+# =============================================================================
+# IDE and editor files
+# =============================================================================
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# GoLand/IntelliJ
+.idea/
+*.iml
+*.iws
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Atom
+.atom/
+
+# =============================================================================
+# OS generated files
+# =============================================================================
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# Documentation and API files
+# =============================================================================
+
+# Large documentation files
+docs/generated/
+api-docs/
+
+# Postman collections (can be large)
+postman/*.json
+!postman/*.template.json
+!postman/environment.example.json
+
+# OpenAPI/Swagger generated files
+swagger/
+openapi/
+
+# =============================================================================
+# Dependencies and modules
+# =============================================================================
+
+# Node.js (if using for tools)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python (if using for scripts)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+
+# =============================================================================
+# Testing and coverage
+# =============================================================================
+
+# Test coverage reports
+coverage.html
+coverage.xml
+.coverage
+
+# Benchmark results
+*.bench
+benchmark.txt
+
+# Test output
+test-results/
+*.test.log
+
+# =============================================================================
+# Deployment and cloud
+# =============================================================================
+
+# Docker
+.dockerignore
+Dockerfile.dev
+
+# Kubernetes
+k8s/secrets/
+*.secret.yaml
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# =============================================================================
+# Version control
+# =============================================================================
+
+# Git
+.git/
+*.orig
+*.rej
+
+# SVN
+.svn/
+
+# =============================================================================
+# Miscellaneous
+# =============================================================================
+
+# Archives
+*.tar
+*.tar.gz
+*.zip
+*.rar
+*.7z
+
+# Large media files
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.mp3
+*.wav
+
+# Backup files
+*.backup
+*.bak
+*~
