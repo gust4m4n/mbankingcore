@@ -2,11 +2,13 @@ package main
 
 import (
 	"crypto/tls"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 
 	"mbankingcore/config"
 	"mbankingcore/handlers"
@@ -15,6 +17,47 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
+
+// Server start time
+var serverStartTime time.Time
+
+// calculateUptime calculates the uptime and returns a structured format
+func calculateUptime() map[string]interface{} {
+	now := time.Now()
+	uptime := now.Sub(serverStartTime)
+
+	// Calculate individual components
+	years := int(uptime.Hours()) / (24 * 365)
+	remainingHours := int(uptime.Hours()) % (24 * 365)
+
+	months := remainingHours / (24 * 30)
+	remainingHours = remainingHours % (24 * 30)
+
+	weeks := remainingHours / (24 * 7)
+	remainingHours = remainingHours % (24 * 7)
+
+	days := remainingHours / 24
+	hours := remainingHours % 24
+
+	minutes := int(uptime.Minutes()) % 60
+	seconds := int(uptime.Seconds()) % 60
+
+	return map[string]interface{}{
+		"server_started_at": serverStartTime.Format("2006-01-02 15:04:05 MST"),
+		"current_time":      now.Format("2006-01-02 15:04:05 MST"),
+		"uptime": map[string]int{
+			"years":   years,
+			"months":  months,
+			"weeks":   weeks,
+			"days":    days,
+			"hours":   hours,
+			"minutes": minutes,
+			"seconds": seconds,
+		},
+		"total_uptime_seconds": int(uptime.Seconds()),
+		"uptime_string":        fmt.Sprintf("%dy %dmo %dw %dd %dh %dm %ds", years, months, weeks, days, hours, minutes, seconds),
+	}
+}
 
 // generateSelfSignedCert creates a self-signed certificate for development
 func generateSelfSignedCert(certFile, keyFile string) error {
@@ -78,6 +121,9 @@ func startHTTPSServer(router *gin.Engine, address, certFile, keyFile string) err
 }
 
 func main() {
+	// Record server start time
+	serverStartTime = time.Now()
+
 	// Load environment variables
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found or error loading .env file")
@@ -178,8 +224,9 @@ func main() {
 				adminProtected.DELETE("/admins/:id", adminHandler.DeleteAdmin) // Delete admin
 
 				// Transaction monitoring (admin only)
-				adminProtected.GET("/transactions", transactionHandler.GetAllTransactions) // Get all transactions for monitoring
-				adminProtected.POST("/transactions/reversal", transactionHandler.Reversal) // Reverse a transaction
+				adminProtected.GET("/transactions", transactionHandler.GetAllTransactions)    // Get all transactions for monitoring
+				adminProtected.GET("/transactions/:id", adminHandler.GetAdminTransactionByID) // Get transaction detail by ID for admin
+				adminProtected.POST("/transactions/reversal", transactionHandler.Reversal)    // Reverse a transaction
 
 				// Audit trails (admin only)
 				adminProtected.GET("/audit-logs", auditHandler.GetAuditLogs)        // Get audit logs with filtering
@@ -246,18 +293,60 @@ func main() {
 			protected.POST("/transactions/withdraw", transactionHandler.Withdraw)          // Withdraw balance
 			protected.POST("/transactions/transfer", transactionHandler.Transfer)          // Transfer balance to other user
 			protected.GET("/transactions/history", transactionHandler.GetUserTransactions) // Get user transaction history
+			protected.GET("/transactions/:id", transactionHandler.GetTransactionByID)      // Get transaction detail by ID
 		}
 	}
 
 	// Health check endpoint
 	router.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"code":    200,
-			"message": "MBankingCore API is running",
-			"data": gin.H{
-				"status": "ok",
-			},
-		})
+		// Check database connection
+		databaseStatus := "healthy"
+		dbError := ""
+
+		if config.DB != nil {
+			sqlDB, err := config.DB.DB()
+			if err != nil {
+				databaseStatus = "unhealthy"
+				dbError = err.Error()
+			} else if err := sqlDB.Ping(); err != nil {
+				databaseStatus = "unhealthy"
+				dbError = err.Error()
+			}
+		} else {
+			databaseStatus = "disconnected"
+			dbError = "database connection not initialized"
+		}
+
+		// API is always healthy if server is running
+		apiStatus := "healthy"
+
+		// Get uptime information
+		uptimeInfo := calculateUptime()
+
+		// Determine HTTP status code
+		httpCode := 200
+		if databaseStatus != "healthy" {
+			httpCode = 503 // Service Unavailable
+		}
+
+		response := gin.H{
+			"code":            httpCode,
+			"message":         "MBankingCore API Health Check",
+			"api_status":      apiStatus,
+			"database_status": databaseStatus,
+		}
+
+		// Add uptime information
+		for key, value := range uptimeInfo {
+			response[key] = value
+		}
+
+		// Add error details if database is unhealthy
+		if dbError != "" {
+			response["database_error"] = dbError
+		}
+
+		c.JSON(httpCode, response)
 	})
 
 	// Get port from environment or default to 8080

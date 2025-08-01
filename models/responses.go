@@ -364,9 +364,12 @@ type PerformanceDataPoint struct {
 
 // PerformanceData represents chart data for different time ranges
 type PerformanceData struct {
-	Weekly  []PerformanceDataPoint `json:"weekly"`
-	Monthly []PerformanceDataPoint `json:"monthly"`
-	Yearly  []PerformanceDataPoint `json:"yearly"`
+	Daily      []PerformanceDataPoint `json:"daily"`        // Last 7 days
+	Weekly     []PerformanceDataPoint `json:"weekly"`       // Last 7 weeks
+	Monthly    []PerformanceDataPoint `json:"monthly"`      // Last 12 months
+	Yearly     []PerformanceDataPoint `json:"yearly"`       // Last 5 years
+	Last7Days  []PerformanceDataPoint `json:"last_7_days"`  // Daily data for last 7 days (for charts)
+	Last30Days []PerformanceDataPoint `json:"last_30_days"` // Daily data for last 30 days (for charts)
 }
 
 // DashboardStats represents dashboard statistics
@@ -378,6 +381,18 @@ type DashboardStats struct {
 	WithdrawTransactions TransactionPeriodsWithAmount `json:"withdraw_transactions"`
 	TransferTransactions TransactionPeriodsWithAmount `json:"transfer_transactions"`
 	Performance          PerformanceData              `json:"performance"`
+}
+
+// TransactionSummary represents transaction summary for a specific period
+type TransactionSummary struct {
+	TotalCount     int64 `json:"total_count"`
+	TotalAmount    int64 `json:"total_amount"`
+	TopupCount     int64 `json:"topup_count"`
+	TopupAmount    int64 `json:"topup_amount"`
+	WithdrawCount  int64 `json:"withdraw_count"`
+	WithdrawAmount int64 `json:"withdraw_amount"`
+	TransferCount  int64 `json:"transfer_count"`
+	TransferAmount int64 `json:"transfer_amount"`
 }
 
 // TransactionPeriods represents transaction counts for different time periods
@@ -400,16 +415,20 @@ type TransactionAmountPeriods struct {
 
 // TransactionPeriodsWithAmount represents transaction counts and amounts for different time periods
 type TransactionPeriodsWithAmount struct {
-	Today           int64 `json:"today"`
-	TodayAmount     int64 `json:"today_amount"`
-	ThisWeek        int64 `json:"this_week"`
-	ThisWeekAmount  int64 `json:"this_week_amount"`
-	ThisMonth       int64 `json:"this_month"`
-	ThisMonthAmount int64 `json:"this_month_amount"`
-	ThisYear        int64 `json:"this_year"`
-	ThisYearAmount  int64 `json:"this_year_amount"`
-	AllTime         int64 `json:"all_time"`
-	AllTimeAmount   int64 `json:"all_time_amount"`
+	Today            int64 `json:"today"`
+	TodayAmount      int64 `json:"today_amount"`
+	ThisWeek         int64 `json:"this_week"`
+	ThisWeekAmount   int64 `json:"this_week_amount"`
+	ThisMonth        int64 `json:"this_month"`
+	ThisMonthAmount  int64 `json:"this_month_amount"`
+	ThisYear         int64 `json:"this_year"`
+	ThisYearAmount   int64 `json:"this_year_amount"`
+	AllTime          int64 `json:"all_time"`
+	AllTimeAmount    int64 `json:"all_time_amount"`
+	Last7Days        int64 `json:"last_7_days"`
+	Last7DaysAmount  int64 `json:"last_7_days_amount"`
+	Last30Days       int64 `json:"last_30_days"`
+	Last30DaysAmount int64 `json:"last_30_days_amount"`
 }
 
 // Dashboard Success Responses

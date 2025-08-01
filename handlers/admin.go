@@ -603,7 +603,99 @@ func (h *AdminHandler) GetDashboard(c *gin.Context) {
 		Where("type = ?", "transfer_out").
 		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TransferTransactions.AllTimeAmount)
 
+	// Calculate last 7 days and last 30 days for all transaction types
+	last7DaysStart := startOfToday.AddDate(0, 0, -6)   // Last 7 days including today
+	last30DaysStart := startOfToday.AddDate(0, 0, -29) // Last 30 days including today
+
+	// Total transactions - Last 7 days
+	h.DB.Model(&models.Transaction{}).
+		Where("created_at >= ?", last7DaysStart).
+		Count(&dashboard.TotalTransactions.Last7Days)
+	h.DB.Model(&models.Transaction{}).
+		Where("created_at >= ?", last7DaysStart).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTransactions.Last7DaysAmount)
+
+	// Total transactions - Last 30 days
+	h.DB.Model(&models.Transaction{}).
+		Where("created_at >= ?", last30DaysStart).
+		Count(&dashboard.TotalTransactions.Last30Days)
+	h.DB.Model(&models.Transaction{}).
+		Where("created_at >= ?", last30DaysStart).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TotalTransactions.Last30DaysAmount)
+
+	// Topup transactions - Last 7 days
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ?", "topup", last7DaysStart).
+		Count(&dashboard.TopupTransactions.Last7Days)
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ?", "topup", last7DaysStart).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TopupTransactions.Last7DaysAmount)
+
+	// Topup transactions - Last 30 days
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ?", "topup", last30DaysStart).
+		Count(&dashboard.TopupTransactions.Last30Days)
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ?", "topup", last30DaysStart).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TopupTransactions.Last30DaysAmount)
+
+	// Withdraw transactions - Last 7 days
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ?", "withdraw", last7DaysStart).
+		Count(&dashboard.WithdrawTransactions.Last7Days)
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ?", "withdraw", last7DaysStart).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.WithdrawTransactions.Last7DaysAmount)
+
+	// Withdraw transactions - Last 30 days
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ?", "withdraw", last30DaysStart).
+		Count(&dashboard.WithdrawTransactions.Last30Days)
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ?", "withdraw", last30DaysStart).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.WithdrawTransactions.Last30DaysAmount)
+
+	// Transfer transactions - Last 7 days (count both in and out, amount only out to avoid double counting)
+	h.DB.Model(&models.Transaction{}).
+		Where("(type = ? OR type = ?) AND created_at >= ?", "transfer_out", "transfer_in", last7DaysStart).
+		Count(&dashboard.TransferTransactions.Last7Days)
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ?", "transfer_out", last7DaysStart).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TransferTransactions.Last7DaysAmount)
+
+	// Transfer transactions - Last 30 days (count both in and out, amount only out to avoid double counting)
+	h.DB.Model(&models.Transaction{}).
+		Where("(type = ? OR type = ?) AND created_at >= ?", "transfer_out", "transfer_in", last30DaysStart).
+		Count(&dashboard.TransferTransactions.Last30Days)
+	h.DB.Model(&models.Transaction{}).
+		Where("type = ? AND created_at >= ?", "transfer_out", last30DaysStart).
+		Select("COALESCE(SUM(amount), 0)").Row().Scan(&dashboard.TransferTransactions.Last30DaysAmount)
+
 	// Get performance data for charts
+	// Daily performance (last 7 days)
+	for i := 6; i >= 0; i-- {
+		dayStart := startOfToday.AddDate(0, 0, -i)
+		dayEnd := dayStart.AddDate(0, 0, 1)
+		dayLabel := dayStart.Format("Jan 02")
+
+		var dayCount int64
+		var dayAmount int64
+
+		h.DB.Model(&models.Transaction{}).
+			Where("created_at >= ? AND created_at < ?", dayStart, dayEnd).
+			Count(&dayCount)
+
+		h.DB.Model(&models.Transaction{}).
+			Where("created_at >= ? AND created_at < ?", dayStart, dayEnd).
+			Select("COALESCE(SUM(amount), 0)").Row().Scan(&dayAmount)
+
+		dashboard.Performance.Daily = append(dashboard.Performance.Daily, models.PerformanceDataPoint{
+			Period: dayLabel,
+			Count:  dayCount,
+			Amount: dayAmount,
+		})
+	}
+
 	// Weekly performance (last 7 weeks)
 	for i := 6; i >= 0; i-- {
 		weekStart := startOfWeek.AddDate(0, 0, -7*i)
@@ -676,5 +768,101 @@ func (h *AdminHandler) GetDashboard(c *gin.Context) {
 		})
 	}
 
+	// Populate Last7Days chart data (daily)
+	for i := 6; i >= 0; i-- {
+		dayStart := startOfToday.AddDate(0, 0, -i)
+		dayEnd := dayStart.AddDate(0, 0, 1)
+		dayLabel := dayStart.Format("Jan 02")
+
+		var dayCount int64
+		var dayAmount int64
+
+		h.DB.Model(&models.Transaction{}).
+			Where("created_at >= ? AND created_at < ?", dayStart, dayEnd).
+			Count(&dayCount)
+
+		h.DB.Model(&models.Transaction{}).
+			Where("created_at >= ? AND created_at < ?", dayStart, dayEnd).
+			Select("COALESCE(SUM(amount), 0)").Row().Scan(&dayAmount)
+
+		dashboard.Performance.Last7Days = append(dashboard.Performance.Last7Days, models.PerformanceDataPoint{
+			Period: dayLabel,
+			Count:  dayCount,
+			Amount: dayAmount,
+		})
+	}
+
+	// Populate Last30Days chart data (daily)
+	for i := 29; i >= 0; i-- {
+		dayStart := startOfToday.AddDate(0, 0, -i)
+		dayEnd := dayStart.AddDate(0, 0, 1)
+		dayLabel := dayStart.Format("Jan 02")
+
+		var dayCount int64
+		var dayAmount int64
+
+		h.DB.Model(&models.Transaction{}).
+			Where("created_at >= ? AND created_at < ?", dayStart, dayEnd).
+			Count(&dayCount)
+
+		h.DB.Model(&models.Transaction{}).
+			Where("created_at >= ? AND created_at < ?", dayStart, dayEnd).
+			Select("COALESCE(SUM(amount), 0)").Row().Scan(&dayAmount)
+
+		dashboard.Performance.Last30Days = append(dashboard.Performance.Last30Days, models.PerformanceDataPoint{
+			Period: dayLabel,
+			Count:  dayCount,
+			Amount: dayAmount,
+		})
+	}
+
 	c.JSON(http.StatusOK, models.DashboardSuccessResponse(dashboard))
+}
+
+// GetAdminTransactionByID - Get transaction detail by ID for admin
+func (h *AdminHandler) GetAdminTransactionByID(c *gin.Context) {
+	// Get transaction ID from URL parameter
+	txnIDStr := c.Param("id")
+	txnID, err := strconv.ParseUint(txnIDStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Code:    models.CODE_VALIDATION_FAILED,
+			Message: "Invalid transaction ID",
+			Data:    nil,
+		})
+		return
+	}
+
+	// Find transaction by ID with all related data preloaded
+	var transaction models.Transaction
+	err = h.DB.Preload("User").
+		Preload("OriginalTxn").
+		Preload("OriginalTxn.User").
+		Preload("ReversedTxn").
+		Preload("ReversedTxn.User").
+		First(&transaction, uint(txnID)).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, models.Response{
+				Code:    models.CODE_NOT_FOUND,
+				Message: "Transaction not found",
+				Data:    nil,
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_INTERNAL_SERVER,
+			Message: "Failed to retrieve transaction",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, models.Response{
+		Code:    models.CODE_SUCCESS,
+		Message: "Transaction retrieved successfully",
+		Data:    transaction,
+	})
 }

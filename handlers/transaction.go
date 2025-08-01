@@ -252,7 +252,7 @@ func (h *TransactionHandler) GetUserTransactions(c *gin.Context) {
 	h.DB.Model(&models.Transaction{}).Where("user_id = ?", userID).Count(&total)
 
 	// Get transactions with pagination
-	if err := h.DB.Where("user_id = ?", userID).
+	if err := h.DB.Preload("User").Where("user_id = ?", userID).
 		Order("created_at DESC").
 		Limit(limit).
 		Offset(offset).
@@ -803,6 +803,59 @@ func (h *TransactionHandler) Reversal(c *gin.Context) {
 			"balance_after":           newBalance,
 			"reversal_reason":         req.ReversalReason,
 			"reversed_at":             now,
+		},
+	})
+}
+
+// GetTransactionByID - Get transaction detail by ID
+func (h *TransactionHandler) GetTransactionByID(c *gin.Context) {
+	// Get transaction ID from URL parameter
+	transactionID := c.Param("id")
+	if transactionID == "" {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Transaction ID is required",
+		})
+		return
+	}
+
+	// Convert to uint
+	id, err := strconv.ParseUint(transactionID, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Code:    http.StatusBadRequest,
+			Message: "Invalid transaction ID format",
+		})
+		return
+	}
+
+	var transaction models.Transaction
+
+	// Get transaction with user information
+	if err := h.DB.Preload("User").
+		Preload("OriginalTxn").
+		Preload("ReversedTxn").
+		Where("id = ?", uint(id)).
+		First(&transaction).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, models.ErrorResponse{
+				Code:    http.StatusNotFound,
+				Message: "Transaction not found",
+			})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, models.ErrorResponse{
+			Code:    http.StatusInternalServerError,
+			Message: "Failed to fetch transaction",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    http.StatusOK,
+		"message": "Transaction retrieved successfully",
+		"data": gin.H{
+			"transaction": transaction,
 		},
 	})
 }
