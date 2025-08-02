@@ -60,7 +60,7 @@ func ConnectDatabase() {
 	DB = database
 
 	// Run comprehensive migrations and initial setup
-	if err := RunMigrations(); err != nil {
+	if err := SetupDatabase(); err != nil {
 		log.Fatal("Failed to run migrations:", err)
 	}
 }

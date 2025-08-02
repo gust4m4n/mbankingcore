@@ -177,6 +177,8 @@ func main() {
 	adminHandler := handlers.NewAdminHandler(config.DB)
 	transactionHandler := handlers.NewTransactionHandler(config.DB)
 	auditHandler := handlers.NewAuditHandler()
+	checkerMakerHandler := handlers.NewCheckerMakerHandler(config.DB)
+	approvalThresholdHandler := handlers.NewApprovalThresholdHandler(config.DB)
 
 	// API routes
 	api := router.Group("/api")
@@ -220,11 +222,22 @@ func main() {
 				adminProtected.GET("/dashboard", adminHandler.GetDashboard) // Get dashboard statistics
 
 				// Admin management
-				adminProtected.GET("/admins", adminHandler.GetAdmins)          // Get all admins
-				adminProtected.GET("/admins/:id", adminHandler.GetAdminByID)   // Get admin by ID
-				adminProtected.POST("/admins", adminHandler.CreateAdmin)       // Create new admin
-				adminProtected.PUT("/admins/:id", adminHandler.UpdateAdmin)    // Update admin
-				adminProtected.DELETE("/admins/:id", adminHandler.DeleteAdmin) // Delete admin
+				adminProtected.GET("/admins", adminHandler.GetAdmins)                                   // Get all admins
+				adminProtected.GET("/admins/:admin_id", adminHandler.GetAdminByID)                      // Get admin by ID
+				adminProtected.POST("/admins", adminHandler.CreateAdmin)                                // Create new admin
+				adminProtected.PUT("/admins/:admin_id", adminHandler.UpdateAdmin)                       // Update admin
+				adminProtected.DELETE("/admins/:admin_id", adminHandler.DeleteAdmin)                    // Soft delete admin
+				adminProtected.GET("/admins/deleted", adminHandler.GetDeletedAdmins)                    // Get all soft deleted admins
+				adminProtected.POST("/admins/:admin_id/restore", adminHandler.RestoreAdmin)             // Restore soft deleted admin
+				adminProtected.DELETE("/admins/:admin_id/permanent", adminHandler.PermanentDeleteAdmin) // Permanently delete admin
+
+				// User management (admin only)
+				adminProtected.GET("/users", handlers.ListUsers)                                               // Get all users with search filters
+				adminProtected.POST("/users/:user_id/topup", adminHandler.AdminTopupUserBalance)               // Admin topup user balance
+				adminProtected.POST("/users/:user_id/adjust", adminHandler.AdminAdjustUserBalance)             // Admin adjust user balance (credit/debit)
+				adminProtected.POST("/users/:user_id/set-balance", adminHandler.AdminSetUserBalance)           // Admin set exact user balance
+				adminProtected.GET("/users/:user_id/balance-history", adminHandler.AdminGetUserBalanceHistory) // Get user balance history
+				adminProtected.GET("/users/:user_id", handlers.GetUserByID)                                    // Get user by ID
 
 				// Transaction monitoring (admin only)
 				adminProtected.GET("/transactions", transactionHandler.GetAllTransactions)    // Get all transactions for monitoring
@@ -240,6 +253,24 @@ func main() {
 				adminProtected.GET("/configs", handlers.GetAllConfigs)       // Get all configs (admin only)
 				adminProtected.GET("/config/:key", handlers.GetConfig)       // Get config value by key (admin only)
 				adminProtected.DELETE("/config/:key", handlers.DeleteConfig) // Delete config by key (admin only)
+
+				// Admin Terms & Conditions and Privacy Policy management (admin only)
+				adminProtected.GET("/admin-terms-conditions", handlers.GetAdminTermsConditions)  // Get admin terms and conditions
+				adminProtected.POST("/admin-terms-conditions", handlers.SetAdminTermsConditions) // Set admin terms and conditions
+				adminProtected.GET("/admin-privacy-policy", handlers.GetAdminPrivacyPolicy)      // Get admin privacy policy
+				adminProtected.POST("/admin-privacy-policy", handlers.SetAdminPrivacyPolicy)     // Set admin privacy policy
+
+				// Checker-Maker Approval System (admin only)
+				adminProtected.POST("/checker-maker/transactions", checkerMakerHandler.CreatePendingTransaction)       // Create pending transaction (maker)
+				adminProtected.GET("/checker-maker/transactions", checkerMakerHandler.GetPendingTransactions)          // Get pending transactions list
+				adminProtected.POST("/checker-maker/transactions/:id", checkerMakerHandler.ApproveOrRejectTransaction) // Approve or reject transaction (checker)
+				adminProtected.GET("/checker-maker/stats", checkerMakerHandler.GetApprovalStats)                       // Get approval statistics
+
+				// Approval Threshold Management (admin only)
+				adminProtected.GET("/approval-thresholds", approvalThresholdHandler.GetApprovalThresholds)                // Get all approval thresholds
+				adminProtected.GET("/approval-thresholds/:type", approvalThresholdHandler.GetApprovalThresholdByType)     // Get approval threshold by type
+				adminProtected.POST("/approval-thresholds", approvalThresholdHandler.CreateOrUpdateApprovalThreshold)     // Create/update approval threshold
+				adminProtected.DELETE("/approval-thresholds/:type", approvalThresholdHandler.DeactivateApprovalThreshold) // Deactivate approval threshold
 			}
 		} // Protected routes (require authentication)
 		protected := api.Group("/")
@@ -287,9 +318,12 @@ func main() {
 			protected.POST("/photos", photoHandler.CreatePhoto) // Create photo (authenticated users)
 
 			// User management - basic operations (authenticated users)
-			protected.GET("/users", handlers.ListUsers)         // List all users (authenticated users)
-			protected.GET("/users/:id", handlers.GetUserByID)   // Get user by ID (authenticated users)
-			protected.DELETE("/users/:id", handlers.DeleteUser) // Delete user by ID (authenticated users)
+			protected.GET("/users", handlers.ListUsers)                                 // List all users (authenticated users)
+			protected.GET("/users/:user_id", handlers.GetUserByID)                      // Get user by ID (authenticated users)
+			protected.DELETE("/users/:user_id", handlers.DeleteUser)                    // Soft delete user by ID (authenticated users)
+			protected.GET("/users/deleted", handlers.GetDeletedUsers)                   // Get all soft deleted users
+			protected.POST("/users/:user_id/restore", handlers.RestoreUser)             // Restore soft deleted user
+			protected.DELETE("/users/:user_id/permanent", handlers.PermanentDeleteUser) // Permanently delete user
 
 			// Transaction management (authenticated users)
 			protected.POST("/transactions/topup", transactionHandler.Topup)                // Top up balance

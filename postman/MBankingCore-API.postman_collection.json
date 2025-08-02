@@ -192,7 +192,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"John Doe Testing\",\n  \"account_number\": \"1234567890123456\",\n  \"mother_name\": \"Jane Doe Mother\",\n  \"phone\": \"+62812345678901\",\n  \"pin_atm\": \"123456\",\n  \"device_info\": {\n    \"device_type\": \"android\",\n    \"device_id\": \"test-device-123\",\n    \"device_name\": \"Samsung Galaxy S23\"\n  }\n}"
+                  "raw": "{\n  \"name\": \"Demo User\",\n  \"account_number\": \"1234567890\",\n  \"mother_name\": \"Demo Mother\",\n  \"phone\": \"+621234567890\",\n  \"pin_atm\": \"123456\",\n  \"device_info\": {\n    \"device_type\": \"android\",\n    \"device_id\": \"test-device-123\",\n    \"device_name\": \"Samsung Galaxy S23\"\n  }\n}"
                 },
                 "url": {
                   "raw": "{{base_url}}/api/login",
@@ -224,7 +224,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"John Doe Testing\",\n  \"account_number\": \"1234567890123456\",\n  \"mother_name\": \"Jane Doe Mother\",\n  \"phone\": \"+62812345678901\",\n  \"pin_atm\": \"wrong123\",\n  \"device_info\": {\n    \"device_type\": \"android\",\n    \"device_id\": \"test-device-123\",\n    \"device_name\": \"Samsung Galaxy S23\"\n  }\n}"
+                  "raw": "{\n  \"name\": \"Demo User\",\n  \"account_number\": \"1234567890\",\n  \"mother_name\": \"Demo Mother\",\n  \"phone\": \"+621234567890\",\n  \"pin_atm\": \"wrong123\",\n  \"device_info\": {\n    \"device_type\": \"android\",\n    \"device_id\": \"test-device-123\",\n    \"device_name\": \"Samsung Galaxy S23\"\n  }\n}"
                 },
                 "url": {
                   "raw": "{{base_url}}/api/login",
@@ -344,7 +344,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"code\": 200,\n  \"message\": \"Login successful\",\n  \"data\": {\n    \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\",\n    \"refresh_token\": \"def50200684c7d6ad2e96db95e9c1b7a4e3a5b8c7d6ad2e96db95e9c1b7a4e3a5b8c\",\n    \"token_type\": \"Bearer\",\n    \"expires_in\": 3600,\n    \"session_id\": \"session_123456789\",\n    \"user\": {\n      \"id\": 1,\n      \"name\": \"John Doe Testing\",\n      \"phone\": \"+62812345678901\",\n      \"account_number\": \"1234567890123456\",\n      \"balance\": 0,\n      \"status\": \"active\",\n      \"created_at\": \"2025-08-02T01:40:01.000Z\",\n      \"updated_at\": \"2025-08-02T01:40:01.000Z\"\n    }\n  }\n}"
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Login successful\",\n  \"data\": {\n    \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\",\n    \"refresh_token\": \"def50200684c7d6ad2e96db95e9c1b7a4e3a5b8c7d6ad2e96db95e9c1b7a4e3a5b8c\",\n    \"token_type\": \"Bearer\",\n    \"expires_in\": 3600,\n    \"session_id\": \"session_123456789\",\n    \"user\": {\n      \"id\": 22146,\n      \"name\": \"Demo User\",\n      \"phone\": \"+621234567890\",\n      \"account_number\": \"1234567890\",\n      \"balance\": 1000000,\n      \"status\": \"active\",\n      \"created_at\": \"2025-08-02T01:40:01.000Z\",\n      \"updated_at\": \"2025-08-02T01:40:01.000Z\"\n    }\n  }\n}"
             }
           ]
         },
@@ -1722,7 +1722,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"code\": 200,\n  \"message\": \"Profile retrieved successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"John Doe Testing\",\n    \"phone\": \"+62812345678901\",\n    \"mother_name\": \"Jane Doe Mother\",\n    \"account_number\": \"1234567890123456\",\n    \"balance\": 250000,\n    \"status\": \"active\",\n    \"avatar\": null,\n    \"created_at\": \"2025-08-02T01:40:01.000Z\",\n    \"updated_at\": \"2025-08-02T01:45:15.000Z\"\n  }\n}"
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Profile retrieved successfully\",\n  \"data\": {\n    \"id\": 22146,\n    \"name\": \"Demo User\",\n    \"phone\": \"+621234567890\",\n    \"mother_name\": \"Demo Mother\",\n    \"account_number\": \"1234567890\",\n    \"balance\": 1000000,\n    \"status\": \"active\",\n    \"avatar\": null,\n    \"created_at\": \"2025-08-02T01:40:01.000Z\",\n    \"updated_at\": \"2025-08-02T01:45:15.000Z\"\n  }\n}"
             }
           ]
         },
@@ -1806,7 +1806,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"code\": 200,\n  \"message\": \"Profile updated successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"John Doe Updated\",\n    \"phone\": \"+62812345678901\",\n    \"mother_name\": \"Jane Doe Mother Updated\",\n    \"account_number\": \"1234567890123456\",\n    \"balance\": 250000,\n    \"status\": \"active\",\n    \"avatar\": null,\n    \"created_at\": \"2025-08-02T01:40:01.000Z\",\n    \"updated_at\": \"2025-08-02T02:15:30.000Z\"\n  }\n}"
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Profile updated successfully\",\n  \"data\": {\n    \"id\": 22146,\n    \"name\": \"Demo User Updated\",\n    \"phone\": \"+621234567890\",\n    \"mother_name\": \"Demo Mother Updated\",\n    \"account_number\": \"1234567890\",\n    \"balance\": 1000000,\n    \"status\": \"active\",\n    \"avatar\": null,\n    \"created_at\": \"2025-08-02T01:40:01.000Z\",\n    \"updated_at\": \"2025-08-02T02:15:30.000Z\"\n  }\n}"
             },
             {
               "name": "Update User Profile - Validation Error",

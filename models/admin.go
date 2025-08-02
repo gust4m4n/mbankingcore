@@ -2,6 +2,8 @@ package models
 
 import (
 	"time"
+
+	"gorm.io/gorm"
 )
 
 // Admin status constants
@@ -18,16 +20,17 @@ const (
 )
 
 type Admin struct {
-	ID        uint       `json:"id" gorm:"primaryKey"`
-	Name      string     `json:"name" gorm:"not null"`
-	Email     string     `json:"email" gorm:"unique;not null"`
-	Password  string     `json:"-" gorm:"not null"` // Hidden from JSON
-	Role      string     `json:"role" gorm:"default:admin"`
-	Status    int        `json:"status" gorm:"default:1"` // 0=inactive, 1=active, 2=blocked
-	Avatar    string     `json:"avatar" gorm:"size:500"`
-	LastLogin *time.Time `json:"last_login,omitempty"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
+	ID        uint           `json:"id" gorm:"primaryKey"`
+	Name      string         `json:"name" gorm:"not null"`
+	Email     string         `json:"email" gorm:"unique;not null"`
+	Password  string         `json:"-" gorm:"not null"` // Hidden from JSON
+	Role      string         `json:"role" gorm:"default:admin"`
+	Status    int            `json:"status" gorm:"default:1"` // 0=inactive, 1=active, 2=blocked
+	Avatar    string         `json:"avatar" gorm:"size:500"`
+	LastLogin *time.Time     `json:"last_login,omitempty"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"deleted_at,omitempty" gorm:"index"`
 }
 
 type AdminLoginRequest struct {
@@ -174,5 +177,51 @@ func AdminLogoutSuccessResponse() Response {
 		Code:    200,
 		Message: "Admin logout successful",
 		Data:    nil,
+	}
+}
+
+// Admin Soft Delete Response
+type AdminSoftDeletedResponse struct {
+	ID        uint      `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Role      string    `json:"role"`
+	DeletedAt time.Time `json:"deleted_at"`
+}
+
+func AdminSoftDeletedSuccessResponse(admin *Admin) Response {
+	return Response{
+		Code:    200,
+		Message: "Admin soft deleted successfully",
+		Data: AdminSoftDeletedResponse{
+			ID:        admin.ID,
+			Name:      admin.Name,
+			Email:     admin.Email,
+			Role:      admin.Role,
+			DeletedAt: admin.DeletedAt.Time,
+		},
+	}
+}
+
+// Admin Restore Response
+type AdminRestoredResponse struct {
+	ID     uint   `json:"id"`
+	Name   string `json:"name"`
+	Email  string `json:"email"`
+	Role   string `json:"role"`
+	Status int    `json:"status"`
+}
+
+func AdminRestoredSuccessResponse(admin *Admin) Response {
+	return Response{
+		Code:    200,
+		Message: "Admin restored successfully",
+		Data: AdminRestoredResponse{
+			ID:     admin.ID,
+			Name:   admin.Name,
+			Email:  admin.Email,
+			Role:   admin.Role,
+			Status: admin.Status,
+		},
 	}
 }

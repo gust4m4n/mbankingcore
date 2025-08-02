@@ -47,6 +47,25 @@ type TransferRequest struct {
 	Description     string `json:"description"`
 }
 
+type BalanceAdjustmentRequest struct {
+	Amount      int64  `json:"amount" binding:"required"`        // Positive for credit, negative for debit
+	Reason      string `json:"reason" binding:"required,min=10"` // Minimum 10 characters reason
+	Description string `json:"description"`                      // Optional description
+	Type        string `json:"type" binding:"required,oneof=adjustment correction manual_correction error_correction"`
+}
+
+type BalanceCorrectionRequest struct {
+	NewBalance  int64  `json:"new_balance" binding:"required,min=0"` // Set exact balance
+	Reason      string `json:"reason" binding:"required,min=10"`     // Minimum 10 characters reason
+	Description string `json:"description"`                          // Optional description
+}
+
+type BalanceSetRequest struct {
+	Balance     int64  `json:"balance" binding:"required,min=0"` // Set exact balance
+	Reason      string `json:"reason" binding:"required,min=10"` // Minimum 10 characters reason
+	Description string `json:"description"`                      // Optional description
+}
+
 type ReversalRequest struct {
 	TransactionID  uint   `json:"transaction_id" binding:"required"`
 	ReversalReason string `json:"reversal_reason" binding:"required,min=10,max=500"`

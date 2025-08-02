@@ -284,8 +284,14 @@ func (h *TransactionHandler) GetAllTransactions(c *gin.Context) {
 	// Parse pagination parameters
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "50"))
+
+	// Get search and filter parameters
+	search := c.Query("search")
 	userID := c.Query("user_id")
 	transactionType := c.Query("type")
+	status := c.Query("status")
+	userName := c.Query("user_name")
+	description := c.Query("description")
 
 	if page < 1 {
 		page = 1
@@ -298,21 +304,37 @@ func (h *TransactionHandler) GetAllTransactions(c *gin.Context) {
 
 	query := h.DB.Model(&models.Transaction{}).Preload("User")
 
-	// Apply filters
+	// Apply search filter (searches across user name and description)
+	if search != "" {
+		query = query.Joins("LEFT JOIN users ON users.id = transactions.user_id").
+			Where("users.name ILIKE ? OR transactions.description ILIKE ?", "%"+search+"%", "%"+search+"%")
+	}
+
+	// Apply specific filters
 	if userID != "" {
 		query = query.Where("user_id = ?", userID)
 	}
 	if transactionType != "" {
 		query = query.Where("type = ?", transactionType)
 	}
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+	if userName != "" {
+		query = query.Joins("LEFT JOIN users ON users.id = transactions.user_id").
+			Where("users.name ILIKE ?", "%"+userName+"%")
+	}
+	if description != "" {
+		query = query.Where("description ILIKE ?", "%"+description+"%")
+	}
 
 	var transactions []models.Transaction
 	var total int64
 
-	// Count total transactions
+	// Count total transactions with filters
 	query.Count(&total)
 
-	// Get transactions with pagination
+	// Get transactions with filters and pagination
 	if err := query.Order("created_at DESC").
 		Limit(limit).
 		Offset(offset).

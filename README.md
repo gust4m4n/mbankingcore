@@ -18,6 +18,8 @@
 - 📱 **Multi-Device Session Management** (Login dari multiple devices) ✅ VERIFIED
 - 💼 **Multi-Account Banking Support** (CRUD bank accounts) ✅ ACTIVE
 - 💳 **Transaction Management** (Topup, withdraw, transfer, reversal) ✅ PROCESSING
+- ⚖️ **Checker-Maker System** (Dual approval workflow untuk high-value transactions) ✅ ENTERPRISE GRADE
+- 🎯 **Approval Threshold Management** (Risk-based controls dengan auto-expiration) ✅ CONFIGURABLE
 - 🔄 **Transaction Reversal System** (Admin-only dengan audit trail lengkap) ✅ FUNCTIONAL
 - 🔑 **JWT Authentication** dengan refresh token ✅ SECURE
 - 🎯 **Selective Logout** (Per device atau semua device) ✅ WORKING
@@ -28,7 +30,7 @@
 - 📋 **Terms & Conditions** dan **Privacy Policy** management ✅ CONTENT MANAGEMENT
 - 🔍 **Comprehensive Audit Trails** (Activity & Login monitoring) ✅ LOGGING ACTIVE
 - 💰 **Transaction Management** dengan reversal system ✅ ENTERPRISE READY
-- ⚡ **RESTful API** dengan response format konsisten (73+ endpoints) ✅ ALL VERIFIED
+- ⚡ **RESTful API** dengan response format konsisten (75+ endpoints) ✅ ALL VERIFIED
 - 🗄️ **PostgreSQL Database** dengan GORM ORM ✅ CONNECTED
 - 🔄 **Auto Database Migration** dengan realistic demo data seeding ✅ 10,000+ TRANSACTIONS
 - 📊 **Live Demo Data** (Users, Admins, Transactions) ✅ READY FOR TESTING
@@ -52,6 +54,7 @@ mbankingcore/
 │   ├── audit.go                 # Audit trails handlers (NEW)
 │   ├── auth.go                  # Banking authentication handlers
 │   ├── bank_account.go          # Bank account management
+│   ├── checker_maker.go         # Checker-maker dual approval handlers (NEW)
 │   ├── config.go                # Configuration handlers
 │   ├── onboarding.go            # Onboarding content handlers
 │   ├── photo.go                 # Photo management handlers
@@ -65,12 +68,15 @@ mbankingcore/
 │   └── auth.go                  # JWT authentication middleware
 ├── models/
 │   ├── admin.go                 # Admin model & structures (NEW)
+│   ├── approval_threshold.go    # Approval threshold model (NEW)
 │   ├── article.go               # Article model & structures
+│   ├── audit.go                 # Audit trails model (NEW)
 │   ├── bank_account.go          # Bank account model
 │   ├── config.go                # Configuration model
 │   ├── constants.go             # Response codes & messages
 │   ├── device_session.go        # Device session model
 │   ├── onboarding.go            # Onboarding model
+│   ├── pending_transaction.go   # Pending transaction model (NEW)
 │   ├── photo.go                 # Photo model
 │   ├── responses.go             # Response helper functions
 │   ├── transaction.go           # Transaction model & structures (NEW)
@@ -92,7 +98,37 @@ mbankingcore/
 └── README.md                        # This documentation
 ```
 
-## 📋 Prerequisites (macOS)
+## � LATEST UPDATE: Checker-Maker System
+
+⚖️ **ENTERPRISE-GRADE DUAL APPROVAL SYSTEM** telah diimplementasikan untuk high-value transactions dengan fitur lengkap:
+
+### 🎯 Key Features
+
+- **Segregation of Duties**: Maker tidak dapat approve transaksi sendiri
+- **Configurable Thresholds**: Threshold berdasarkan jenis transaksi
+- **Auto-Expiration**: Transaksi pending otomatis expired dalam waktu yang ditentukan
+- **Dual Approval**: Transaksi ultra-high value memerlukan 2 approval berbeda
+- **Comprehensive Audit**: Semua aktivitas dicatat untuk compliance
+
+### 📊 Default Approval Thresholds
+
+| Transaction Type | Amount Threshold | Dual Approval | Auto Expire |
+|------------------|------------------|---------------|-------------|
+| Topup | 5M IDR | 50M IDR | 24 hours |
+| Withdraw | 2M IDR | 20M IDR | 12 hours |
+| Transfer | 10M IDR | 100M IDR | 24 hours |
+| Balance Adjustment | 1M IDR | 10M IDR | 48 hours |
+| Balance Set | 5M IDR | 50M IDR | 48 hours |
+
+### 🚀 New API Endpoints
+
+- **Checker-Maker System**: 5 endpoints untuk dual approval workflow
+- **Approval Threshold Management**: 4 endpoints untuk konfigurasi threshold
+- **Comprehensive Statistics**: Approval metrics dan analytics
+
+---
+
+## �📋 Prerequisites (macOS)
 
 - **Go** 1.19+ (install via Homebrew: `brew install go`)
 - **PostgreSQL** 12+ (install via Homebrew: `brew install postgresql`)
@@ -292,7 +328,7 @@ MBankingCore dilengkapi dengan sistem manajemen admin yang komprehensif untuk me
 ### Transaction Features
 
 - 💵 **Topup Balance** - Add balance to user account
-- 💸 **Withdraw Balance** - Deduct balance from user account  
+- 💸 **Withdraw Balance** - Deduct balance from user account
 - 🔄 **Transfer Balance** - Transfer balance between users using account numbers
 - ↩️ **Transaction Reversal** - Admin-only reversal with comprehensive business logic
 - 📊 **Transaction History** - Complete audit trail with pagination
@@ -326,7 +362,7 @@ MBankingCore dilengkapi dengan sistem manajemen admin yang komprehensif untuk me
 #### Reversal Business Logic
 
 1. **Topup Reversal**: Deducts the topup amount from user balance
-2. **Withdraw Reversal**: Adds the withdraw amount back to user balance  
+2. **Withdraw Reversal**: Adds the withdraw amount back to user balance
 3. **Transfer Reversal**: Creates two reversal transactions:
    - Adds amount back to sender's balance (`transfer_out` → `transfer_in`)
    - Deducts amount from receiver's balance (`transfer_in` → `transfer_out`)
@@ -355,7 +391,7 @@ MBankingCore dilengkapi dengan sistem manajemen admin yang komprehensif untuk me
 ### Audit Features
 
 - **Comprehensive Activity Logging** - Records all user and admin actions
-- **Login/Logout Monitoring** - Tracks authentication activities  
+- **Login/Logout Monitoring** - Tracks authentication activities
 - **Real-time Tracking** - Automatic logging via middleware
 - **Advanced Filtering** - Filter by user, admin, entity type, date range, IP
 - **Pagination Support** - Efficient handling of large audit datasets
@@ -377,7 +413,7 @@ Tracks all system activities including:
 - **Entity Operations**: CREATE, READ, UPDATE, DELETE operations
 - **API Calls**: Request details, response codes, execution time
 
-#### 2. Login Audit Logs  
+#### 2. Login Audit Logs
 
 Monitors authentication activities:
 
@@ -392,7 +428,7 @@ Monitors authentication activities:
 # Filter by entity type
 GET /api/admin/audit-logs?entity_type=transaction
 
-# Filter by user ID  
+# Filter by user ID
 GET /api/admin/audit-logs?user_id=123
 
 # Filter by admin ID
@@ -413,7 +449,7 @@ GET /api/admin/audit-logs?entity_type=user&start_date=2024-01-01&page=1&limit=50
 The audit system automatically logs:
 
 - **All API Requests** - Method, endpoint, parameters, response codes
-- **User Activities** - Profile changes, transactions, content management  
+- **User Activities** - Profile changes, transactions, content management
 - **Admin Activities** - User management, system configuration, transaction oversight
 - **Authentication Events** - Login/logout attempts with device information
 - **Security Events** - Failed attempts, blocked access, suspicious activities
@@ -421,7 +457,7 @@ The audit system automatically logs:
 ### 🔒 Security Features
 
 - **Atomic Database Transactions** - Ensures data consistency
-- **Row-level Locking** - Prevents concurrent balance conflicts  
+- **Row-level Locking** - Prevents concurrent balance conflicts
 - **Balance Validation** - Prevents negative balances and invalid amounts
 - **Account Number Verification** - Validates recipient accounts for transfers
 - **Self-transfer Prevention** - Blocks transfers to same account
@@ -439,7 +475,7 @@ curl -X POST http://localhost:8080/api/login \
   -d '{
     "name": "John Doe Smith",
     "account_number": "1234567890123456",
-    "mother_name": "Jane Doe Smith", 
+    "mother_name": "Jane Doe Smith",
     "phone": "081234567890",
     "pin_atm": "123456",
     "device_info": {
@@ -516,7 +552,7 @@ curl -X POST http://localhost:8080/api/admin/logout \
 Import koleksi Postman untuk testing yang lebih komprehensif:
 
 1. **Import Collection**: `postman/MBankingCore-API.postman_collection.json` ✅ READY
-2. **Import Environment**: `postman/MBankingCore-API.postman_environment.json` ✅ READY  
+2. **Import Environment**: `postman/MBankingCore-API.postman_environment.json` ✅ READY
 3. **Update Environment Variables**: Pastikan `banking_account_number` unik
 4. **Run Collection**: Test semua endpoints dengan automated token management ✅ FUNCTIONAL
 
@@ -626,7 +662,7 @@ Client → Server: Credentials + Device Info
 Server → Client: login_token (5 min expiry)
 Server → SMS: OTP Code
 
-Step 2: OTP Verification  
+Step 2: OTP Verification
 Client → Server: login_token + OTP
 Server → Client: access_token + refresh_token
 ```
@@ -641,7 +677,7 @@ Server → Client: access_token + refresh_token
 #### JWT Token Strategy
 
 - **Access Token**: Short-lived (24 jam)
-- **Refresh Token**: Long-lived (7 hari)  
+- **Refresh Token**: Long-lived (7 hari)
 - **Device-Specific**: Token terikat dengan device_id
 - **Auto-Invalidation**: PIN change invalidates semua sessions
 

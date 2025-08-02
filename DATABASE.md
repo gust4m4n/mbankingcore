@@ -2,27 +2,29 @@
 
 Dokumentasi lengkap struktur database untuk aplikasi MBankingCore dengan PostgreSQL sebagai database utama dan comprehensive demo data integration.
 
-**Last Updated:** July 31, 2025  
-**Database Version:** PostgreSQL 12+  
-**ORM:** GORM (Go ORM)  
-**Database Name:** `mbcdb`  
-**Total Tables:** 12  
-**Demo Data:** ✅ Integrated (18 admins + 67 users + 92 transactions)
+**Last Updated:** July 31, 2025
+**Database Version:** PostgreSQL 12+
+**ORM:** GORM (Go ORM)
+**Database Name:** `mbcdb`
+**Total Tables:** 14
+**Demo Data:** ✅ Integrated (18 admins + 67 users + 92 transactions + checker-maker system)
 
 ## 📋 Database Overview
 
-**Database Engine:** PostgreSQL 12+  
-**ORM:** GORM (Go ORM) with Auto Migration  
-**Auto Migration:** ✅ Enabled with comprehensive seeding  
-**Connection Pool:** ✅ Configured for production  
-**SSL Mode:** Configurable (disable/require)  
-**HTTPS Support:** ✅ TLS 1.2+ encryption ready  
+**Database Engine:** PostgreSQL 12+
+**ORM:** GORM (Go ORM) with Auto Migration
+**Auto Migration:** ✅ Enabled with comprehensive seeding
+**Connection Pool:** ✅ Configured for production
+**SSL Mode:** Configurable (disable/require)
+**HTTPS Support:** ✅ TLS 1.2+ encryption ready
 **Demo Data Integration:** ✅ Indonesian banking scenarios
 
 ## 🎯 Key Features
 
 - ✅ **Auto Migration System** - Automatic table creation and updates
 - ✅ **Comprehensive Seeding** - 18 admins, 67 users, 92 realistic transactions
+- ✅ **Checker-Maker System** - Dual approval workflow for high-value transactions
+- ✅ **Approval Threshold Management** - Configurable risk-based controls
 - ✅ **Multi-Device Support** - JWT session management across platforms
 - ✅ **Multi-Account Banking** - Primary account management system
 - ✅ **Transaction Processing** - Real-time balance tracking
@@ -40,6 +42,8 @@ Dokumentasi lengkap struktur database untuk aplikasi MBankingCore dengan Postgre
 | `device_sessions` | Multi-device session management | Dynamic | `id` (uint) |
 | `otp_sessions` | Temporary OTP session data for banking login | Dynamic | `id` (uint) |
 | `transactions` | Transaction history (topup, withdraw, transfer) | 92 transactions | `id` (uint) |
+| `pending_transactions` | Checker-maker pending transactions for approval | Dynamic | `id` (uint) |
+| `approval_thresholds` | Configurable approval thresholds by transaction type | Seeded | `id` (uint) |
 | `articles` | Content management articles | Dynamic | `id` (uint) |
 | `photos` | Photo management system | Dynamic | `id` (uint) |
 | `onboardings` | App onboarding content | Seeded | `id` (uint) |
@@ -199,7 +203,7 @@ CREATE TABLE bank_accounts (
     is_primary BOOLEAN DEFAULT false,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
-    
+
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -259,7 +263,7 @@ CREATE TABLE device_sessions (
     expires_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
-    
+
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -396,7 +400,7 @@ CREATE TABLE transactions (
     description TEXT,  -- Transaction description
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
-    
+
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -471,7 +475,7 @@ CREATE TABLE articles (
     user_id INTEGER NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
-    
+
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -629,7 +633,7 @@ CREATE TABLE audit_logs (
     request_method VARCHAR(10),
     status_code INTEGER,
     created_at TIMESTAMP NOT NULL,
-    
+
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
     FOREIGN KEY (admin_id) REFERENCES admins(id) ON DELETE SET NULL
 );
@@ -703,7 +707,7 @@ CREATE TABLE login_audits (
     device_info JSONB,
     failure_reason VARCHAR(255),
     created_at TIMESTAMP NOT NULL,
-    
+
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
     FOREIGN KEY (admin_id) REFERENCES admins(id) ON DELETE SET NULL
 );
@@ -878,7 +882,7 @@ CREATE INDEX idx_login_audits_composite ON login_audits(login_type, status, crea
 
 10. **Independent Tables**
     - `otp_sessions` - Temporary data, no permanent relationships
-    - `onboardings` - No foreign key relationships  
+    - `onboardings` - No foreign key relationships
     - `configs` - No foreign key relationships
 
 ---
@@ -989,7 +993,7 @@ CREATE INDEX idx_users_role ON users(role);
 CREATE INDEX idx_users_balance ON users(balance);
 CREATE INDEX idx_users_status ON users(status);
 
--- Bank account management  
+-- Bank account management
 CREATE INDEX idx_bank_accounts_user_id ON bank_accounts(user_id);
 CREATE UNIQUE INDEX idx_user_account ON bank_accounts(user_id, account_number);
 
@@ -1044,7 +1048,7 @@ go run cmd/migrate/main.go
 
 ```sql
 -- Create test user
-INSERT INTO users (name, phone, mother_name, pin_atm, role) 
+INSERT INTO users (name, phone, mother_name, pin_atm, role)
 VALUES ('Test User', '081234567890', 'Test Mother', '$2a$10$...', 'user');
 
 -- Create test bank account
@@ -1052,7 +1056,7 @@ INSERT INTO bank_accounts (user_id, account_number, account_name, bank_name, is_
 VALUES (1, '1234567890123456', 'Test User', 'Test Bank', true);
 
 -- Create test config
-INSERT INTO configs (key, value) 
+INSERT INTO configs (key, value)
 VALUES ('tnc', 'Terms and conditions content');
 ```
 
@@ -1239,27 +1243,27 @@ func SeedData(db *gorm.DB) error {
     if err := seedInitialAdmins(db); err != nil {
         return err
     }
-    
+
     // 2. Configuration Seeding
     if err := seedInitialConfig(db); err != nil {
         return err
     }
-    
+
     // 3. Onboarding Content Seeding
     if err := seedInitialOnboarding(db); err != nil {
         return err
     }
-    
+
     // 4. Users Seeding
     if err := seedInitialUsers(db); err != nil {
         return err
     }
-    
+
     // 5. Transactions Seeding
     if err := seedInitialTransactions(db); err != nil {
         return err
     }
-    
+
     return nil
 }
 ```
@@ -1388,8 +1392,8 @@ This comprehensive seeding system ensures that the MBankingCore application is i
 ```sql
 -- Example: Monitor failed login attempts
 SELECT ip_address, COUNT(*) as failed_attempts
-FROM login_audits 
-WHERE status = 'failed' 
+FROM login_audits
+WHERE status = 'failed'
   AND created_at > NOW() - INTERVAL '1 hour'
 GROUP BY ip_address
 HAVING COUNT(*) >= 5;
@@ -1417,9 +1421,110 @@ HAVING COUNT(*) >= 5;
 
 ---
 
-**Last Updated:** July 30, 2025  
-**Database Version:** PostgreSQL 12+  
-**ORM Version:** GORM v1.25+  
-**Tables:** 12 core tables (including audit trails)  
-**Total Relationships:** 9 foreign key relationships  
+## 📊 Checker-Maker System Tables
+
+### 11. pending_transactions
+
+**Table:** `pending_transactions`
+**Description:** Transaksi yang memerlukan approval dalam checker-maker workflow
+**Primary Key:** `id` (uint, auto increment)
+**Relationships:** Belongs to `users`, `admins` (maker & checker)
+
+```sql
+CREATE TABLE pending_transactions (
+    id SERIAL PRIMARY KEY,
+    transaction_type VARCHAR(20) NOT NULL,
+    amount BIGINT NOT NULL,
+    description TEXT,
+    target_user_id INTEGER NOT NULL,
+    target_user_name VARCHAR(255),
+    maker_admin_id INTEGER NOT NULL,
+    maker_admin_name VARCHAR(255),
+    checker_admin_id INTEGER,
+    checker_admin_name VARCHAR(255),
+    status VARCHAR(20) DEFAULT 'pending',
+    metadata JSONB,
+    requires_dual_approval BOOLEAN DEFAULT false,
+    dual_approval_count INTEGER DEFAULT 0,
+    comments TEXT,
+    rejection_reason TEXT,
+    executed_transaction_id INTEGER,
+    expires_at TIMESTAMP,
+    approved_at TIMESTAMP,
+    rejected_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (target_user_id) REFERENCES users(id),
+    FOREIGN KEY (maker_admin_id) REFERENCES admins(id),
+    FOREIGN KEY (checker_admin_id) REFERENCES admins(id)
+);
+```
+
+**Key Features:**
+- Segregation of duties (maker != checker)
+- Auto-expiration based on threshold settings
+- Dual approval support for ultra-high values
+- Complete audit trail with timestamps
+- Flexible metadata storage for different transaction types
+
+**Status Values:**
+- `pending`: Awaiting approval
+- `approved`: Approved and executed
+- `rejected`: Rejected by checker
+- `expired`: Auto-expired
+
+**Transaction Types:**
+- `topup`: Balance top-up
+- `withdraw`: Balance withdrawal
+- `transfer`: User-to-user transfer
+- `balance_adjustment`: Admin balance adjustment
+- `balance_set`: Admin balance set
+
+### 12. approval_thresholds
+
+**Table:** `approval_thresholds`
+**Description:** Konfigurasi threshold approval berdasarkan jenis transaksi
+**Primary Key:** `id` (uint, auto increment)
+**Unique Key:** `transaction_type`
+
+```sql
+CREATE TABLE approval_thresholds (
+    id SERIAL PRIMARY KEY,
+    transaction_type VARCHAR(20) UNIQUE NOT NULL,
+    amount_threshold BIGINT NOT NULL,
+    requires_dual_approval BOOLEAN DEFAULT false,
+    dual_approval_threshold BIGINT,
+    auto_expire_hours INTEGER DEFAULT 24,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+**Default Seeded Data:**
+
+| Type | Threshold | Dual Approval | Dual Threshold | Auto Expire |
+|------|----------|---------------|----------------|-------------|
+| topup | 5,000,000 | Yes | 50,000,000 | 24 hours |
+| withdraw | 2,000,000 | Yes | 20,000,000 | 12 hours |
+| transfer | 10,000,000 | Yes | 100,000,000 | 24 hours |
+| balance_adjustment | 1,000,000 | Yes | 10,000,000 | 48 hours |
+| balance_set | 5,000,000 | Yes | 50,000,000 | 48 hours |
+
+**Key Features:**
+- Configurable per transaction type
+- Dual approval thresholds for ultra-high values
+- Auto-expiration timing control
+- Active/inactive status management
+- Real-time threshold checking
+
+---
+
+**Last Updated:** August 2, 2025
+**Database Version:** PostgreSQL 12+
+**ORM Version:** GORM v1.25+
+**Checker-Maker System:** ✅ Enterprise Ready
+**Tables:** 12 core tables (including audit trails)
+**Total Relationships:** 9 foreign key relationships
 **Audit Features:** Comprehensive activity & authentication tracking

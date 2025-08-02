@@ -2,6 +2,8 @@ package models
 
 import (
 	"time"
+
+	"gorm.io/gorm"
 )
 
 // User status constants
@@ -24,6 +26,7 @@ type User struct {
 	DeviceSessions []DeviceSession `json:"device_sessions,omitempty" gorm:"foreignKey:UserID"`
 	CreatedAt      time.Time       `json:"created_at"`
 	UpdatedAt      time.Time       `json:"updated_at"`
+	DeletedAt      gorm.DeletedAt  `json:"deleted_at,omitempty" gorm:"index"`
 }
 
 // Action-based Request Structure
@@ -103,4 +106,46 @@ func (u *User) IsBlocked() bool {
 
 func ValidateStatus(status int) bool {
 	return status == USER_STATUS_INACTIVE || status == USER_STATUS_ACTIVE || status == USER_STATUS_BLOCKED
+}
+
+// Soft Delete Response
+type UserSoftDeletedResponse struct {
+	ID        uint      `json:"id"`
+	Name      string    `json:"name"`
+	Phone     string    `json:"phone"`
+	DeletedAt time.Time `json:"deleted_at"`
+}
+
+func UserSoftDeletedSuccessResponse(user *User) Response {
+	return Response{
+		Code:    200,
+		Message: "User soft deleted successfully",
+		Data: UserSoftDeletedResponse{
+			ID:        user.ID,
+			Name:      user.Name,
+			Phone:     user.Phone,
+			DeletedAt: user.DeletedAt.Time,
+		},
+	}
+}
+
+// User Restore Response
+type UserRestoredResponse struct {
+	ID     uint   `json:"id"`
+	Name   string `json:"name"`
+	Phone  string `json:"phone"`
+	Status int    `json:"status"`
+}
+
+func UserRestoredSuccessResponse(user *User) Response {
+	return Response{
+		Code:    200,
+		Message: "User restored successfully",
+		Data: UserRestoredResponse{
+			ID:     user.ID,
+			Name:   user.Name,
+			Phone:  user.Phone,
+			Status: user.Status,
+		},
+	}
 }

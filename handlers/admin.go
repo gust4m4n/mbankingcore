@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"mbankingcore/models"
 	"mbankingcore/utils"
 	"net/http"
@@ -146,7 +147,7 @@ func (h *AdminHandler) CreateAdmin(c *gin.Context) {
 
 // UpdateAdmin updates an existing admin
 func (h *AdminHandler) UpdateAdmin(c *gin.Context) {
-	adminIDStr := c.Param("id")
+	adminIDStr := c.Param("admin_id")
 	adminID, err := strconv.ParseUint(adminIDStr, 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.Response{
@@ -245,7 +246,7 @@ func (h *AdminHandler) UpdateAdmin(c *gin.Context) {
 
 // DeleteAdmin deletes an admin
 func (h *AdminHandler) DeleteAdmin(c *gin.Context) {
-	adminIDStr := c.Param("id")
+	adminIDStr := c.Param("admin_id")
 	adminID, err := strconv.ParseUint(adminIDStr, 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.Response{
@@ -288,17 +289,189 @@ func (h *AdminHandler) DeleteAdmin(c *gin.Context) {
 		return
 	}
 
-	// Delete admin
+	// Soft delete admin
 	if err := h.DB.Delete(&admin).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, models.Response{
 			Code:    models.CODE_USER_DELETE_FAILED,
-			Message: "Failed to delete admin",
+			Message: "Failed to soft delete admin",
 			Data:    nil,
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, models.AdminDeletedResponse())
+	c.JSON(http.StatusOK, models.AdminSoftDeletedSuccessResponse(&admin))
+}
+
+// RestoreAdmin restores a soft deleted admin by ID
+func (h *AdminHandler) RestoreAdmin(c *gin.Context) {
+	adminID := c.Param("admin_id")
+	id, err := strconv.ParseUint(adminID, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Code:    models.CODE_INVALID_REQUEST,
+			Message: "Invalid admin ID",
+			Data:    nil,
+		})
+		return
+	}
+
+	var admin models.Admin
+	// Find soft deleted admin
+	if err := h.DB.Unscoped().Where("id = ? AND deleted_at IS NOT NULL", uint(id)).First(&admin).Error; err != nil {
+		if err.Error() == "record not found" {
+			c.JSON(http.StatusNotFound, models.Response{
+				Code:    models.CODE_USER_NOT_FOUND,
+				Message: "Deleted admin not found",
+				Data:    nil,
+			})
+		} else {
+			c.JSON(http.StatusInternalServerError, models.Response{
+				Code:    models.CODE_USER_DELETE_FAILED,
+				Message: "Database error",
+				Data:    nil,
+			})
+		}
+		return
+	}
+
+	// Restore the admin by setting deleted_at to NULL
+	if err := h.DB.Unscoped().Model(&admin).Update("deleted_at", nil).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_USER_DELETE_FAILED,
+			Message: "Failed to restore admin",
+			Data:    nil,
+		})
+		return
+	}
+
+	// Refresh admin data
+	h.DB.First(&admin, uint(id))
+
+	c.JSON(http.StatusOK, models.AdminRestoredSuccessResponse(&admin))
+}
+
+// GetDeletedAdmins retrieves all soft deleted admins
+func (h *AdminHandler) GetDeletedAdmins(c *gin.Context) {
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	perPage, _ := strconv.Atoi(c.DefaultQuery("per_page", "20"))
+
+	if page < 1 {
+		page = 1
+	}
+	if perPage < 1 || perPage > 100 {
+		perPage = 20
+	}
+
+	offset := (page - 1) * perPage
+
+	var admins []models.Admin
+	var total int64
+
+	// Count total soft deleted admins
+	h.DB.Unscoped().Where("deleted_at IS NOT NULL").Model(&models.Admin{}).Count(&total)
+
+	// Get soft deleted admins
+	if err := h.DB.Unscoped().Where("deleted_at IS NOT NULL").
+		Offset(offset).Limit(perPage).Find(&admins).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_USER_LIST_FAILED,
+			Message: "Failed to retrieve deleted admins",
+			Data:    nil,
+		})
+		return
+	}
+
+	// Convert to response format
+	adminResponses := make([]models.AdminResponse, len(admins))
+	for i, admin := range admins {
+		adminResponses[i] = admin.ToResponse()
+	}
+
+	c.JSON(http.StatusOK, models.Response{
+		Code:    models.CODE_SUCCESS,
+		Message: "Deleted admins retrieved successfully",
+		Data: gin.H{
+			"admins":   adminResponses,
+			"total":    total,
+			"page":     page,
+			"per_page": perPage,
+		},
+	})
+}
+
+// PermanentDeleteAdmin permanently deletes a soft deleted admin (unrecoverable)
+func (h *AdminHandler) PermanentDeleteAdmin(c *gin.Context) {
+	adminID := c.Param("admin_id")
+	id, err := strconv.ParseUint(adminID, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Code:    models.CODE_INVALID_REQUEST,
+			Message: "Invalid admin ID",
+			Data:    nil,
+		})
+		return
+	}
+
+	var admin models.Admin
+	// Find soft deleted admin first
+	if err := h.DB.Unscoped().Where("id = ? AND deleted_at IS NOT NULL", uint(id)).First(&admin).Error; err != nil {
+		if err.Error() == "record not found" {
+			c.JSON(http.StatusNotFound, models.Response{
+				Code:    models.CODE_USER_NOT_FOUND,
+				Message: "Deleted admin not found",
+				Data:    nil,
+			})
+		} else {
+			c.JSON(http.StatusInternalServerError, models.Response{
+				Code:    models.CODE_USER_DELETE_FAILED,
+				Message: "Database error",
+				Data:    nil,
+			})
+		}
+		return
+	}
+
+	// Get current admin info for self-deletion check
+	currentAdminID, exists := c.Get("admin_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, models.Response{
+			Code:    models.CODE_UNAUTHORIZED,
+			Message: "Admin authentication required",
+			Data:    nil,
+		})
+		return
+	}
+
+	// Prevent self permanent deletion
+	if admin.ID == currentAdminID.(uint) {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Code:    models.CODE_INVALID_REQUEST,
+			Message: "Cannot permanently delete your own account",
+			Data:    nil,
+		})
+		return
+	}
+
+	// Permanently delete the admin
+	if err := h.DB.Unscoped().Delete(&admin, uint(id)).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_USER_DELETE_FAILED,
+			Message: "Failed to permanently delete admin",
+			Data:    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, models.Response{
+		Code:    models.CODE_SUCCESS,
+		Message: "Admin permanently deleted successfully",
+		Data: gin.H{
+			"id":    admin.ID,
+			"name":  admin.Name,
+			"email": admin.Email,
+			"role":  admin.Role,
+		},
+	})
 }
 
 // GetAdmins retrieves all admins with pagination
@@ -306,6 +479,13 @@ func (h *AdminHandler) GetAdmins(c *gin.Context) {
 	// Get pagination parameters
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	perPage, _ := strconv.Atoi(c.DefaultQuery("per_page", "10"))
+
+	// Get search filter parameters
+	search := c.Query("search")
+	name := c.Query("name")
+	email := c.Query("email")
+	role := c.Query("role")
+	status := c.Query("status")
 
 	// Validate pagination
 	if page < 1 {
@@ -317,13 +497,39 @@ func (h *AdminHandler) GetAdmins(c *gin.Context) {
 
 	offset := (page - 1) * perPage
 
-	// Get total count
-	var total int64
-	h.DB.Model(&models.Admin{}).Count(&total)
+	// Build query with filters
+	query := h.DB.Model(&models.Admin{})
 
-	// Get admins
+	// Apply search filter (searches across name and email)
+	if search != "" {
+		query = query.Where("name ILIKE ? OR email ILIKE ?", "%"+search+"%", "%"+search+"%")
+	}
+
+	// Apply specific field filters
+	if name != "" {
+		query = query.Where("name ILIKE ?", "%"+name+"%")
+	}
+	if email != "" {
+		query = query.Where("email ILIKE ?", "%"+email+"%")
+	}
+	if role != "" {
+		query = query.Where("role = ?", role)
+	}
+	if status != "" {
+		if status == "active" {
+			query = query.Where("status = ?", true)
+		} else if status == "inactive" {
+			query = query.Where("status = ?", false)
+		}
+	}
+
+	// Get total count with filters
+	var total int64
+	query.Count(&total)
+
+	// Get admins with filters and pagination
 	var admins []models.Admin
-	if err := h.DB.Offset(offset).Limit(perPage).Order("created_at DESC").Find(&admins).Error; err != nil {
+	if err := query.Offset(offset).Limit(perPage).Order("created_at DESC").Find(&admins).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, models.Response{
 			Code:    models.CODE_USER_LIST_FAILED,
 			Message: "Failed to retrieve admins",
@@ -337,7 +543,7 @@ func (h *AdminHandler) GetAdmins(c *gin.Context) {
 
 // GetAdminByID retrieves a specific admin by ID
 func (h *AdminHandler) GetAdminByID(c *gin.Context) {
-	adminIDStr := c.Param("id")
+	adminIDStr := c.Param("admin_id")
 	adminID, err := strconv.ParseUint(adminIDStr, 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, models.Response{
@@ -768,5 +974,795 @@ func (h *AdminHandler) GetAdminTransactionByID(c *gin.Context) {
 		Code:    models.CODE_SUCCESS,
 		Message: "Transaction retrieved successfully",
 		Data:    transaction,
+	})
+}
+
+// AdminTopupUserBalance - Admin can topup user balance
+func (h *AdminHandler) AdminTopupUserBalance(c *gin.Context) {
+	// Get user ID from URL parameter
+	userIDStr := c.Param("user_id")
+	userID, err := strconv.ParseUint(userIDStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Code:    models.CODE_VALIDATION_FAILED,
+			Message: "Invalid user ID",
+			Data:    nil,
+		})
+		return
+	}
+
+	// Parse request body
+	var request models.TopupRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Code:    models.CODE_VALIDATION_FAILED,
+			Message: "Invalid request data",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Validate amount
+	if request.Amount <= 0 {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Code:    models.CODE_VALIDATION_FAILED,
+			Message: "Amount must be greater than zero",
+			Data:    nil,
+		})
+		return
+	}
+
+	// Check if user exists and is active
+	var user models.User
+	if err := h.DB.First(&user, uint(userID)).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, models.Response{
+				Code:    models.CODE_NOT_FOUND,
+				Message: "User not found",
+				Data:    nil,
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_INTERNAL_SERVER,
+			Message: "Failed to find user",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Check if user is active
+	if user.Status != models.USER_STATUS_ACTIVE {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Code:    models.CODE_VALIDATION_FAILED,
+			Message: "User account is not active",
+			Data:    nil,
+		})
+		return
+	}
+
+	// Get admin information from context
+	adminInterface, exists := c.Get("admin")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, models.Response{
+			Code:    models.CODE_UNAUTHORIZED,
+			Message: "Admin context not found",
+			Data:    nil,
+		})
+		return
+	}
+
+	admin, ok := adminInterface.(models.Admin)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, models.Response{
+			Code:    models.CODE_UNAUTHORIZED,
+			Message: "Invalid admin context",
+			Data:    nil,
+		})
+		return
+	}
+
+	// Start database transaction
+	tx := h.DB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Lock user for update to prevent race conditions
+	var lockedUser models.User
+	if err := tx.Set("gorm:query_option", "FOR UPDATE").First(&lockedUser, uint(userID)).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_INTERNAL_SERVER,
+			Message: "Failed to lock user record",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Calculate new balance
+	balanceBefore := lockedUser.Balance
+	balanceAfter := balanceBefore + request.Amount
+
+	// Create transaction record
+	description := request.Description
+	if description == "" {
+		description = "Admin top-up balance"
+	}
+
+	transaction := models.Transaction{
+		UserID:        uint(userID),
+		Type:          "topup",
+		Amount:        request.Amount,
+		BalanceBefore: balanceBefore,
+		BalanceAfter:  balanceAfter,
+		Description:   description,
+		Status:        "completed",
+	}
+
+	if err := tx.Create(&transaction).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_INTERNAL_SERVER,
+			Message: "Failed to create transaction record",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Update user balance
+	if err := tx.Model(&lockedUser).Update("balance", balanceAfter).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_INTERNAL_SERVER,
+			Message: "Failed to update user balance",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Create audit log for admin action
+	auditDetails := map[string]interface{}{
+		"amount":           request.Amount,
+		"balance_before":   balanceBefore,
+		"balance_after":    balanceAfter,
+		"description":      description,
+		"transaction_id":   transaction.ID,
+		"target_user_id":   userID,
+		"target_user_name": user.Name,
+	}
+
+	auditDetailsJSON, _ := json.Marshal(auditDetails)
+	auditDetailsRaw := json.RawMessage(auditDetailsJSON)
+
+	auditLog := models.AuditLog{
+		EntityType: "user_balance",
+		EntityID:   uint(userID),
+		Action:     "ADMIN_TOPUP",
+		AdminID:    &admin.ID,
+		IPAddress:  c.ClientIP(),
+		NewValues:  &auditDetailsRaw,
+	}
+
+	if err := tx.Create(&auditLog).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_INTERNAL_SERVER,
+			Message: "Failed to create audit log",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Commit transaction
+	if err := tx.Commit().Error; err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_INTERNAL_SERVER,
+			Message: "Failed to commit transaction",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Prepare response data
+	responseData := map[string]interface{}{
+		"transaction_id": transaction.ID,
+		"user_id":        userID,
+		"user_name":      user.Name,
+		"amount":         request.Amount,
+		"balance_before": balanceBefore,
+		"balance_after":  balanceAfter,
+		"description":    description,
+		"admin_id":       admin.ID,
+		"admin_name":     admin.Name,
+		"created_at":     transaction.CreatedAt,
+	}
+
+	c.JSON(http.StatusOK, models.Response{
+		Code:    models.CODE_SUCCESS,
+		Message: "User balance topped up successfully",
+		Data:    responseData,
+	})
+}
+
+// AdminAdjustUserBalance - Admin can adjust user balance with credit/debit
+func (h *AdminHandler) AdminAdjustUserBalance(c *gin.Context) {
+	// Get user ID from URL parameter
+	userIDStr := c.Param("user_id")
+	userID, err := strconv.ParseUint(userIDStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Code:    models.CODE_VALIDATION_FAILED,
+			Message: "Invalid user ID",
+			Data:    nil,
+		})
+		return
+	}
+
+	// Parse request body
+	var request models.BalanceAdjustmentRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Code:    models.CODE_VALIDATION_FAILED,
+			Message: "Invalid request data",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Validate amount (cannot be zero)
+	if request.Amount == 0 {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Code:    models.CODE_VALIDATION_FAILED,
+			Message: "Amount cannot be zero",
+			Data:    nil,
+		})
+		return
+	}
+
+	// Check if user exists and is active
+	var user models.User
+	if err := h.DB.First(&user, uint(userID)).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, models.Response{
+				Code:    models.CODE_NOT_FOUND,
+				Message: "User not found",
+				Data:    nil,
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_INTERNAL_SERVER,
+			Message: "Failed to find user",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Check if user is active
+	if user.Status != models.USER_STATUS_ACTIVE {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Code:    models.CODE_VALIDATION_FAILED,
+			Message: "User account is not active",
+			Data:    nil,
+		})
+		return
+	}
+
+	// Get admin information from context
+	adminInterface, exists := c.Get("admin")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, models.Response{
+			Code:    models.CODE_UNAUTHORIZED,
+			Message: "Admin context not found",
+			Data:    nil,
+		})
+		return
+	}
+
+	admin, ok := adminInterface.(models.Admin)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, models.Response{
+			Code:    models.CODE_UNAUTHORIZED,
+			Message: "Invalid admin context",
+			Data:    nil,
+		})
+		return
+	}
+
+	// Start database transaction
+	tx := h.DB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Lock user for update to prevent race conditions
+	var lockedUser models.User
+	if err := tx.Set("gorm:query_option", "FOR UPDATE").First(&lockedUser, uint(userID)).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_INTERNAL_SERVER,
+			Message: "Failed to lock user record",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Calculate new balance
+	balanceBefore := lockedUser.Balance
+	balanceAfter := balanceBefore + request.Amount
+
+	// Validate that balance doesn't go negative
+	if balanceAfter < 0 {
+		tx.Rollback()
+		c.JSON(http.StatusBadRequest, models.Response{
+			Code:    models.CODE_VALIDATION_FAILED,
+			Message: "Insufficient balance for debit adjustment",
+			Data: map[string]interface{}{
+				"current_balance":   balanceBefore,
+				"adjustment_amount": request.Amount,
+				"resulting_balance": balanceAfter,
+			},
+		})
+		return
+	}
+
+	// Determine transaction type based on amount
+	var transactionType string
+	if request.Amount > 0 {
+		transactionType = "adjustment_credit"
+	} else {
+		transactionType = "adjustment_debit"
+	}
+
+	// Create transaction record
+	description := request.Description
+	if description == "" {
+		if request.Amount > 0 {
+			description = "Admin balance credit adjustment"
+		} else {
+			description = "Admin balance debit adjustment"
+		}
+	}
+
+	transaction := models.Transaction{
+		UserID:        uint(userID),
+		Type:          transactionType,
+		Amount:        request.Amount,
+		BalanceBefore: balanceBefore,
+		BalanceAfter:  balanceAfter,
+		Description:   description,
+		Status:        "completed",
+	}
+
+	if err := tx.Create(&transaction).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_INTERNAL_SERVER,
+			Message: "Failed to create transaction record",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Update user balance
+	if err := tx.Model(&lockedUser).Update("balance", balanceAfter).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_INTERNAL_SERVER,
+			Message: "Failed to update user balance",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Create audit log for admin action
+	auditDetails := map[string]interface{}{
+		"amount":           request.Amount,
+		"balance_before":   balanceBefore,
+		"balance_after":    balanceAfter,
+		"reason":           request.Reason,
+		"adjustment_type":  request.Type,
+		"description":      description,
+		"transaction_id":   transaction.ID,
+		"target_user_id":   userID,
+		"target_user_name": user.Name,
+	}
+
+	auditDetailsJSON, _ := json.Marshal(auditDetails)
+	auditDetailsRaw := json.RawMessage(auditDetailsJSON)
+
+	auditLog := models.AuditLog{
+		EntityType: "user_balance",
+		EntityID:   uint(userID),
+		Action:     "ADMIN_BALANCE_ADJUSTMENT",
+		AdminID:    &admin.ID,
+		IPAddress:  c.ClientIP(),
+		NewValues:  &auditDetailsRaw,
+	}
+
+	if err := tx.Create(&auditLog).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_INTERNAL_SERVER,
+			Message: "Failed to create audit log",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Commit transaction
+	if err := tx.Commit().Error; err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_INTERNAL_SERVER,
+			Message: "Failed to commit transaction",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Prepare response data
+	responseData := map[string]interface{}{
+		"transaction_id":    transaction.ID,
+		"user_id":           userID,
+		"user_name":         user.Name,
+		"adjustment_amount": request.Amount,
+		"adjustment_type":   request.Type,
+		"balance_before":    balanceBefore,
+		"balance_after":     balanceAfter,
+		"reason":            request.Reason,
+		"description":       description,
+		"admin_id":          admin.ID,
+		"admin_name":        admin.Name,
+		"created_at":        transaction.CreatedAt,
+	}
+
+	c.JSON(http.StatusOK, models.Response{
+		Code:    models.CODE_SUCCESS,
+		Message: "User balance adjusted successfully",
+		Data:    responseData,
+	})
+}
+
+// AdminSetUserBalance - Admin can set exact user balance
+func (h *AdminHandler) AdminSetUserBalance(c *gin.Context) {
+	// Get user ID from URL parameter
+	userIDStr := c.Param("user_id")
+	userID, err := strconv.ParseUint(userIDStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Code:    models.CODE_VALIDATION_FAILED,
+			Message: "Invalid user ID",
+			Data:    nil,
+		})
+		return
+	}
+
+	// Parse request body
+	var request models.BalanceSetRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Code:    models.CODE_VALIDATION_FAILED,
+			Message: "Invalid request data",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Check if user exists and is active
+	var user models.User
+	if err := h.DB.First(&user, uint(userID)).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, models.Response{
+				Code:    models.CODE_NOT_FOUND,
+				Message: "User not found",
+				Data:    nil,
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_INTERNAL_SERVER,
+			Message: "Failed to find user",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Check if user is active
+	if user.Status != models.USER_STATUS_ACTIVE {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Code:    models.CODE_VALIDATION_FAILED,
+			Message: "User account is not active",
+			Data:    nil,
+		})
+		return
+	}
+
+	// Get admin information from context
+	adminInterface, exists := c.Get("admin")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, models.Response{
+			Code:    models.CODE_UNAUTHORIZED,
+			Message: "Admin context not found",
+			Data:    nil,
+		})
+		return
+	}
+
+	admin, ok := adminInterface.(models.Admin)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, models.Response{
+			Code:    models.CODE_UNAUTHORIZED,
+			Message: "Invalid admin context",
+			Data:    nil,
+		})
+		return
+	}
+
+	// Start database transaction
+	tx := h.DB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Lock user for update to prevent race conditions
+	var lockedUser models.User
+	if err := tx.Set("gorm:query_option", "FOR UPDATE").First(&lockedUser, uint(userID)).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_INTERNAL_SERVER,
+			Message: "Failed to lock user record",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Calculate adjustment amount
+	balanceBefore := lockedUser.Balance
+	balanceAfter := request.Balance
+	adjustmentAmount := balanceAfter - balanceBefore
+
+	// Skip if balance is already at the desired amount
+	if adjustmentAmount == 0 {
+		tx.Rollback()
+		c.JSON(http.StatusBadRequest, models.Response{
+			Code:    models.CODE_VALIDATION_FAILED,
+			Message: "User balance is already at the specified amount",
+			Data: map[string]interface{}{
+				"current_balance":   balanceBefore,
+				"requested_balance": request.Balance,
+			},
+		})
+		return
+	}
+
+	// Determine transaction type based on adjustment
+	var transactionType string
+	if adjustmentAmount > 0 {
+		transactionType = "balance_set_credit"
+	} else {
+		transactionType = "balance_set_debit"
+	}
+
+	// Create transaction record
+	description := request.Description
+	if description == "" {
+		description = "Admin balance set operation"
+	}
+
+	transaction := models.Transaction{
+		UserID:        uint(userID),
+		Type:          transactionType,
+		Amount:        adjustmentAmount,
+		BalanceBefore: balanceBefore,
+		BalanceAfter:  balanceAfter,
+		Description:   description,
+		Status:        "completed",
+	}
+
+	if err := tx.Create(&transaction).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_INTERNAL_SERVER,
+			Message: "Failed to create transaction record",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Update user balance
+	if err := tx.Model(&lockedUser).Update("balance", balanceAfter).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_INTERNAL_SERVER,
+			Message: "Failed to update user balance",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Create audit log for admin action
+	auditDetails := map[string]interface{}{
+		"balance_before":    balanceBefore,
+		"balance_after":     balanceAfter,
+		"adjustment_amount": adjustmentAmount,
+		"reason":            request.Reason,
+		"description":       description,
+		"transaction_id":    transaction.ID,
+		"target_user_id":    userID,
+		"target_user_name":  user.Name,
+	}
+
+	auditDetailsJSON, _ := json.Marshal(auditDetails)
+	auditDetailsRaw := json.RawMessage(auditDetailsJSON)
+
+	auditLog := models.AuditLog{
+		EntityType: "user_balance",
+		EntityID:   uint(userID),
+		Action:     "ADMIN_BALANCE_SET",
+		AdminID:    &admin.ID,
+		IPAddress:  c.ClientIP(),
+		NewValues:  &auditDetailsRaw,
+	}
+
+	if err := tx.Create(&auditLog).Error; err != nil {
+		tx.Rollback()
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_INTERNAL_SERVER,
+			Message: "Failed to create audit log",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Commit transaction
+	if err := tx.Commit().Error; err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_INTERNAL_SERVER,
+			Message: "Failed to commit transaction",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Prepare response data
+	responseData := map[string]interface{}{
+		"transaction_id":    transaction.ID,
+		"user_id":           userID,
+		"user_name":         user.Name,
+		"balance_before":    balanceBefore,
+		"balance_after":     balanceAfter,
+		"adjustment_amount": adjustmentAmount,
+		"reason":            request.Reason,
+		"description":       description,
+		"admin_id":          admin.ID,
+		"admin_name":        admin.Name,
+		"created_at":        transaction.CreatedAt,
+	}
+
+	c.JSON(http.StatusOK, models.Response{
+		Code:    models.CODE_SUCCESS,
+		Message: "User balance set successfully",
+		Data:    responseData,
+	})
+}
+
+// AdminGetUserBalanceHistory - Get user balance change history
+func (h *AdminHandler) AdminGetUserBalanceHistory(c *gin.Context) {
+	// Get user ID from URL parameter
+	userIDStr := c.Param("user_id")
+	userID, err := strconv.ParseUint(userIDStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.Response{
+			Code:    models.CODE_VALIDATION_FAILED,
+			Message: "Invalid user ID",
+			Data:    nil,
+		})
+		return
+	}
+
+	// Check if user exists
+	var user models.User
+	if err := h.DB.First(&user, uint(userID)).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, models.Response{
+				Code:    models.CODE_NOT_FOUND,
+				Message: "User not found",
+				Data:    nil,
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_INTERNAL_SERVER,
+			Message: "Failed to find user",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Parse query parameters for pagination and filtering
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
+	transactionType := c.Query("type") // Filter by transaction type
+
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 || limit > 100 {
+		limit = 20
+	}
+
+	offset := (page - 1) * limit
+
+	// Build query for balance-affecting transactions
+	query := h.DB.Where("user_id = ?", userID).
+		Where("type IN (?)", []string{
+			"topup", "withdraw", "transfer_in", "transfer_out",
+			"adjustment_credit", "adjustment_debit",
+			"balance_set_credit", "balance_set_debit",
+			"reversal_credit", "reversal_debit",
+		})
+
+	if transactionType != "" {
+		query = query.Where("type = ?", transactionType)
+	}
+
+	// Get total count
+	var total int64
+	if err := query.Model(&models.Transaction{}).Count(&total).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_INTERNAL_SERVER,
+			Message: "Failed to count transactions",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Get transactions with pagination
+	var transactions []models.Transaction
+	if err := query.Order("created_at DESC").
+		Limit(limit).
+		Offset(offset).
+		Find(&transactions).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, models.Response{
+			Code:    models.CODE_INTERNAL_SERVER,
+			Message: "Failed to retrieve transactions",
+			Data:    err.Error(),
+		})
+		return
+	}
+
+	// Prepare response data
+	responseData := map[string]interface{}{
+		"user": map[string]interface{}{
+			"id":              user.ID,
+			"name":            user.Name,
+			"phone":           user.Phone,
+			"current_balance": user.Balance,
+			"status":          user.Status,
+		},
+		"balance_history": transactions,
+		"pagination": map[string]interface{}{
+			"page":        page,
+			"limit":       limit,
+			"total":       total,
+			"total_pages": (total + int64(limit) - 1) / int64(limit),
+		},
+	}
+
+	c.JSON(http.StatusOK, models.Response{
+		Code:    models.CODE_SUCCESS,
+		Message: "User balance history retrieved successfully",
+		Data:    responseData,
 	})
 }
