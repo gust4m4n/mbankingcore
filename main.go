@@ -18,6 +18,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// Application version
+const APP_VERSION = "0.9"
+
 // Server start time
 var serverStartTime time.Time
 
@@ -332,6 +335,8 @@ func main() {
 		response := gin.H{
 			"code":            httpCode,
 			"message":         "MBankingCore API Health Check",
+			"version":         APP_VERSION,
+			"backend_version": APP_VERSION,
 			"api_status":      apiStatus,
 			"database_status": databaseStatus,
 		}

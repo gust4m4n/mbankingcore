@@ -139,7 +139,7 @@ func seedInitialConfigs() error {
 
 	initialConfigs := []models.Config{
 		{Key: "app_name", Value: "MBankingCore"},
-		{Key: "app_version", Value: "1.0.0"},
+		{Key: "app_version", Value: "0.9"},
 		{Key: "terms_conditions", Value: getTermsConditionsContent()},
 		{Key: "privacy_policy", Value: getPrivacyPolicyContent()},
 		{Key: "contact_email", Value: "support@mbankingcore.com"},
