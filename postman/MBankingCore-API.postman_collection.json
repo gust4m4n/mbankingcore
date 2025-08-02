@@ -1,8 +1,8 @@
 {
   "info": {
     "_postman_id": "mbankingcore-api-collection",
-    "name": "MBankingCore API Collection - Updated",
-    "description": "✅ UPDATED API testing collection for MBankingCore running on PORT 8080 with comprehensive endpoint coverage.\n\n## 🔄 Latest Update:\n- ✅ Application running successfully on port 8080\n- ✅ Database connected with 10,000 transactions\n- ✅ All endpoints verified and accessible\n- ✅ Clean admin seeding (no dummy data)\n- ✅ Updated Postman collection to match current server\n\n## Features:\n- 🏦 Banking Authentication (3-step process with refresh)\n- 📱 Device session management\n- 🔄 Automated token refresh\n- ✅ Comprehensive API coverage\n- 💰 Multi-account banking support\n- 💳 Transaction management (topup, withdraw, transfer, reversal)\n- 📝 Article management (CRUD)\n- 🎯 Onboarding content management\n- 📸 Photo gallery management\n- ⚙️ Config management system\n- 📋 Terms & Conditions management\n- 🔐 Privacy Policy management\n- 👥 User management (CRUD)\n- 🔧 Admin management system\n- 🔍 Audit trails & compliance monitoring\n- 🧪 Testing scenarios\n\n## API Coverage (73+ endpoints):\n- **Public APIs** (8 endpoints)\n  - Health Check (1)\n  - Terms & Conditions (1)\n  - Privacy Policy (1)\n  - Onboarding (2)\n  - Banking Authentication (3)\n- **Authenticated Content Management APIs** (2 endpoints)\n  - Terms & Conditions Management (1)\n  - Privacy Policy Management (1)\n- **Protected User APIs** (39 endpoints)\n  - User Profile Management (3)\n  - Session Management (3)\n  - Bank Account Management (5)\n  - Transaction Management (4)\n  - Article Management (6)\n  - Photo Management (5)\n  - Onboarding Management (3)\n  - Configuration Management (4)\n  - User Management (4)\n  - Transaction History (2)\n- **Admin Management APIs** (12 endpoints)\n  - Admin Authentication (2)\n  - Admin Dashboard (1)\n  - Admin CRUD Operations (5)\n  - Admin Transaction Monitoring (1)\n  - Transaction Reversal (1)\n  - Audit Trails (2)\n\n## Testing Order:\n1. **Public APIs** - No authentication required\n2. **Banking Authentication** - 3-step process (login → verify → refresh)\n3. **Protected APIs** - User profile, bank accounts, content management\n4. **Transaction APIs** - Topup, withdraw, transfer, history\n5. **Admin APIs** - Admin login, admin management, transaction monitoring, reversal\n6. **Audit APIs** - Activity logs, login monitoring\n7. **Content Management** - Terms, Privacy Policy, Onboarding\n8. **User Management** - User CRUD operations\n\n## Usage:\n1. Import environment file: `MBankingCore-API.postman_environment.json`\n2. **Important**: Update `banking_account_number` to a unique value before testing\n3. Run collection with automated token handling\n4. Test all API endpoints systematically\n\n## Banking Authentication Flow:\n1. Banking Login → Submit credentials and get login_token + OTP\n2. Banking Verify → Submit login_token + OTP and get session tokens\n3. Refresh Token → Get new access/refresh tokens using refresh token\n4. Access protected endpoints → Auto token refresh\n5. Test CRUD operations on all resources\n6. Logout selectively → Per device or all devices\n\n## Transaction Management Flow:\n1. Topup Balance → Add balance to user account\n2. Withdraw Balance → Deduct balance from user account  \n3. Transfer Balance → Transfer balance between users using account number\n4. Transaction History → View user's transaction records\n5. Admin Transaction Monitoring → Admin view of all transactions\n6. Transaction Reversal → Admin reversal of any transaction type\n\n## Admin Authentication Flow:\n1. Admin Login → Submit admin credentials and get admin access_token\n2. Get Dashboard → View comprehensive system statistics with massive dataset (6,067+ users, 50+ admins, 35,375+ transactions)\n3. Access admin endpoints → Create, read, update, delete admin accounts\n4. Monitor Transactions → View all user transactions with filtering\n5. Reverse Transactions → Reverse any transaction type with reason\n6. Audit Trails → Monitor system activities and login attempts\n7. Admin Logout → Invalidate admin session\n\n## Audit Trails Flow:\n1. Get Audit Logs → Review all system activities with filtering\n   - Filter by entity type (user, transaction, admin, etc.)\n   - Filter by action (CREATE, READ, UPDATE, DELETE)\n   - Filter by user/admin ID, date range, IP address\n   - Pagination support for large datasets\n2. Get Login Audit Logs → Monitor authentication activities\n   - Filter by login type (user_login, admin_login, logout)\n   - Filter by status (success, failed, blocked)\n   - Filter by date range, IP address\n   - Device information and failure reasons\n3. Security Monitoring → Detect suspicious activities\n   - Failed login attempts\n   - Unusual transaction patterns\n   - Administrative actions tracking\n\n## Content Management Flow:\n1. Terms & Conditions → Set/update terms content (authenticated)\n2. Privacy Policy → Set/update privacy policy content (authenticated)\n3. Onboarding → Create, update, delete onboarding steps (authenticated)\n4. Articles → Full CRUD operations for articles (authenticated)\n5. Photos → Full CRUD operations for photo gallery (authenticated)\n\n## Configuration Management Flow:\n1. Set Config → Create or update configuration values\n2. Get All Configs → Retrieve all system configurations\n3. Get Config by Key → Retrieve specific configuration\n4. Delete Config → Remove configuration by key\n\n## User Management Flow:\n1. List Users → Get all users in the system\n2. Get User by ID → Retrieve specific user details\n3. Delete User → Remove user from the system\n\n## Transaction Reversal Flow:\n1. Get All Transactions (Admin) → Find transaction ID to reverse\n2. Reverse Transaction → Submit transaction ID and reversal reason\n3. Verify Reversal → Check original transaction is marked as reversed\n4. Check Balance Impact → Verify user balance reflects reversal\n5. Audit Trail → Review reversal transaction record\n\n## Important Notes:\n⚠️ **Account Numbers Must Be Unique**: Each account number must be unique across the system. If testing with existing data, ensure you use a unique account number in the environment variables to avoid database constraint violations.\n\n🔑 **Environment Variables**: The collection uses pre-configured variables for testing. Update these values as needed:\n- `banking_account_number`: Use unique 16-digit number\n- `banking_phone`: Use unique phone number\n- `banking_name`: Full name (8+ characters)\n- `banking_mother_name`: Mother's name (8+ characters)\n- `banking_pin_atm`: 6-digit PIN\n- `admin_email`: Admin email (default: super@mbankingcore.com)\n- `admin_password`: Admin password (default: Super123?)\n- `config_key`: Configuration key for testing (default: app_version)\n- `test_user_id`: User ID for testing user operations\n- `created_article_id`: Auto-saved from article creation\n- `created_photo_id`: Auto-saved from photo creation\n- `created_onboarding_id`: Auto-saved from onboarding creation\n- `created_user_id`: Auto-saved from user creation\n- `topup_amount`: Amount for topup testing (default: 100000)\n- `withdraw_amount`: Amount for withdraw testing (default: 25000)\n- `transfer_amount`: Amount for transfer testing (default: 75000)\n- `transfer_to_account_number`: Target account for transfer testing\n- `transaction_page`: Page number for transaction history (default: 1)\n- `transaction_limit`: Items per page for transaction history (default: 10)\n- `transaction_id_to_reverse`: Transaction ID for reversal testing\n- `reversal_reason`: Reason for transaction reversal (default: Administrative reversal - Error correction)\n- `audit_page`: Page number for audit logs (default: 1)\n- `audit_limit`: Items per page for audit logs (default: 20)\n- `audit_entity_type`: Filter audit logs by entity type (default: transaction)\n- `audit_start_date`: Start date for audit log filtering (format: 2024-01-01)\n- `audit_end_date`: End date for audit log filtering (format: 2024-12-31)\n- `login_audit_page`: Page number for login audit logs (default: 1)\n- `login_audit_limit`: Items per page for login audit logs (default: 20)\n- `login_audit_type`: Filter by login type (user_login, admin_login, logout)\n- `login_audit_status`: Filter by status (success, failed, blocked)",
+    "name": "MBankingCore API Collection - Updated with Examples",
+    "description": "✅ UPDATED API testing collection for MBankingCore running on PORT 8080 with comprehensive endpoint coverage and EXAMPLE RESPONSES.\n\n## 🔄 Latest Update:\n- ✅ Application running successfully on port 8080\n- ✅ Database connected with 10,000 transactions\n- ✅ All endpoints verified and accessible\n- ✅ Clean admin seeding (no dummy data)\n- ✅ Updated Postman collection to match current server\n- 🆕 **Added example success responses for key endpoints**\n\n## 🎯 Example Responses Included:\n- ✅ Health Check with server uptime\n- ✅ Banking Authentication (login + verification)\n- ✅ User Profile Management\n- ✅ Admin Dashboard with comprehensive statistics\n- ✅ Transaction Management (topup example)\n- ✅ Real response structures and data formats\n\n## Features:\n- 🏦 Banking Authentication (3-step process with refresh)\n- 📱 Device session management\n- 🔄 Automated token refresh\n- ✅ Comprehensive API coverage\n- 💰 Multi-account banking support\n- 💳 Transaction management (topup, withdraw, transfer, reversal)\n- 📝 Article management (CRUD)\n- 🎯 Onboarding content management\n- 📸 Photo gallery management\n- ⚙️ Config management system\n- 📋 Terms & Conditions management\n- 🔐 Privacy Policy management\n- 👥 User management (CRUD)\n- 🔧 Admin management system\n- 🔍 Audit trails & compliance monitoring\n- 🧪 Testing scenarios\n\n## API Coverage (73+ endpoints):\n- **Public APIs** (8 endpoints)\n  - Health Check (1)\n  - Terms & Conditions (1)\n  - Privacy Policy (1)\n  - Onboarding (2)\n  - Banking Authentication (3)\n- **Authenticated Content Management APIs** (2 endpoints)\n  - Terms & Conditions Management (1)\n  - Privacy Policy Management (1)\n- **Protected User APIs** (39 endpoints)\n  - User Profile Management (3)\n  - Session Management (3)\n  - Bank Account Management (5)\n  - Transaction Management (4)\n  - Article Management (6)\n  - Photo Management (5)\n  - Onboarding Management (3)\n  - Configuration Management (4)\n  - User Management (4)\n  - Transaction History (2)\n- **Admin Management APIs** (12 endpoints)\n  - Admin Authentication (2)\n  - Admin Dashboard (1)\n  - Admin CRUD Operations (5)\n  - Admin Transaction Monitoring (1)\n  - Transaction Reversal (1)\n  - Audit Trails (2)\n\n## Testing Order:\n1. **Public APIs** - No authentication required\n2. **Banking Authentication** - 3-step process (login → verify → refresh)\n3. **Protected APIs** - User profile, bank accounts, content management\n4. **Transaction APIs** - Topup, withdraw, transfer, history\n5. **Admin APIs** - Admin login, admin management, transaction monitoring, reversal\n6. **Audit APIs** - Activity logs, login monitoring\n7. **Content Management** - Terms, Privacy Policy, Onboarding\n8. **User Management** - User CRUD operations\n\n## Usage:\n1. Import environment file: `MBankingCore-API.postman_environment.json`\n2. **Important**: Update `banking_account_number` to a unique value before testing\n3. Run collection with automated token handling\n4. Test all API endpoints systematically\n\n## Banking Authentication Flow:\n1. Banking Login → Submit credentials and get login_token + OTP\n2. Banking Verify → Submit login_token + OTP and get session tokens\n3. Refresh Token → Get new access/refresh tokens using refresh token\n4. Access protected endpoints → Auto token refresh\n5. Test CRUD operations on all resources\n6. Logout selectively → Per device or all devices\n\n## Transaction Management Flow:\n1. Topup Balance → Add balance to user account\n2. Withdraw Balance → Deduct balance from user account  \n3. Transfer Balance → Transfer balance between users using account number\n4. Transaction History → View user's transaction records\n5. Admin Transaction Monitoring → Admin view of all transactions\n6. Transaction Reversal → Admin reversal of any transaction type\n\n## Admin Authentication Flow:\n1. Admin Login → Submit admin credentials and get admin access_token\n2. Get Dashboard → View comprehensive system statistics with massive dataset (6,067+ users, 50+ admins, 35,375+ transactions)\n3. Access admin endpoints → Create, read, update, delete admin accounts\n4. Monitor Transactions → View all user transactions with filtering\n5. Reverse Transactions → Reverse any transaction type with reason\n6. Audit Trails → Monitor system activities and login attempts\n7. Admin Logout → Invalidate admin session\n\n## Audit Trails Flow:\n1. Get Audit Logs → Review all system activities with filtering\n   - Filter by entity type (user, transaction, admin, etc.)\n   - Filter by action (CREATE, READ, UPDATE, DELETE)\n   - Filter by user/admin ID, date range, IP address\n   - Pagination support for large datasets\n2. Get Login Audit Logs → Monitor authentication activities\n   - Filter by login type (user_login, admin_login, logout)\n   - Filter by status (success, failed, blocked)\n   - Filter by date range, IP address\n   - Device information and failure reasons\n3. Security Monitoring → Detect suspicious activities\n   - Failed login attempts\n   - Unusual transaction patterns\n   - Administrative actions tracking\n\n## Content Management Flow:\n1. Terms & Conditions → Set/update terms content (authenticated)\n2. Privacy Policy → Set/update privacy policy content (authenticated)\n3. Onboarding → Create, update, delete onboarding steps (authenticated)\n4. Articles → Full CRUD operations for articles (authenticated)\n5. Photos → Full CRUD operations for photo gallery (authenticated)\n\n## Configuration Management Flow:\n1. Set Config → Create or update configuration values\n2. Get All Configs → Retrieve all system configurations\n3. Get Config by Key → Retrieve specific configuration\n4. Delete Config → Remove configuration by key\n\n## User Management Flow:\n1. List Users → Get all users in the system\n2. Get User by ID → Retrieve specific user details\n3. Delete User → Remove user from the system\n\n## Transaction Reversal Flow:\n1. Get All Transactions (Admin) → Find transaction ID to reverse\n2. Reverse Transaction → Submit transaction ID and reversal reason\n3. Verify Reversal → Check original transaction is marked as reversed\n4. Check Balance Impact → Verify user balance reflects reversal\n5. Audit Trail → Review reversal transaction record\n\n## Important Notes:\n⚠️ **Account Numbers Must Be Unique**: Each account number must be unique across the system. If testing with existing data, ensure you use a unique account number in the environment variables to avoid database constraint violations.\n\n🔑 **Environment Variables**: The collection uses pre-configured variables for testing. Update these values as needed:\n- `banking_account_number`: Use unique 16-digit number\n- `banking_phone`: Use unique phone number\n- `banking_name`: Full name (8+ characters)\n- `banking_mother_name`: Mother's name (8+ characters)\n- `banking_pin_atm`: 6-digit PIN\n- `admin_email`: Admin email (default: super@mbankingcore.com)\n- `admin_password`: Admin password (default: Super123?)\n- `config_key`: Configuration key for testing (default: app_version)\n- `test_user_id`: User ID for testing user operations\n- `created_article_id`: Auto-saved from article creation\n- `created_photo_id`: Auto-saved from photo creation\n- `created_onboarding_id`: Auto-saved from onboarding creation\n- `created_user_id`: Auto-saved from user creation\n- `topup_amount`: Amount for topup testing (default: 100000)\n- `withdraw_amount`: Amount for withdraw testing (default: 25000)\n- `transfer_amount`: Amount for transfer testing (default: 75000)\n- `transfer_to_account_number`: Target account for transfer testing\n- `transaction_page`: Page number for transaction history (default: 1)\n- `transaction_limit`: Items per page for transaction history (default: 10)\n- `transaction_id_to_reverse`: Transaction ID for reversal testing\n- `reversal_reason`: Reason for transaction reversal (default: Administrative reversal - Error correction)\n- `audit_page`: Page number for audit logs (default: 1)\n- `audit_limit`: Items per page for audit logs (default: 20)\n- `audit_entity_type`: Filter audit logs by entity type (default: transaction)\n- `audit_start_date`: Start date for audit log filtering (format: 2024-01-01)\n- `audit_end_date`: End date for audit log filtering (format: 2024-12-31)\n- `login_audit_page`: Page number for login audit logs (default: 1)\n- `login_audit_limit`: Items per page for login audit logs (default: 20)\n- `login_audit_type`: Filter by login type (user_login, admin_login, logout)\n- `login_audit_status`: Filter by status (success, failed, blocked)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_uid": "12345-mbankingcore"
   },
@@ -55,7 +55,54 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Health Check Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/health",
+                  "host": ["{{base_url}}"],
+                  "path": ["health"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"api_status\": \"healthy\",\n  \"code\": 200,\n  \"current_time\": \"2025-08-02 08:46:19 WIB\",\n  \"database_status\": \"healthy\",\n  \"message\": \"MBankingCore API Health Check\",\n  \"server_started_at\": \"2025-08-02 08:40:01 WIB\",\n  \"total_uptime_seconds\": 378,\n  \"uptime\": {\n    \"days\": 0,\n    \"hours\": 0,\n    \"minutes\": 6,\n    \"months\": 0,\n    \"seconds\": 18,\n    \"weeks\": 0,\n    \"years\": 0\n  },\n  \"uptime_string\": \"0y 0mo 0w 0d 0h 6m 18s\"\n}"
+            },
+            {
+              "name": "Health Check - Database Unhealthy",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/health",
+                  "host": ["{{base_url}}"],
+                  "path": ["health"]
+                }
+              },
+              "status": "Service Unavailable",
+              "code": 503,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"api_status\": \"healthy\",\n  \"code\": 503,\n  \"current_time\": \"2025-08-02 08:46:19 WIB\",\n  \"database_status\": \"unhealthy\",\n  \"database_error\": \"dial tcp [::1]:5432: connect: connection refused\",\n  \"message\": \"MBankingCore API Health Check\",\n  \"server_started_at\": \"2025-08-02 08:40:01 WIB\",\n  \"total_uptime_seconds\": 378,\n  \"uptime\": {\n    \"days\": 0,\n    \"hours\": 0,\n    \"minutes\": 6,\n    \"months\": 0,\n    \"seconds\": 18,\n    \"weeks\": 0,\n    \"years\": 0\n  },\n  \"uptime_string\": \"0y 0mo 0w 0d 0h 6m 18s\"\n}"
+            }
+          ]
         }
       ]
     },
@@ -123,7 +170,72 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Banking Login Success - New User",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"John Doe Testing\",\n  \"account_number\": \"1234567890123456\",\n  \"mother_name\": \"Jane Doe Mother\",\n  \"phone\": \"+62812345678901\",\n  \"pin_atm\": \"123456\",\n  \"device_info\": {\n    \"device_type\": \"android\",\n    \"device_id\": \"test-device-123\",\n    \"device_name\": \"Samsung Galaxy S23\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "login"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Phone number will be registered. OTP sent for verification\",\n  \"data\": {\n    \"expires_in\": 300,\n    \"is_new_user\": true,\n    \"login_token\": \"47898ef5054fcaffd7ad4afc77899868b1800287e1169014ed7472fc41cb0315\"\n  }\n}"
+            },
+            {
+              "name": "Banking Login - Invalid PIN",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"John Doe Testing\",\n  \"account_number\": \"1234567890123456\",\n  \"mother_name\": \"Jane Doe Mother\",\n  \"phone\": \"+62812345678901\",\n  \"pin_atm\": \"wrong123\",\n  \"device_info\": {\n    \"device_type\": \"android\",\n    \"device_id\": \"test-device-123\",\n    \"device_name\": \"Samsung Galaxy S23\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "login"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 253,\n  \"message\": \"Invalid request data\",\n  \"data\": \"PIN ATM must be exactly 6 digits\"\n}"
+            }
+          ]
         },
         {
           "name": "Banking Login Verification (Step 2)",
@@ -192,7 +304,40 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Banking Login Verification Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"login_token\": \"47898ef5054fcaffd7ad4afc77899868b1800287e1169014ed7472fc41cb0315\",\n  \"otp\": \"123456\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/login/verify",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "login", "verify"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Login successful\",\n  \"data\": {\n    \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\",\n    \"refresh_token\": \"def50200684c7d6ad2e96db95e9c1b7a4e3a5b8c7d6ad2e96db95e9c1b7a4e3a5b8c\",\n    \"token_type\": \"Bearer\",\n    \"expires_in\": 3600,\n    \"session_id\": \"session_123456789\",\n    \"user\": {\n      \"id\": 1,\n      \"name\": \"John Doe Testing\",\n      \"phone\": \"+62812345678901\",\n      \"account_number\": \"1234567890123456\",\n      \"balance\": 0,\n      \"status\": \"active\",\n      \"created_at\": \"2025-08-02T01:40:01.000Z\",\n      \"updated_at\": \"2025-08-02T01:40:01.000Z\"\n    }\n  }\n}"
+            }
+          ]
         },
         {
           "name": "Refresh Token",
@@ -249,7 +394,74 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Refresh Token Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"refresh_token\": \"def50200684c7d6ad2e96db95e9c1b7a4e3a5b8c7d6ad2e96db95e9c1b7a4e3a5b8c\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/refresh",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "refresh"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Token refreshed successfully\",\n  \"data\": {\n    \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\",\n    \"refresh_token\": \"abc12300684c7d6ad2e96db95e9c1b7a4e3a5b8c7d6ad2e96db95e9c1b7a4e3a5b8c\",\n    \"token_type\": \"Bearer\",\n    \"expires_in\": 3600\n  }\n}"
+            },
+            {
+              "name": "Refresh Token - Invalid Token",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"refresh_token\": \"invalid_token_here\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/refresh",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "refresh"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 401,\n  \"message\": \"Invalid refresh token\",\n  \"data\": null\n}"
+            }
+          ]
         }
       ]
     },
@@ -314,7 +526,36 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Get Bank Accounts Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/bank-accounts",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "bank-accounts"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Bank accounts retrieved successfully\",\n  \"data\": {\n    \"accounts\": [\n      {\n        \"id\": 1,\n        \"account_number\": \"1234567890123456\",\n        \"account_name\": \"John Doe Testing\",\n        \"bank_name\": \"Bank Central Asia\",\n        \"bank_code\": \"BCA\",\n        \"account_type\": \"savings\",\n        \"is_primary\": true,\n        \"balance\": 250000,\n        \"status\": \"active\",\n        \"created_at\": \"2025-08-02T01:40:01.000Z\",\n        \"updated_at\": \"2025-08-02T01:40:01.000Z\"\n      },\n      {\n        \"id\": 2,\n        \"account_number\": \"9876543210987654\",\n        \"account_name\": \"Secondary Account\",\n        \"bank_name\": \"Test Bank\",\n        \"bank_code\": \"TB001\",\n        \"account_type\": \"checking\",\n        \"is_primary\": false,\n        \"balance\": 100000,\n        \"status\": \"active\",\n        \"created_at\": \"2025-08-02T02:00:01.000Z\",\n        \"updated_at\": \"2025-08-02T02:00:01.000Z\"\n      }\n    ],\n    \"total\": 2\n  }\n}"
+            }
+          ]
         },
         {
           "name": "Create Bank Account",
@@ -381,7 +622,44 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Create Bank Account Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"account_number\": \"9876543210987654\",\n  \"account_name\": \"Secondary Account\",\n  \"bank_name\": \"Test Bank\",\n  \"bank_code\": \"TB001\",\n  \"account_type\": \"checking\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/bank-accounts",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "bank-accounts"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 201,\n  \"message\": \"Bank account created successfully\",\n  \"data\": {\n    \"account\": {\n      \"id\": 2,\n      \"account_number\": \"9876543210987654\",\n      \"account_name\": \"Secondary Account\",\n      \"bank_name\": \"Test Bank\",\n      \"bank_code\": \"TB001\",\n      \"account_type\": \"checking\",\n      \"is_primary\": false,\n      \"balance\": 0,\n      \"status\": \"active\",\n      \"created_at\": \"2025-08-02T02:00:01.000Z\",\n      \"updated_at\": \"2025-08-02T02:00:01.000Z\"\n    }\n  }\n}"
+            }
+          ]
         },
         {
           "name": "Update Bank Account",
@@ -431,7 +709,44 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Update Bank Account Success",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"account_name\": \"John Doe Testing - Updated\",\n  \"bank_name\": \"Bank Central Asia - Updated\",\n  \"account_type\": \"checking\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/bank-accounts/2",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "bank-accounts", "2"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Bank account updated successfully\",\n  \"data\": {\n    \"account\": {\n      \"id\": 2,\n      \"account_number\": \"9876543210987654\",\n      \"account_name\": \"John Doe Testing - Updated\",\n      \"bank_name\": \"Bank Central Asia - Updated\",\n      \"bank_code\": \"TB001\",\n      \"account_type\": \"checking\",\n      \"is_primary\": false,\n      \"balance\": 100000,\n      \"status\": \"active\",\n      \"created_at\": \"2025-08-02T02:00:01.000Z\",\n      \"updated_at\": \"2025-08-02T02:15:30.000Z\"\n    }\n  }\n}"
+            }
+          ]
         },
         {
           "name": "Set Primary Bank Account",
@@ -474,7 +789,36 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Set Primary Bank Account Success",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/bank-accounts/2/primary",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "bank-accounts", "2", "primary"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Primary bank account set successfully\",\n  \"data\": {\n    \"account\": {\n      \"id\": 2,\n      \"account_number\": \"9876543210987654\",\n      \"account_name\": \"Secondary Account\",\n      \"bank_name\": \"Test Bank\",\n      \"bank_code\": \"TB001\",\n      \"account_type\": \"checking\",\n      \"is_primary\": true,\n      \"balance\": 100000,\n      \"status\": \"active\",\n      \"created_at\": \"2025-08-02T02:00:01.000Z\",\n      \"updated_at\": \"2025-08-02T02:20:45.000Z\"\n    }\n  }\n}"
+            }
+          ]
         },
         {
           "name": "Delete Bank Account",
@@ -516,7 +860,36 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Delete Bank Account Success",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/bank-accounts/2",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "bank-accounts", "2"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Bank account deleted successfully\",\n  \"data\": null\n}"
+            }
+          ]
         }
       ]
     },
@@ -561,7 +934,31 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Get Terms & Conditions Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/terms-conditions",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "terms-conditions"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Terms and conditions retrieved successfully\",\n  \"data\": {\n    \"content\": \"<h1>Terms and Conditions</h1><p>Welcome to MBankingCore. By using our services, you agree to these terms...</p><h2>1. Acceptance of Terms</h2><p>By accessing and using this service, you accept and agree to be bound by the terms and provision of this agreement.</p><h2>2. Privacy Policy</h2><p>Your privacy is important to us. Please review our Privacy Policy, which also governs your use of the Service.</p>\",\n    \"version\": \"1.2\",\n    \"last_updated\": \"2025-08-01T10:00:00.000Z\"\n  }\n}"
+            }
+          ]
         }
       ]
     },
@@ -606,7 +1003,31 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Get Privacy Policy Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/privacy-policy",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "privacy-policy"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Privacy policy retrieved successfully\",\n  \"data\": {\n    \"content\": \"<h1>Privacy Policy</h1><p>This Privacy Policy describes how MBankingCore collects, uses, and shares your personal information.</p><h2>Information We Collect</h2><p>We collect information you provide directly to us, such as when you create an account, make transactions, or contact us.</p><h2>How We Use Your Information</h2><p>We use the information we collect to provide, maintain, and improve our services.</p>\",\n    \"version\": \"1.1\",\n    \"last_updated\": \"2025-08-01T09:30:00.000Z\"\n  }\n}"
+            }
+          ]
         }
       ]
     },
@@ -665,7 +1086,46 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Set Terms & Conditions Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"<h1>Terms and Conditions - Updated</h1><p>Welcome to MBankingCore. By using our services, you agree to these updated terms...</p>\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/terms-conditions",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "terms-conditions"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Terms and conditions updated successfully\",\n  \"data\": {\n    \"content\": \"<h1>Terms and Conditions - Updated</h1><p>Welcome to MBankingCore. By using our services, you agree to these updated terms...</p>\",\n    \"version\": \"1.3\",\n    \"last_updated\": \"2025-08-02T03:00:00.000Z\"\n  }\n}"
+            }
+          ]
         }
       ]
     },
@@ -724,7 +1184,46 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Set Privacy Policy Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"<h1>Privacy Policy - Updated</h1><p>This updated Privacy Policy describes how MBankingCore collects, uses, and shares your personal information...</p>\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/privacy-policy",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "privacy-policy"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Privacy policy updated successfully\",\n  \"data\": {\n    \"content\": \"<h1>Privacy Policy - Updated</h1><p>This updated Privacy Policy describes how MBankingCore collects, uses, and shares your personal information...</p>\",\n    \"version\": \"1.2\",\n    \"last_updated\": \"2025-08-02T03:05:00.000Z\"\n  }\n}"
+            }
+          ]
         }
       ]
     },
@@ -769,7 +1268,31 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Get All Onboardings Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/onboardings",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "onboardings"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Onboardings retrieved successfully\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"title\": \"Welcome to MBankingCore\",\n      \"description\": \"Start your digital banking journey with us. Experience secure, fast, and convenient banking.\",\n      \"image\": \"https://example.com/onboarding-welcome.jpg\",\n      \"order\": 1,\n      \"created_at\": \"2025-08-01T10:00:00.000Z\",\n      \"updated_at\": \"2025-08-01T10:00:00.000Z\"\n    },\n    {\n      \"id\": 2,\n      \"title\": \"Secure Transactions\",\n      \"description\": \"Your transactions are protected with bank-level security and encryption.\",\n      \"image\": \"https://example.com/onboarding-security.jpg\",\n      \"order\": 2,\n      \"created_at\": \"2025-08-01T10:05:00.000Z\",\n      \"updated_at\": \"2025-08-01T10:05:00.000Z\"\n    },\n    {\n      \"id\": 3,\n      \"title\": \"24/7 Support\",\n      \"description\": \"Get help anytime, anywhere with our round-the-clock customer support.\",\n      \"image\": \"https://example.com/onboarding-support.jpg\",\n      \"order\": 3,\n      \"created_at\": \"2025-08-01T10:10:00.000Z\",\n      \"updated_at\": \"2025-08-01T10:10:00.000Z\"\n    }\n  ]\n}"
+            }
+          ]
         },
         {
           "name": "Get Onboarding by ID",
@@ -810,12 +1333,59 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Get Onboarding by ID Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/onboardings/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "onboardings", "1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Onboarding retrieved successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"title\": \"Welcome to MBankingCore\",\n    \"description\": \"Start your digital banking journey with us. Experience secure, fast, and convenient banking.\",\n    \"image\": \"https://example.com/onboarding-welcome.jpg\",\n    \"order\": 1,\n    \"created_at\": \"2025-08-01T10:00:00.000Z\",\n    \"updated_at\": \"2025-08-01T10:00:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "Get Onboarding by ID - Not Found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/onboardings/999",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "onboardings", "999"]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 404,\n  \"message\": \"Onboarding not found\",\n  \"data\": null\n}"
+            }
+          ]
         }
       ]
     },
     {
-      "name": "🎯 Onboarding Management", 
+      "name": "🎯 Onboarding Management",
       "description": "CRUD operations for managing onboarding content (authenticated users)",
       "item": [
         {
@@ -873,7 +1443,46 @@
               "path": ["api", "onboardings"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Create Onboarding Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"New Onboarding Step\",\n  \"description\": \"This is a new onboarding step description.\",\n  \"image\": \"https://example.com/onboarding-image.jpg\",\n  \"order\": 4\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/onboardings",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "onboardings"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 201,\n  \"message\": \"Onboarding created successfully\",\n  \"data\": {\n    \"id\": 4,\n    \"title\": \"New Onboarding Step\",\n    \"description\": \"This is a new onboarding step description.\",\n    \"image\": \"https://example.com/onboarding-image.jpg\",\n    \"order\": 4,\n    \"created_at\": \"2025-08-02T03:15:00.000Z\",\n    \"updated_at\": \"2025-08-02T03:15:00.000Z\"\n  }\n}"
+            }
+          ]
         },
         {
           "name": "Update Onboarding",
@@ -922,7 +1531,46 @@
               "path": ["api", "onboardings", "{{created_onboarding_id}}"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Update Onboarding Success",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Updated Onboarding Step\",\n  \"description\": \"This is an updated onboarding step description.\",\n  \"image\": \"https://example.com/updated-onboarding-image.jpg\",\n  \"order\": 2\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/onboardings/4",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "onboardings", "4"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Onboarding updated successfully\",\n  \"data\": {\n    \"id\": 4,\n    \"title\": \"Updated Onboarding Step\",\n    \"description\": \"This is an updated onboarding step description.\",\n    \"image\": \"https://example.com/updated-onboarding-image.jpg\",\n    \"order\": 2,\n    \"created_at\": \"2025-08-02T03:15:00.000Z\",\n    \"updated_at\": \"2025-08-02T03:20:30.000Z\"\n  }\n}"
+            }
+          ]
         },
         {
           "name": "Delete Onboarding",
@@ -960,7 +1608,37 @@
               "path": ["api", "onboardings", "{{created_onboarding_id}}"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Delete Onboarding Success",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/onboardings/4",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "onboardings", "4"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Onboarding deleted successfully\",\n  \"data\": null\n}"
+            }
+          ]
         }
       ]
     },
@@ -1007,7 +1685,37 @@
               "path": ["api", "profile"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Get User Profile Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/profile",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "profile"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Profile retrieved successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"John Doe Testing\",\n    \"phone\": \"+62812345678901\",\n    \"mother_name\": \"Jane Doe Mother\",\n    \"account_number\": \"1234567890123456\",\n    \"balance\": 250000,\n    \"status\": \"active\",\n    \"avatar\": null,\n    \"created_at\": \"2025-08-02T01:40:01.000Z\",\n    \"updated_at\": \"2025-08-02T01:45:15.000Z\"\n  }\n}"
+            }
+          ]
         },
         {
           "name": "Update User Profile",
@@ -1053,7 +1761,82 @@
               "path": ["api", "profile"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Update User Profile - Success",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"John Doe Updated\",\n  \"mother_name\": \"Jane Doe Mother Updated\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/profile",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "profile"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Profile updated successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"John Doe Updated\",\n    \"phone\": \"+62812345678901\",\n    \"mother_name\": \"Jane Doe Mother Updated\",\n    \"account_number\": \"1234567890123456\",\n    \"balance\": 250000,\n    \"status\": \"active\",\n    \"avatar\": null,\n    \"created_at\": \"2025-08-02T01:40:01.000Z\",\n    \"updated_at\": \"2025-08-02T02:15:30.000Z\"\n  }\n}"
+            },
+            {
+              "name": "Update User Profile - Validation Error",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"\",\n  \"mother_name\": \"Abc\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/profile",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "profile"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 400,\n  \"message\": \"Validation failed\",\n  \"data\": {\n    \"name\": [\"Name is required and must be at least 3 characters\"],\n    \"mother_name\": [\"Mother name must be at least 5 characters\"]\n  }\n}"
+            }
+          ]
         },
         {
           "name": "Change PIN ATM",
@@ -1099,7 +1882,82 @@
               "path": ["api", "change-pin"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Change PIN ATM - Success",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"old_pin\": \"123456\",\n  \"new_pin\": \"654321\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/change-pin",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "change-pin"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"PIN changed successfully\",\n  \"data\": {\n    \"user_id\": 1,\n    \"updated_at\": \"2025-08-02T02:20:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "Change PIN ATM - Wrong Old PIN",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"old_pin\": \"wrong123\",\n  \"new_pin\": \"654321\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/change-pin",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "change-pin"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 400,\n  \"message\": \"Current PIN is incorrect\",\n  \"data\": null\n}"
+            }
+          ]
         }
       ]
     },
@@ -1142,7 +2000,37 @@
               "path": ["api", "sessions"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Get Active Sessions Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/sessions",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "sessions"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Active sessions retrieved successfully\",\n  \"data\": [\n    {\n      \"id\": \"session_123456789\",\n      \"device_type\": \"android\",\n      \"device_name\": \"Samsung Galaxy S23\",\n      \"device_id\": \"test-device-123\",\n      \"is_current\": true,\n      \"last_activity\": \"2025-08-02T02:45:30.000Z\",\n      \"created_at\": \"2025-08-02T01:40:01.000Z\",\n      \"ip_address\": \"192.168.1.100\",\n      \"location\": \"Jakarta, Indonesia\"\n    },\n    {\n      \"id\": \"session_987654321\",\n      \"device_type\": \"ios\",\n      \"device_name\": \"iPhone 14 Pro\",\n      \"device_id\": \"ios-device-456\",\n      \"is_current\": false,\n      \"last_activity\": \"2025-08-01T18:20:15.000Z\",\n      \"created_at\": \"2025-08-01T15:30:45.000Z\",\n      \"ip_address\": \"192.168.1.105\",\n      \"location\": \"Bandung, Indonesia\"\n    }\n  ]\n}"
+            }
+          ]
         },
         {
           "name": "Logout Current Device",
@@ -1188,7 +2076,45 @@
               "path": ["api", "logout"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Logout Current Device - Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"logout_type\": \"current\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/logout",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "logout"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Logout successful\",\n  \"data\": {\n    \"user_id\": 1,\n    \"session_id\": \"session_123456789\",\n    \"device_type\": \"android\",\n    \"logout_time\": \"2025-08-02T03:00:00.000Z\"\n  }\n}"
+            }
+          ]
         },
         {
           "name": "Logout Other Sessions",
@@ -1225,7 +2151,36 @@
               "path": ["api", "logout-others"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Logout Other Sessions - Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/logout-others",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "logout-others"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Other sessions logged out successfully\",\n  \"data\": {\n    \"user_id\": 1,\n    \"sessions_terminated\": 2,\n    \"current_session\": \"session_123456789\",\n    \"logout_time\": \"2025-08-02T03:05:00.000Z\"\n  }\n}"
+            }
+          ]
         }
       ]
     },
@@ -1279,7 +2234,46 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Get All Articles - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/articles?page=1&per_page=10",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "articles"],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "10"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Articles retrieved successfully\",\n  \"data\": {\n    \"articles\": [\n      {\n        \"id\": 1,\n        \"title\": \"Tips Mengelola Keuangan Digital\",\n        \"content\": \"Dalam era digital ini, mengelola keuangan menjadi lebih mudah dengan berbagai aplikasi mobile banking...\",\n        \"excerpt\": \"Pelajari cara mengelola keuangan digital dengan bijak dan aman.\",\n        \"image_url\": \"https://example.com/images/financial-tips.jpg\",\n        \"status\": \"published\",\n        \"created_at\": \"2025-07-25T10:00:00.000Z\",\n        \"updated_at\": \"2025-07-25T10:00:00.000Z\"\n      },\n      {\n        \"id\": 2,\n        \"title\": \"Keamanan Transaksi Mobile Banking\",\n        \"content\": \"Keamanan adalah prioritas utama dalam bertransaksi menggunakan mobile banking...\",\n        \"excerpt\": \"Panduan lengkap menjaga keamanan saat bertransaksi mobile banking.\",\n        \"image_url\": \"https://example.com/images/security-guide.jpg\",\n        \"status\": \"published\",\n        \"created_at\": \"2025-07-20T15:30:00.000Z\",\n        \"updated_at\": \"2025-07-20T15:30:00.000Z\"\n      }\n    ],\n    \"pagination\": {\n      \"current_page\": 1,\n      \"per_page\": 10,\n      \"total\": 25,\n      \"total_pages\": 3,\n      \"has_next\": true,\n      \"has_prev\": false\n    }\n  }\n}"
+            }
+          ]
         },
         {
           "name": "Get Article by ID",
@@ -1318,7 +2312,64 @@
               "path": ["api", "articles", "1"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Get Article by ID - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/articles/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "articles", "1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Article retrieved successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"title\": \"Tips Mengelola Keuangan Digital\",\n    \"content\": \"Dalam era digital ini, mengelola keuangan menjadi lebih mudah dengan berbagai aplikasi mobile banking. Namun, diperlukan kehati-hatian dan strategi yang tepat untuk memaksimalkan manfaatnya. Berikut adalah beberapa tips praktis:\\n\\n1. Selalu gunakan password yang kuat\\n2. Aktifkan notifikasi transaksi\\n3. Periksa saldo secara berkala\\n4. Jangan gunakan WiFi publik untuk transaksi\\n5. Logout setelah selesai bertransaksi\",\n    \"excerpt\": \"Pelajari cara mengelola keuangan digital dengan bijak dan aman.\",\n    \"image_url\": \"https://example.com/images/financial-tips.jpg\",\n    \"status\": \"published\",\n    \"created_at\": \"2025-07-25T10:00:00.000Z\",\n    \"updated_at\": \"2025-07-25T10:00:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "Get Article by ID - Not Found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/articles/999",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "articles", "999"]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 404,\n  \"message\": \"Article not found\",\n  \"data\": null\n}"
+            }
+          ]
         },
         {
           "name": "Update Article",
@@ -1364,7 +2415,45 @@
               "path": ["api", "articles", "1"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Update Article - Success",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Updated Article Title\",\n  \"content\": \"Updated article content here...\",\n  \"is_active\": true\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/articles/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "articles", "1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Article updated successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"title\": \"Updated Article Title\",\n    \"content\": \"Updated article content here...\",\n    \"excerpt\": \"Updated article excerpt\",\n    \"image_url\": \"https://example.com/images/updated-article.jpg\",\n    \"status\": \"published\",\n    \"created_at\": \"2025-07-25T10:00:00.000Z\",\n    \"updated_at\": \"2025-08-02T03:30:00.000Z\"\n  }\n}"
+            }
+          ]
         },
         {
           "name": "Delete Article",
@@ -1401,7 +2490,36 @@
               "path": ["api", "articles", "1"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Delete Article - Success",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/articles/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "articles", "1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Article deleted successfully\",\n  \"data\": {\n    \"id\": 1,\n    \"title\": \"Tips Mengelola Keuangan Digital\",\n    \"deleted_at\": \"2025-08-02T03:35:00.000Z\"\n  }\n}"
+            }
+          ]
         },
         {
           "name": "Get My Articles",
@@ -1450,7 +2568,46 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Get My Articles - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/my-articles?page=1&per_page=10",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "my-articles"],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "10"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"User articles retrieved successfully\",\n  \"data\": {\n    \"articles\": [\n      {\n        \"id\": 3,\n        \"title\": \"Panduan Lengkap Mobile Banking\",\n        \"content\": \"Mobile banking telah mengubah cara kita bertransaksi...\",\n        \"excerpt\": \"Pelajari fitur-fitur mobile banking untuk kemudahan transaksi.\",\n        \"image_url\": \"https://example.com/images/mobile-banking-guide.jpg\",\n        \"status\": \"published\",\n        \"created_at\": \"2025-07-30T09:00:00.000Z\",\n        \"updated_at\": \"2025-07-30T09:00:00.000Z\"\n      },\n      {\n        \"id\": 5,\n        \"title\": \"Tips Hemat dengan E-Wallet\",\n        \"content\": \"E-wallet menawarkan berbagai promo menarik...\",\n        \"excerpt\": \"Manfaatkan promo e-wallet untuk berhemat.\",\n        \"image_url\": \"https://example.com/images/ewallet-tips.jpg\",\n        \"status\": \"draft\",\n        \"created_at\": \"2025-08-01T14:30:00.000Z\",\n        \"updated_at\": \"2025-08-01T14:30:00.000Z\"\n      }\n    ],\n    \"pagination\": {\n      \"current_page\": 1,\n      \"per_page\": 10,\n      \"total\": 8,\n      \"total_pages\": 1,\n      \"has_next\": false,\n      \"has_prev\": false\n    }\n  }\n}"
+            }
+          ]
         },
         {
           "name": "Create Article",
@@ -1507,7 +2664,82 @@
               "path": ["api", "articles"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Create Article - Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"New Test Article\",\n  \"content\": \"This is a test article content created via Postman API testing.\",\n  \"is_active\": true\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/articles",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "articles"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 201,\n  \"message\": \"Article created successfully\",\n  \"data\": {\n    \"id\": 6,\n    \"title\": \"New Test Article\",\n    \"content\": \"This is a test article content created via Postman API testing.\",\n    \"excerpt\": \"This is a test article content created via...\",\n    \"image_url\": null,\n    \"status\": \"published\",\n    \"created_at\": \"2025-08-02T04:00:00.000Z\",\n    \"updated_at\": \"2025-08-02T04:00:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "Create Article - Validation Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"\",\n  \"content\": \"Short\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/articles",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "articles"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 400,\n  \"message\": \"Validation failed\",\n  \"data\": {\n    \"title\": [\"Title is required and must be at least 5 characters\"],\n    \"content\": [\"Content must be at least 50 characters\"]\n  }\n}"
+            }
+          ]
         }
       ]
     },
@@ -2262,7 +3494,37 @@
               "path": ["api", "admin", "dashboard"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Dashboard Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{admin_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/admin/dashboard",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "admin", "dashboard"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Dashboard data retrieved successfully\",\n  \"data\": {\n    \"total_users\": 12,\n    \"total_admins\": 3,\n    \"total_transactions\": {\n      \"today\": 5,\n      \"today_amount\": 750000,\n      \"this_week\": 23,\n      \"this_week_amount\": 3250000,\n      \"this_month\": 89,\n      \"this_month_amount\": 12500000,\n      \"this_year\": 456,\n      \"this_year_amount\": 45600000,\n      \"all_time\": 1234,\n      \"all_time_amount\": 123400000,\n      \"last_7_days\": 23,\n      \"last_7_days_amount\": 3250000,\n      \"last_30_days\": 89,\n      \"last_30_days_amount\": 12500000\n    },\n    \"topup_transactions\": {\n      \"today\": 2,\n      \"today_amount\": 500000,\n      \"this_week\": 12,\n      \"this_week_amount\": 2000000,\n      \"this_month\": 45,\n      \"this_month_amount\": 8000000,\n      \"this_year\": 234,\n      \"this_year_amount\": 23400000,\n      \"all_time\": 678,\n      \"all_time_amount\": 67800000,\n      \"last_7_days\": 12,\n      \"last_7_days_amount\": 2000000,\n      \"last_30_days\": 45,\n      \"last_30_days_amount\": 8000000\n    },\n    \"withdraw_transactions\": {\n      \"today\": 1,\n      \"today_amount\": 100000,\n      \"this_week\": 6,\n      \"this_week_amount\": 750000,\n      \"this_month\": 22,\n      \"this_month_amount\": 2250000,\n      \"this_year\": 111,\n      \"this_year_amount\": 11100000,\n      \"all_time\": 333,\n      \"all_time_amount\": 33300000,\n      \"last_7_days\": 6,\n      \"last_7_days_amount\": 750000,\n      \"last_30_days\": 22,\n      \"last_30_days_amount\": 2250000\n    },\n    \"transfer_transactions\": {\n      \"today\": 2,\n      \"today_amount\": 150000,\n      \"this_week\": 5,\n      \"this_week_amount\": 500000,\n      \"this_month\": 22,\n      \"this_month_amount\": 2250000,\n      \"this_year\": 111,\n      \"this_year_amount\": 11100000,\n      \"all_time\": 223,\n      \"all_time_amount\": 22300000,\n      \"last_7_days\": 5,\n      \"last_7_days_amount\": 500000,\n      \"last_30_days\": 22,\n      \"last_30_days_amount\": 2250000\n    },\n    \"performance\": {\n      \"last_7_days\": [\n        { \"period\": \"Jul 27\", \"count\": 3, \"amount\": 450000 },\n        { \"period\": \"Jul 28\", \"count\": 2, \"amount\": 300000 },\n        { \"period\": \"Jul 29\", \"count\": 4, \"amount\": 600000 },\n        { \"period\": \"Jul 30\", \"count\": 1, \"amount\": 150000 },\n        { \"period\": \"Jul 31\", \"count\": 6, \"amount\": 900000 },\n        { \"period\": \"Aug 01\", \"count\": 2, \"amount\": 300000 },\n        { \"period\": \"Aug 02\", \"count\": 5, \"amount\": 750000 }\n      ],\n      \"last_30_days\": [\n        { \"period\": \"Jul 04\", \"count\": 2, \"amount\": 300000 },\n        { \"period\": \"Jul 05\", \"count\": 3, \"amount\": 450000 },\n        { \"period\": \"Jul 06\", \"count\": 1, \"amount\": 150000 },\n        { \"period\": \"Jul 07\", \"count\": 4, \"amount\": 600000 },\n        { \"period\": \"Jul 08\", \"count\": 2, \"amount\": 300000 },\n        { \"period\": \"Jul 09\", \"count\": 5, \"amount\": 750000 },\n        { \"period\": \"Jul 10\", \"count\": 3, \"amount\": 450000 }\n      ]\n    }\n  }\n}"
+            }
+          ]
         },
         {
           "name": "Get All Admins",
@@ -2574,7 +3836,46 @@
               "path": ["api", "transactions", "topup"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Topup Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"amount\": 100000,\n  \"description\": \"Top up saldo untuk kebutuhan sehari-hari\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/transactions/topup",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "transactions", "topup"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Topup successful\",\n  \"data\": {\n    \"transaction\": {\n      \"id\": 123,\n      \"user_id\": 1,\n      \"type\": \"topup\",\n      \"amount\": 100000,\n      \"balance_before\": 250000,\n      \"balance_after\": 350000,\n      \"description\": \"Top up saldo untuk kebutuhan sehari-hari\",\n      \"status\": \"completed\",\n      \"created_at\": \"2025-08-02T01:50:15.000Z\",\n      \"updated_at\": \"2025-08-02T01:50:15.000Z\"\n    },\n    \"user\": {\n      \"id\": 1,\n      \"name\": \"John Doe Testing\",\n      \"account_number\": \"1234567890123456\",\n      \"balance\": 350000\n    }\n  }\n}"
+            }
+          ]
         },
         {
           "name": "Withdraw Balance",
@@ -2640,7 +3941,82 @@
               "path": ["api", "transactions", "withdraw"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Withdraw Balance - Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"amount\": 50000,\n  \"description\": \"Withdraw untuk belanja bulanan\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/transactions/withdraw",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "transactions", "withdraw"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Withdraw successful\",\n  \"data\": {\n    \"transaction\": {\n      \"id\": 124,\n      \"user_id\": 1,\n      \"type\": \"withdraw\",\n      \"amount\": 50000,\n      \"balance_before\": 350000,\n      \"balance_after\": 300000,\n      \"description\": \"Withdraw untuk belanja bulanan\",\n      \"status\": \"completed\",\n      \"created_at\": \"2025-08-02T02:15:30.000Z\",\n      \"updated_at\": \"2025-08-02T02:15:30.000Z\"\n    },\n    \"user\": {\n      \"id\": 1,\n      \"name\": \"John Doe Testing\",\n      \"account_number\": \"1234567890123456\",\n      \"balance\": 300000\n    }\n  }\n}"
+            },
+            {
+              "name": "Withdraw Balance - Insufficient Balance",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"amount\": 500000,\n  \"description\": \"Withdraw amount too large\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/transactions/withdraw",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "transactions", "withdraw"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 400,\n  \"message\": \"Insufficient balance\",\n  \"data\": {\n    \"current_balance\": 300000,\n    \"requested_amount\": 500000,\n    \"available_balance\": 300000\n  }\n}"
+            }
+          ]
         },
         {
           "name": "Transfer Balance",
@@ -2708,7 +4084,82 @@
               "path": ["api", "transactions", "transfer"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Transfer Balance - Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"to_account_number\": \"9876543210987654\",\n  \"amount\": 75000,\n  \"description\": \"Transfer untuk kebutuhan kuliah\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/transactions/transfer",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "transactions", "transfer"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Transfer successful\",\n  \"data\": {\n    \"transaction\": {\n      \"id\": 125,\n      \"sender_id\": 1,\n      \"receiver_id\": 2,\n      \"type\": \"transfer\",\n      \"amount\": 75000,\n      \"sender_balance_before\": 300000,\n      \"sender_balance_after\": 225000,\n      \"to_account_number\": \"9876543210987654\",\n      \"to_account_name\": \"Jane Smith\",\n      \"description\": \"Transfer untuk kebutuhan kuliah\",\n      \"status\": \"completed\",\n      \"created_at\": \"2025-08-02T02:30:45.000Z\",\n      \"updated_at\": \"2025-08-02T02:30:45.000Z\"\n    },\n    \"sender\": {\n      \"id\": 1,\n      \"name\": \"John Doe Testing\",\n      \"account_number\": \"1234567890123456\",\n      \"balance\": 225000\n    },\n    \"receiver\": {\n      \"id\": 2,\n      \"name\": \"Jane Smith\",\n      \"account_number\": \"9876543210987654\",\n      \"balance\": 175000\n    }\n  }\n}"
+            },
+            {
+              "name": "Transfer Balance - Account Not Found",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"to_account_number\": \"9999999999999999\",\n  \"amount\": 50000,\n  \"description\": \"Transfer to invalid account\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/transactions/transfer",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "transactions", "transfer"]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 404,\n  \"message\": \"Destination account not found\",\n  \"data\": {\n    \"account_number\": \"9999999999999999\"\n  }\n}"
+            }
+          ]
         },
         {
           "name": "Get Transaction History",
@@ -2781,7 +4232,46 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Get Transaction History - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/transactions/history?page=1&limit=10",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "transactions", "history"],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"code\": 200,\n  \"message\": \"Transaction history retrieved successfully\",\n  \"data\": {\n    \"transactions\": [\n      {\n        \"id\": 125,\n        \"type\": \"transfer\",\n        \"amount\": 75000,\n        \"balance_before\": 300000,\n        \"balance_after\": 225000,\n        \"description\": \"Transfer untuk kebutuhan kuliah\",\n        \"to_account_number\": \"9876543210987654\",\n        \"to_account_name\": \"Jane Smith\",\n        \"status\": \"completed\",\n        \"created_at\": \"2025-08-02T02:30:45.000Z\"\n      },\n      {\n        \"id\": 124,\n        \"type\": \"withdraw\",\n        \"amount\": 50000,\n        \"balance_before\": 350000,\n        \"balance_after\": 300000,\n        \"description\": \"Withdraw untuk belanja bulanan\",\n        \"status\": \"completed\",\n        \"created_at\": \"2025-08-02T02:15:30.000Z\"\n      },\n      {\n        \"id\": 123,\n        \"type\": \"topup\",\n        \"amount\": 100000,\n        \"balance_before\": 250000,\n        \"balance_after\": 350000,\n        \"description\": \"Top up saldo untuk kebutuhan sehari-hari\",\n        \"status\": \"completed\",\n        \"created_at\": \"2025-08-02T01:50:15.000Z\"\n      }\n    ],\n    \"pagination\": {\n      \"current_page\": 1,\n      \"per_page\": 10,\n      \"total\": 25,\n      \"total_pages\": 3,\n      \"has_next\": true,\n      \"has_prev\": false\n    },\n    \"summary\": {\n      \"total_income\": 250000,\n      \"total_expense\": 125000,\n      \"current_balance\": 225000\n    }\n  }\n}"
+            }
+          ]
         },
         {
           "name": "Get All Transactions (Admin)",
