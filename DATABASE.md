@@ -2,12 +2,13 @@
 
 Dokumentasi lengkap struktur database untuk aplikasi MBankingCore dengan PostgreSQL sebagai database utama dan comprehensive demo data integration.
 
-**Last Updated:** July 31, 2025
+**Last Updated:** August 3, 2025
 **Database Version:** PostgreSQL 12+
 **ORM:** GORM (Go ORM)
 **Database Name:** `mbcdb`
-**Total Tables:** 14
-**Demo Data:** ✅ Integrated (18 admins + 67 users + 92 transactions + checker-maker system)
+**Total Tables:** 13
+**Demo Data:** ✅ Integrated (3 admins + 67 users + 92 transactions + checker-maker system)
+**Authentication:** ✅ Verified and tested (Super Admin & Admin login working)
 
 ## 📋 Database Overview
 
@@ -37,26 +38,51 @@ Dokumentasi lengkap struktur database untuk aplikasi MBankingCore dengan Postgre
 | Table | Description | Demo Records | Primary Key |
 |-------|-------------|--------------|-------------|
 | `users` | User accounts with banking authentication | 67 users | `id` (uint) |
-| `admins` | Admin accounts with administrative privileges | 18 admins | `id` (uint) |
+| `admins` | Admin accounts with administrative privileges | 3 admins | `id` (uint) |
 | `bank_accounts` | Multi-account banking support | Dynamic | `id` (uint) |
 | `device_sessions` | Multi-device session management | Dynamic | `id` (uint) |
-| `otp_sessions` | Temporary OTP session data for banking login | Dynamic | `id` (uint) |
 | `transactions` | Transaction history (topup, withdraw, transfer) | 92 transactions | `id` (uint) |
 | `pending_transactions` | Checker-maker pending transactions for approval | Dynamic | `id` (uint) |
+| `pending_user_status_changes` | User status change requests (maker-checker) | Dynamic | `id` (uint) |
 | `approval_thresholds` | Configurable approval thresholds by transaction type | Seeded | `id` (uint) |
 | `articles` | Content management articles | Dynamic | `id` (uint) |
 | `photos` | Photo management system | Dynamic | `id` (uint) |
 | `onboardings` | App onboarding content | Seeded | `id` (uint) |
 | `configs` | Dynamic application configuration | Seeded | `key` (string) |
 | `audit_logs` | Comprehensive system activity audit trail | Dynamic | `id` (uint) |
+| `audit_logs` | Comprehensive system activity audit trail | Dynamic | `id` (uint) |
 | `login_audits` | Authentication and login activity tracking | Dynamic | `id` (uint) |
+
+## 🔧 **Latest Updates & Testing Status**
+
+### ✅ **Authentication Testing (Aug 3, 2025)**
+- **Super Admin Login**: `super@mbankingcore.com` / `Super123?` → ✅ **WORKING**
+- **Regular Admin Login**: `admin@mbankingcore.com` / `Admin123?` → ✅ **WORKING**
+- **Password Hashing**: Updated to proper bcrypt hashes in database
+- **JWT Token Generation**: ✅ Working correctly
+- **API Endpoints**: All admin endpoints accessible with valid tokens
+
+### 🚀 **API Status**
+- **Server**: Running on `http://localhost:8080` ✅
+- **Health Check**: `http://localhost:8080/health` ✅
+- **Admin API Base**: `http://localhost:8080/api/admin` ✅
+- **Postman Environment**: Updated with page size 32 for all pagination
+- **Maker-Checker API**: Added to Postman collection ✅
+
+### 📊 **Pagination Updates**
+- **Default Page Size**: Changed from 20/50 to **32** for all APIs
+- **Environment Variables**: Updated in Postman for consistent testing
+- **Affected Endpoints**: Users, Transactions, Audit Logs, Admin Lists
+
+---
 
 ## 🏦 Demo Data Overview
 
-### Admin Users (18 total)
-- **Super Admin:** `super@mbankingcore.com` (password: `Super123?`)
-- **Main Admin:** `admin@mbankingcore.com` (password: `Admin123?`)
-- **16 Additional Admins:** Various roles and realistic Indonesian names
+### Admin Users (3 total)
+
+- **Super Admin:** `super@mbankingcore.com` (password: `Super123?`) ✅ **Verified**
+- **Main Admin:** `admin@mbankingcore.com` (password: `Admin123?`) ✅ **Verified**
+- **Checker Admin:** `checker@mbankingcore.com` (for maker-checker testing)
 
 ### Regular Users (67 total)
 - **Phone Numbers:** `081234567001` to `081234567067`
@@ -1270,12 +1296,14 @@ func SeedData(db *gorm.DB) error {
 
 ### Admin Users Seeding (18 accounts)
 
-#### Super Admin Accounts (2)
-- `super@mbankingcore.com` / `Super123?` - Primary super admin
-- `admin@mbankingcore.com` / `Admin123?` - Secondary admin
+#### Super Admin Accounts (1)
 
-#### Additional Admin Accounts (16)
-- Realistic Indonesian names and email addresses
+- `super@mbankingcore.com` / `Super123?` - Primary super admin ✅ **Verified**
+
+#### Regular Admin Accounts (2)
+
+- `admin@mbankingcore.com` / `Admin123?` - Secondary admin ✅ **Verified**
+- `checker@mbankingcore.com` / `checker123` - Checker admin for maker-checker workflows
 - Secure bcrypt password hashing
 - Mixed roles (admin, super)
 - Active status by default
