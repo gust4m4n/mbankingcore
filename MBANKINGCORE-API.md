@@ -2696,7 +2696,7 @@ Authorization: Bearer <admin_access_token>
 ```json
 {
     "email": "admin@mbankingcore.com",
-    "password": "admin123"
+    "password": "Admin123?"
 }
 ```
 

@@ -271,6 +271,12 @@ func main() {
 				adminProtected.GET("/approval-thresholds/:type", approvalThresholdHandler.GetApprovalThresholdByType)     // Get approval threshold by type
 				adminProtected.POST("/approval-thresholds", approvalThresholdHandler.CreateOrUpdateApprovalThreshold)     // Create/update approval threshold
 				adminProtected.DELETE("/approval-thresholds/:type", approvalThresholdHandler.DeactivateApprovalThreshold) // Deactivate approval threshold
+
+				// User status management (admin only)
+				adminProtected.PUT("/users/:user_id/status", handlers.UpdateUserStatus)                                 // Direct status update (admin only)
+				adminProtected.POST("/users/:user_id/status/request", handlers.CreatePendingUserStatusChange)           // Create pending status change (maker-checker)
+				adminProtected.GET("/users/status-changes/pending", handlers.GetPendingUserStatusChanges)               // List pending status changes
+				adminProtected.POST("/users/status-changes/:pending_id/review", handlers.ReviewPendingUserStatusChange) // Approve/reject pending status change
 			}
 		} // Protected routes (require authentication)
 		protected := api.Group("/")

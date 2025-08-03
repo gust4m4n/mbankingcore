@@ -24,6 +24,7 @@ func SetupDatabase() error {
 		&models.Photo{},
 		&models.DeviceSession{},
 		&models.PendingTransaction{},
+		&models.PendingUserStatusChange{},
 		&models.ApprovalThreshold{},
 	)
 	if err != nil {

@@ -515,7 +515,7 @@ curl -X POST http://localhost:8080/api/admin/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "admin@mbankingcore.com",
-    "password": "admin123"
+    "password": "Admin123?"
   }'
 ```
 
@@ -582,7 +582,7 @@ Import koleksi Postman untuk testing yang lebih komprehensif:
 
 **Admin Variables ✅ VERIFIED WORKING:**
 - `admin_email`: Email admin - super@mbankingcore.com / admin@mbankingcore.com ✅ BOTH WORKING
-- `admin_password`: Password admin (default: admin123) ✅ VERIFIED
+- `admin_password`: Password admin - Super123? / Admin123? ✅ VERIFIED
 - `new_admin_name`: Nama admin baru untuk testing ✅ FUNCTIONAL
 - `new_admin_email`: Email admin baru untuk testing
 
@@ -741,7 +741,7 @@ curl -X POST http://localhost:8080/api/login/verify \
 # Admin Login ✅ WORKING
 curl -X POST http://localhost:8080/api/admin/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@mbankingcore.com","password":"admin123"}'
+  -d '{"email":"admin@mbankingcore.com","password":"Admin123?"}'
 
 # Get All Admins (use admin_token from above) ✅ WORKING
 curl -X GET http://localhost:8080/api/admin/admins \
@@ -975,8 +975,8 @@ createdb mbcdb
 - **Multi-Device Sessions**: ✅ Device-specific session management active
 
 ### 🟢 **Admin Credentials Verified**
-- **Super Admin**: ✅ `super@mbankingcore.com` / `admin123` - WORKING
-- **Admin**: ✅ `admin@mbankingcore.com` / `admin123` - WORKING
+- **Super Admin**: ✅ `super@mbankingcore.com` / `Super123?` - WORKING
+- **Admin**: ✅ `admin@mbankingcore.com` / `Admin123?` - WORKING
 - **Admin Dashboard**: ✅ Live statistics and management tools active
 
 ### 🟢 **Testing & Documentation**
